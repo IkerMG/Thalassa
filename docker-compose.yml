@@ -1,0 +1,91 @@
+version: "3.9"
+
+# =============================================================================
+# Thalassa — Docker Compose
+# Sprint 4: completar configuración de servicios, volúmenes y redes
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Backend — Spring Boot (Java)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thalassa-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/thalassa
+      # - SPRING_DATASOURCE_USERNAME=thalassa
+      # - SPRING_DATASOURCE_PASSWORD=changeme
+    depends_on:
+      - db
+      - scraper
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React + Vite (TypeScript)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: thalassa-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Scraper — FastAPI (Python)
+  # ---------------------------------------------------------------------------
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    container_name: thalassa-scraper
+    ports:
+      - "8001:8001"
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Base de datos — PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: thalassa-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: thalassa
+      POSTGRES_USER: thalassa
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+# =============================================================================
+# Volúmenes
+# =============================================================================
+volumes:
+  db_data:
+
+# =============================================================================
+# Redes
+# =============================================================================
+networks:
+  thalassa-net:
+    driver: bridge

@@ -1,0 +1,196 @@
+# =============================================================================
+# Java
+# =============================================================================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+target/
+hs_err_pid*
+replay_pid*
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+.eggs/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+
+# Testing
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+htmlcov/
+.pytest_cache/
+nosetests.xml
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# mypy / pyright
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+pyrightconfig.json
+
+# =============================================================================
+# Node / React
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Build output
+dist/
+dist-ssr/
+build/
+.next/
+out/
+.nuxt/
+.output/
+.vercel/
+.netlify/
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+
+# Editor / OS noise
+*.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# =============================================================================
+# Obsidian
+# =============================================================================
+.obsidian/
+
+# =============================================================================
+# OS / Editor
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
+*.secret
+.secrets/
+
+# =============================================================================
+# Docker
+# =============================================================================
+docker-compose.override.yml
+.docker/
+
+# =============================================================================
+# Env files (global catch-all)
+# =============================================================================
+.env.*
+!.env.example
