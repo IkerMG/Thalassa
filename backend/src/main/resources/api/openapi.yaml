@@ -1,0 +1,856 @@
+openapi: 3.0.3
+
+info:
+  title: Thalassa API
+  description: |
+    API REST del backend de Thalassa — gestión de acuarios marinos.
+    Este archivo es la **fuente de verdad** del contrato API.
+    Los DTOs del paquete `com.thalassa.backend.dto` se generan automáticamente
+    a partir de este documento mediante `openapi-generator-maven-plugin`.
+  version: 1.0.0
+  contact:
+    name: Thalassa Project
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+
+security:
+  - BearerAuth: []
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ── Autenticación ────────────────────────────────────────────────────────
+  /api/auth/register:
+    post:
+      tags: [Autenticación]
+      summary: Registrar nuevo usuario
+      description: Crea la cuenta con plan FREE. No emite JWT; el cliente debe llamar a /login a continuación.
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '409':
+          description: Email o username ya registrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      description: Autentica con email + password y devuelve el JWT.
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Autenticación correcta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Usuario ───────────────────────────────────────────────────────────────
+  /api/users/me:
+    get:
+      tags: [Usuario]
+      summary: Obtener perfil propio
+      operationId: getProfile
+      responses:
+        '200':
+          description: Perfil del usuario autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    put:
+      tags: [Usuario]
+      summary: Actualizar precio del kWh
+      description: Establece el precio de electricidad usado en el cálculo de costes energéticos.
+      operationId: updateElectricityPrice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Acuarios ──────────────────────────────────────────────────────────────
+  /api/aquariums:
+    get:
+      tags: [Acuarios]
+      summary: Listar acuarios
+      description: Devuelve los acuarios del usuario autenticado en vista resumen.
+      operationId: listAquariums
+      responses:
+        '200':
+          description: Lista de acuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AquariumSummaryResponse'
+    post:
+      tags: [Acuarios]
+      summary: Crear acuario
+      description: |
+        Crea un nuevo acuario. Los usuarios con plan FREE solo pueden tener 1 acuario.
+        Intento de crear un segundo acuario con plan FREE devuelve 403.
+      operationId: createAquarium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AquariumRequest'
+      responses:
+        '201':
+          description: Acuario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AquariumSummaryResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Límite del plan FREE superado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/aquariums/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Acuarios]
+      summary: Detalle de acuario
+      description: Devuelve el acuario con toda su fauna y equipamiento.
+      operationId: getAquariumDetail
+      responses:
+        '200':
+          description: Detalle del acuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AquariumDetailResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Acuarios]
+      summary: Actualizar acuario
+      operationId: updateAquarium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AquariumRequest'
+      responses:
+        '200':
+          description: Acuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AquariumSummaryResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Acuarios]
+      summary: Eliminar acuario
+      description: Elimina el acuario y en cascada todo su equipamiento y fauna.
+      operationId: deleteAquarium
+      responses:
+        '204':
+          description: Acuario eliminado
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Equipamiento (sub-recurso de acuario) ────────────────────────────────
+  /api/aquariums/{id}/equipment:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Equipamiento]
+      summary: Listar equipamiento
+      operationId: listEquipment
+      responses:
+        '200':
+          description: Lista de equipos del acuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EquipmentResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Equipamiento]
+      summary: Añadir equipo
+      operationId: addEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRequest'
+      responses:
+        '201':
+          description: Equipo añadido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/equipment/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    put:
+      tags: [Equipamiento]
+      summary: Actualizar equipo
+      operationId: updateEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentRequest'
+      responses:
+        '200':
+          description: Equipo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentResponse'
+        '404':
+          description: Equipo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Equipamiento]
+      summary: Eliminar equipo
+      operationId: deleteEquipment
+      responses:
+        '204':
+          description: Equipo eliminado
+        '404':
+          description: Equipo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Energía (sub-recurso de acuario) ─────────────────────────────────────
+  /api/aquariums/{id}/energy:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Energía]
+      summary: Calcular coste energético mensual
+      description: |
+        Calcula el coste mensual de todos los equipos del acuario.
+        Fórmula: `(powerWatts / 1000.0) * hoursPerDay * 30 * electricityPriceKwh`
+        Requiere que el usuario tenga configurado `electricityPriceKwh` en su perfil.
+      operationId: calculateEnergy
+      responses:
+        '200':
+          description: Desglose energético
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnergyResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Precio del kWh no configurado en el perfil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Fauna (sub-recurso de acuario) ────────────────────────────────────────
+  /api/aquariums/{id}/livestock:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Fauna]
+      summary: Listar fauna
+      operationId: listLivestock
+      responses:
+        '200':
+          description: Lista de especímenes del acuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LivestockResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Fauna]
+      summary: Añadir espécimen
+      description: |
+        Añade un espécimen al acuario. Si el acuario es de tipo `MARINO_ARRECIFE`
+        y el espécimen no es reef-safe, la respuesta incluirá un campo `warning`.
+        La operación no se bloquea por incompatibilidad.
+      operationId: addLivestock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LivestockRequest'
+      responses:
+        '201':
+          description: Espécimen añadido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddLivestockResponse'
+        '404':
+          description: Acuario o especie del catálogo no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/livestock/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    put:
+      tags: [Fauna]
+      summary: Actualizar espécimen
+      operationId: updateLivestock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LivestockRequest'
+      responses:
+        '200':
+          description: Espécimen actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivestockResponse'
+        '404':
+          description: Espécimen no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Fauna]
+      summary: Eliminar espécimen
+      description: Elimina un espécimen del acuario (baja o venta).
+      operationId: deleteLivestock
+      responses:
+        '204':
+          description: Espécimen eliminado
+        '404':
+          description: Espécimen no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Catálogo de Especies ──────────────────────────────────────────────────
+  /api/species:
+    get:
+      tags: [Catálogo de Especies]
+      summary: Buscar especies
+      description: |
+        Busca por nombre común o científico (case-insensitive).
+        Sin parámetro `search` devuelve el catálogo completo.
+      operationId: searchSpecies
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de especies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpeciesCatalogResponse'
+
+  /api/species/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Catálogo de Especies]
+      summary: Detalle de especie
+      operationId: getSpeciesById
+      responses:
+        '200':
+          description: Detalle de la especie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpeciesCatalogResponse'
+        '404':
+          description: Especie no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COMPONENTS
+# ─────────────────────────────────────────────────────────────────────────────
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT obtenido en POST /api/auth/login
+
+  schemas:
+
+    # ── Enumeraciones ─────────────────────────────────────────────────────────
+    # Definidas aquí para que $ref sea válido; NO se generan (importMappings
+    # en pom.xml las mapea a com.thalassa.backend.models.*).
+
+    SubscriptionPlan:
+      type: string
+      description: Plan de suscripción del usuario
+      enum: [FREE, REEFMASTER]
+
+    AquariumType:
+      type: string
+      description: Tipo de acuario marino
+      enum: [MARINO_PECES, MARINO_ARRECIFE]
+
+    LivestockCategory:
+      type: string
+      description: Categoría taxonómica del espécimen
+      enum: [PEZ, CORAL, INVERTEBRADO]
+
+    # ── Autenticación ─────────────────────────────────────────────────────────
+
+    AuthRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email del usuario registrado
+        password:
+          type: string
+          minLength: 1
+          description: Contraseña del usuario
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT de acceso
+        username:
+          type: string
+        email:
+          type: string
+        subscriptionPlan:
+          $ref: '#/components/schemas/SubscriptionPlan'
+
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Nombre de usuario único
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email único
+        password:
+          type: string
+          minLength: 8
+          description: Contraseña (mínimo 8 caracteres)
+
+    # ── Usuario ───────────────────────────────────────────────────────────────
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        subscriptionPlan:
+          $ref: '#/components/schemas/SubscriptionPlan'
+        electricityPriceKwh:
+          type: number
+          format: double
+          description: Precio del kWh en €. Null si no ha sido configurado.
+
+    UpdateUserRequest:
+      type: object
+      required: [electricityPriceKwh]
+      properties:
+        electricityPriceKwh:
+          type: number
+          format: double
+          minimum: 0.0
+          description: Precio del kWh en € para el cálculo energético
+
+    # ── Acuarios ──────────────────────────────────────────────────────────────
+
+    AquariumRequest:
+      type: object
+      required: [name, liters, type]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Nombre descriptivo del acuario
+        liters:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Volumen en litros
+        type:
+          $ref: '#/components/schemas/AquariumType'
+
+    AquariumSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        liters:
+          type: integer
+          format: int32
+        type:
+          $ref: '#/components/schemas/AquariumType'
+
+    AquariumDetailResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        liters:
+          type: integer
+          format: int32
+        type:
+          $ref: '#/components/schemas/AquariumType'
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentResponse'
+        livestock:
+          type: array
+          items:
+            $ref: '#/components/schemas/LivestockResponse'
+
+    # ── Equipamiento ──────────────────────────────────────────────────────────
+
+    EquipmentRequest:
+      type: object
+      required: [name, powerWatts, hoursPerDay]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Nombre del equipo
+        powerWatts:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Potencia en vatios
+        hoursPerDay:
+          type: number
+          format: double
+          minimum: 0.1
+          maximum: 24.0
+          description: Horas de funcionamiento diario
+
+    EquipmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        powerWatts:
+          type: integer
+          format: int32
+        hoursPerDay:
+          type: number
+          format: double
+
+    EquipmentEnergyCost:
+      type: object
+      properties:
+        equipmentId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        powerWatts:
+          type: integer
+          format: int32
+        hoursPerDay:
+          type: number
+          format: double
+        monthlyCost:
+          type: number
+          description: Coste mensual en € con escala de 4 decimales (BigDecimal)
+
+    EnergyResponse:
+      type: object
+      properties:
+        aquariumId:
+          type: integer
+          format: int64
+        aquariumName:
+          type: string
+        totalMonthlyCost:
+          type: number
+          description: Suma de costes de todos los equipos (BigDecimal)
+        electricityPriceKwh:
+          type: number
+          format: double
+        currencySymbol:
+          type: string
+          example: "€"
+        equipmentBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentEnergyCost'
+
+    # ── Fauna ─────────────────────────────────────────────────────────────────
+
+    LivestockRequest:
+      type: object
+      required: [name, category, reefSafe, quantity]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Nombre del espécimen (puede ser personalizado)
+        category:
+          $ref: '#/components/schemas/LivestockCategory'
+        reefSafe:
+          type: boolean
+          description: Si es compatible con acuarios de tipo arrecife
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Número de ejemplares
+        speciesCatalogId:
+          type: integer
+          format: int64
+          nullable: true
+          description: ID de la especie en el catálogo. Null para especímenes personalizados.
+
+    LivestockResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/LivestockCategory'
+        reefSafe:
+          type: boolean
+        quantity:
+          type: integer
+          format: int32
+        speciesCatalogId:
+          type: integer
+          format: int64
+          nullable: true
+
+    AddLivestockResponse:
+      # @JsonInclude(NON_NULL) a nivel de clase: el campo 'warning' solo
+      # aparece en el JSON cuando hay un problema de compatibilidad reef-safe.
+      x-class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)"
+      type: object
+      properties:
+        livestock:
+          $ref: '#/components/schemas/LivestockResponse'
+        warning:
+          type: string
+          nullable: true
+          description: Advertencia de incompatibilidad reef-safe. Ausente cuando no hay problema.
+
+    # ── Catálogo de Especies ──────────────────────────────────────────────────
+
+    SpeciesCatalogResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        commonName:
+          type: string
+        scientificName:
+          type: string
+        category:
+          $ref: '#/components/schemas/LivestockCategory'
+        reefSafe:
+          type: boolean
+        imageUrl:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    # ── Error ─────────────────────────────────────────────────────────────────
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Descripción legible del error
+        timestamp:
+          type: string
+          format: date-time
+          description: Momento en que ocurrió el error (ISO 8601)

@@ -65,7 +65,6 @@ public class AuthService {
 
     /**
      * Autentica al usuario con email y contraseña.
-     * Spring Security verifica la contraseña internamente mediante DaoAuthenticationProvider.
      *
      * @throws org.springframework.security.core.AuthenticationException si las credenciales son incorrectas.
      */

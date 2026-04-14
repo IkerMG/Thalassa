@@ -21,6 +21,7 @@
     <properties>
         <java.version>17</java.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <openapi-generator.version>7.4.0</openapi-generator.version>
     </properties>
 
     <dependencies>
@@ -81,6 +82,20 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- OpenAPI Generator — anotaciones Swagger usadas en los modelos generados -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.21</version>
+        </dependency>
+
+        <!-- OpenAPI Generator — soporte para campos nullable (JsonNullable) -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -96,6 +111,86 @@
 
     <build>
         <plugins>
+
+            <!-- ── OpenAPI Generator ─────────────────────────────────────────────
+                 Genera los modelos (DTOs) a partir de src/main/resources/api/openapi.yaml.
+                 Los archivos se crean en target/generated-sources/openapi y se añaden
+                 automáticamente al classpath de compilación.
+
+                 IMPORTANTE: NO modifiques los archivos generados; edita el YAML y
+                 vuelve a ejecutar `mvn clean compile`.
+            ──────────────────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/api/openapi.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+
+                            <!-- Solo modelos: los controladores e interfaces los mantenemos a mano -->
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+
+                            <modelPackage>com.thalassa.backend.dto</modelPackage>
+
+                            <!--
+                                Los tres enums ya existen en com.thalassa.backend.models.
+                                El generador NO los crea; simplemente importa la clase existente
+                                cuando los encuentra referenciados en el YAML.
+                            -->
+                            <importMappings>
+                                <importMapping>SubscriptionPlan=com.thalassa.backend.models.SubscriptionPlan</importMapping>
+                                <importMapping>AquariumType=com.thalassa.backend.models.AquariumType</importMapping>
+                                <importMapping>LivestockCategory=com.thalassa.backend.models.LivestockCategory</importMapping>
+                            </importMappings>
+
+                            <!--
+                                Template personalizado: pojo.mustache sin constructores ni
+                                getters/setters generados. Lombok los aporta vía
+                                additionalModelTypeAnnotations (dentro de configOptions).
+                            -->
+                            <templateDirectory>${project.basedir}/src/main/resources/templates/openapi</templateDirectory>
+
+                            <configOptions>
+                                <!-- Spring Boot 3 / Jakarta namespace -->
+                                <useSpringBoot3>true</useSpringBoot3>
+
+                                <!-- Bean Validation: añade @NotNull, @Size, @Min, @Max, etc. -->
+                                <useBeanValidation>true</useBeanValidation>
+                                <performBeanValidation>true</performBeanValidation>
+
+                                <!--
+                                    Desactiva JsonNullable<T>: los campos nullable se mantienen
+                                    como referencias Java ordinarias (Long, String, etc.).
+                                -->
+                                <openApiNullable>false</openApiNullable>
+
+                                <!-- LocalDateTime para campos format: date-time -->
+                                <dateLibrary>java8-localdatetime</dateLibrary>
+
+                                <!--
+                                    Anotaciones Lombok inyectadas en cada DTO generado.
+                                    El template personalizado no genera constructores ni accessors,
+                                    por lo que no hay conflicto con @Builder.
+                                -->
+                                <additionalModelTypeAnnotations>@lombok.Data;@lombok.Builder;@lombok.NoArgsConstructor;@lombok.AllArgsConstructor</additionalModelTypeAnnotations>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ── Spring Boot ───────────────────────────────────────────────── -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -108,6 +203,7 @@
                     </excludes>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
