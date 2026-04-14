@@ -1,72 +1,76 @@
 """
 Capa de servicio del scraper.
 
-Fase 2: datos mockeados.
-Fase 3: sustituir _mock_tiendanimal / _mock_kiwoko por scrapers reales con HTTPX + BS4.
+Fase 3: scrapers reales con HTTPX + BeautifulSoup.
+  - tiendanimal.py → scrape_tiendanimal()
+  - kiwoko.py      → scrape_kiwoko()
+  - asyncio.gather lanza ambas peticiones en paralelo cuando store="all".
+  - Un fallo en una tienda NO cancela los resultados de la otra.
 """
 
+from __future__ import annotations
+
+import asyncio
+import logging
+
+import httpx
+
 from app.models.responses import ProductResult, ScrapeError, ScrapeResponse
+from app.services.tiendanimal import scrape_tiendanimal
+from app.services.kiwoko import scrape_kiwoko
 
-# ── Fixtures ──────────────────────────────────────────────────────────────────
+logger = logging.getLogger(__name__)
 
-_MOCK_TIENDANIMAL = [
-    ProductResult(
-        name="Tunze Comline DOC Skimmer 9004",
-        price=89.99,
-        currency="EUR",
-        image_url="https://www.tiendanimal.es/img/tunze-9004.jpg",  # type: ignore[arg-type]
-        product_url="https://www.tiendanimal.es/tunze-comline-doc-skimmer-9004",  # type: ignore[arg-type]
-        store="tiendanimal",
-    ),
-    ProductResult(
-        name="Tunze Comline DOC Skimmer 9004.040",
-        price=112.50,
-        currency="EUR",
-        image_url="https://www.tiendanimal.es/img/tunze-9004-040.jpg",  # type: ignore[arg-type]
-        product_url="https://www.tiendanimal.es/tunze-comline-doc-skimmer-9004-040",  # type: ignore[arg-type]
-        store="tiendanimal",
-    ),
-]
 
-_MOCK_KIWOKO = [
-    ProductResult(
-        name="Tunze 9004 Skimmer Interno",
-        price=94.95,
-        currency="EUR",
-        image_url="https://www.kiwoko.com/img/tunze-9004.jpg",  # type: ignore[arg-type]
-        product_url="https://www.kiwoko.com/tunze-9004-skimmer-interno",  # type: ignore[arg-type]
-        store="kiwoko",
-    ),
-    ProductResult(
-        name="Tunze DOC Skimmer 9004 - Edición especial",
-        price=99.00,
-        currency="EUR",
-        image_url="https://www.kiwoko.com/img/tunze-9004-especial.jpg",  # type: ignore[arg-type]
-        product_url="https://www.kiwoko.com/tunze-doc-skimmer-9004-especial",  # type: ignore[arg-type]
-        store="kiwoko",
-    ),
-]
+async def _safe_scrape(store_id: str, keyword: str) -> tuple[list[ProductResult], ScrapeError | None]:
+    """
+    Ejecuta el scraper correspondiente y captura cualquier error,
+    devolviendo siempre (resultados, error_o_None).
+    Un error en esta función nunca se propaga hacia arriba.
+    """
+    scraper = scrape_tiendanimal if store_id == "tiendanimal" else scrape_kiwoko
+    try:
+        results = await scraper(keyword)
+        return results, None
 
-# ── Servicio ──────────────────────────────────────────────────────────────────
+    except httpx.TimeoutException as exc:
+        print(f"[{store_id}] TIMEOUT — {exc}")
+        logger.warning("%s: timeout — %s", store_id, exc)
+        return [], ScrapeError(
+            code="TIMEOUT_ERROR",
+            message=f"La tienda '{store_id}' no respondió a tiempo.",
+        )
+
+    except httpx.HTTPStatusError as exc:
+        print(f"[{store_id}] HTTP {exc.response.status_code} — {exc}")
+        logger.warning("%s: HTTP %s — %s", store_id, exc.response.status_code, exc)
+        return [], ScrapeError(
+            code="PARSING_ERROR",
+            message=f"La tienda '{store_id}' devolvió el código HTTP {exc.response.status_code}.",
+        )
+
+    except Exception as exc:
+        print(f"[{store_id}] ERROR inesperado — {exc}")
+        logger.exception("%s: error inesperado — %s", store_id, exc)
+        return [], ScrapeError(
+            code="PARSING_ERROR",
+            message=f"Error al obtener datos de '{store_id}': {exc}",
+        )
 
 
 async def search_products(keyword: str, store: str = "all") -> ScrapeResponse:
     """
     Busca productos por keyword en la(s) tienda(s) indicada(s).
 
-    Fase 2: devuelve datos estáticos (mock).
-    Fase 3: sustituir el cuerpo de _fetch_* por scrapers reales.
+    - store="all"         → peticiones en paralelo a Tiendanimal + Kiwoko.
+    - store="tiendanimal" → solo Tiendanimal.
+    - store="kiwoko"      → solo Kiwoko.
+
+    Siempre devuelve HTTP 200. Si una tienda falla, se incluye su error
+    en el campo `errors` pero los resultados de la otra tienda se devuelven
+    igualmente en `results`.
     """
-    results: list[ProductResult] = []
-
-    if store in ("tiendanimal", "all"):
-        results.extend(_MOCK_TIENDANIMAL)
-
-    if store in ("kiwoko", "all"):
-        results.extend(_MOCK_KIWOKO)
-
-    # Si la tienda solicitada no existe en el registro anterior
-    if not results and store not in ("all", "tiendanimal", "kiwoko"):
+    if store not in ("all", "tiendanimal", "kiwoko"):
         return ScrapeResponse(
             keyword=keyword,
             store=store,
@@ -78,10 +82,39 @@ async def search_products(keyword: str, store: str = "all") -> ScrapeResponse:
             ),
         )
 
+    # Construir corutinas según la tienda solicitada
+    store_ids: list[str] = []
+    if store in ("tiendanimal", "all"):
+        store_ids.append("tiendanimal")
+    if store in ("kiwoko", "all"):
+        store_ids.append("kiwoko")
+
+    # _safe_scrape nunca lanza: return_exceptions no es necesario, pero
+    # lo añadimos como red de seguridad extra.
+    gathered: list[tuple[list[ProductResult], ScrapeError | None]] = await asyncio.gather(
+        *[_safe_scrape(sid, keyword) for sid in store_ids],
+        return_exceptions=False,
+    )
+
+    results: list[ProductResult] = []
+    # Guardamos solo el primer error para el campo `error` del modelo,
+    # pero siempre acumulamos TODOS los resultados exitosos.
+    first_error: ScrapeError | None = None
+
+    for store_id, (store_results, store_error) in zip(store_ids, gathered):
+        if store_results:
+            results.extend(store_results)
+        if store_error:
+            print(f"[service] {store_id} reportó error: {store_error.code} — {store_error.message}")
+            if first_error is None:
+                first_error = store_error
+
     return ScrapeResponse(
         keyword=keyword,
         store=store,
         results=results,
         total=len(results),
-        error=None,
+        # error=None si todos los scrapers funcionaron, aunque results esté vacío.
+        # error=ScrapeError solo si TODAS las tiendas fallaron o ninguna devolvió productos.
+        error=first_error if not results else None,
     )
