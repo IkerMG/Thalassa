@@ -1,6 +1,5 @@
 package com.thalassa.backend.dto;
 
-import com.thalassa.backend.models.SubscriptionPlan;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class EquipmentResponse {
 
     private Long id;
-    private String username;
-    private String email;
-    private SubscriptionPlan subscriptionPlan;
-    private Double electricityPriceKwh;
+    private String name;
+    private Integer powerWatts;
+    private Double hoursPerDay;
 }
