@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────
+# Thalassa Scraper — Python dependencies
+# ─────────────────────────────────────────────
+
+# Framework & servidor ASGI
+fastapi==0.111.1
+uvicorn[standard]==0.30.1
+
+# Cliente HTTP asíncrono (reemplaza requests)
+httpx==0.27.0
+
+# Parsing HTML
+beautifulsoup4==4.12.3
+lxml==5.2.2
+
+# Validación y configuración
+pydantic==2.7.4
+pydantic-settings==2.3.4
+
+# Anti-bloqueo (rotación de User-Agent)
+fake-useragent==1.5.1
+
+# Variables de entorno
+python-dotenv==1.0.1
