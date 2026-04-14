@@ -3,6 +3,7 @@ package com.thalassa.backend.services;
 import com.thalassa.backend.dto.AuthRequest;
 import com.thalassa.backend.dto.AuthResponse;
 import com.thalassa.backend.dto.RegisterRequest;
+import com.thalassa.backend.dto.UserResponse;
 import com.thalassa.backend.models.SubscriptionPlan;
 import com.thalassa.backend.models.User;
 import com.thalassa.backend.repositories.UserRepository;
@@ -33,10 +34,11 @@ public class AuthService {
 
     /**
      * Registra un nuevo usuario con plan FREE y contraseña cifrada con BCrypt.
+     * No genera JWT: el cliente debe llamar a /login tras el registro.
      *
      * @throws IllegalArgumentException si el email o username ya están en uso.
      */
-    public AuthResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("El email ya está registrado.");
         }
@@ -51,15 +53,13 @@ public class AuthService {
                 .subscriptionPlan(SubscriptionPlan.FREE)
                 .build();
 
-        userRepository.save(user);
+        User saved = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user);
-
-        return AuthResponse.builder()
-                .token(token)
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .subscriptionPlan(user.getSubscriptionPlan())
+        return UserResponse.builder()
+                .id(saved.getId())
+                .username(saved.getUsername())
+                .email(saved.getEmail())
+                .subscriptionPlan(saved.getSubscriptionPlan())
                 .build();
     }
 

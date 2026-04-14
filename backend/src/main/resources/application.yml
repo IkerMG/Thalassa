@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/thalassa?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password:
+    password: Img_190606
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -15,6 +15,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+    # Garantiza que data.sql se ejecuta DESPUÉS de que Hibernate genere las tablas
+    defer-datasource-initialization: true
+  sql:
+    init:
+      # 'always' ejecuta data.sql en cada arranque (idempotente con INSERT IGNORE)
+      mode: always
 
 jwt:
   secret: thalassa-super-secret-key-change-this-in-production-0123456789abcdef
