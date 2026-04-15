@@ -25,3 +25,7 @@ spring:
 jwt:
   secret: thalassa-super-secret-key-change-this-in-production-0123456789abcdef
   expiration: 86400000
+
+python:
+  service:
+    url: ${PYTHON_SERVICE_URL:http://localhost:8001}
