@@ -552,6 +552,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # ── Chatbot IA ───────────────────────────────────────────────────────────
+  /api/chat:
+    post:
+      tags: [Chat]
+      summary: Enviar mensaje al asistente IA Thalassa
+      description: |
+        Proxy al microservicio Python Gemini. Aplica rate-limiting por plan:
+        - FREE: máximo 5 mensajes por día (reinicia a medianoche).
+        - REEFMASTER: sin límite.
+        El campo `aquariumId` es opcional; si se incluye, el contexto del acuario
+        (nombre, litros, tipo, fauna, equipamiento) se adjunta al prompt.
+        Siempre devuelve 200; si el modelo IA no responde, `errorCode` lo indica.
+      operationId: sendChatMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Respuesta del asistente IA (puede incluir errorCode si Gemini falló)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '429':
+          description: Límite diario de mensajes superado (solo plan FREE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ── Catálogo de Especies ──────────────────────────────────────────────────
   /api/species:
     get:
@@ -1021,6 +1054,34 @@ components:
           type: string
         storeName:
           type: string
+
+    # ── Chat ─────────────────────────────────────────────────────────────────
+
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Mensaje del usuario al asistente IA
+        aquariumId:
+          type: integer
+          format: int64
+          nullable: true
+          description: ID del acuario cuyo contexto se adjuntará al prompt. Null para consultas genéricas.
+
+    ChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+          description: Respuesta generada por el asistente IA. Vacío si hubo error.
+        errorCode:
+          type: string
+          nullable: true
+          description: "GEMINI_ERROR | GEMINI_UNAVAILABLE | INVALID_REQUEST. Null si todo fue bien."
 
     # ── Error ─────────────────────────────────────────────────────────────────
 

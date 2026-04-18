@@ -2,6 +2,7 @@ package com.thalassa.backend.controllers;
 
 import com.thalassa.backend.dto.ErrorResponse;
 import com.thalassa.backend.exceptions.AccessDeniedException;
+import com.thalassa.backend.exceptions.RateLimitExceededException;
 import com.thalassa.backend.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error(ex.getMessage()));
+    }
+
+    /** Límite de tasa superado (ej. chat diario FREE) → 429 Too Many Requests */
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimit(RateLimitExceededException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error(ex.getMessage()));
     }
 
     /** Precondición de negocio no satisfecha (ej. precio kWh no configurado) → 422 Unprocessable Entity */
