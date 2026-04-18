@@ -3,23 +3,23 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/thalassa?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: Img_190606
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:5432/thalassa
+    username: thalassa
+    password: changeme
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     # Garantiza que data.sql se ejecuta DESPUÉS de que Hibernate genere las tablas
     defer-datasource-initialization: true
   sql:
     init:
-      # 'always' ejecuta data.sql en cada arranque (idempotente con INSERT IGNORE)
+      # 'always' ejecuta data.sql en cada arranque (idempotente con ON CONFLICT DO NOTHING)
       mode: always
 
 jwt:
@@ -29,3 +29,6 @@ jwt:
 python:
   service:
     url: ${PYTHON_SERVICE_URL:http://localhost:8001}
+
+chat:
+  free-daily-limit: 5
