@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     tiendanimal_base_url: str = "https://www.tiendanimal.es"
     kiwoko_base_url: str = "https://www.kiwoko.com"
 
+    # ── Gemini ────────────────────────────────────────────────────────────────
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-1.5-flash"  # free-tier, 15 RPM / 1M TPM
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
