@@ -3,8 +3,9 @@
 --  Contraseña de TODOS los usuarios: 123456
 --  Hash BCrypt generado con BCryptPasswordEncoder (cost 10)
 --
---  Se usa INSERT IGNORE para que el script sea idempotente:
---  puede ejecutarse en cada arranque sin duplicar registros.
+--  Se usa INSERT ... ON CONFLICT (id) DO NOTHING para que el
+--  script sea idempotente: puede ejecutarse en cada arranque
+--  sin duplicar registros. Sintaxis compatible con PostgreSQL.
 --
 --  Orden de inserción (respeta Foreign Keys):
 --    1. users
@@ -18,24 +19,22 @@
 --  marc  → plan FREE  · sin precio de electricidad configurado
 --  elena → plan REEFMASTER · tiene precio kWh configurado para la calculadora
 -- ─────────────────────────────────────────────────────────────────────────────
-INSERT IGNORE INTO users
-    (id, username, email, password, subscription_plan, electricity_price_kwh)
+INSERT INTO users
+    (id, username, email, password, subscription_plan, electricity_price_kwh,
+     chat_count_today, last_chat_date)
 VALUES
     (1, 'marc',  'marc@thalassa.com',
      '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBpwTTyU3zwOWW',
-     'FREE', NULL),
+     'FREE', NULL, 0, NULL),
 
     (2, 'elena', 'elena@thalassa.com',
      '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBpwTTyU3zwOWW',
-     'REEFMASTER', 0.15);
+     'REEFMASTER', 0.15, 0, NULL)
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ── 2. Catálogo de Especies ───────────────────────────────────────────────────
---  Mezcla de PEZ / CORAL / INVERTEBRADO
---  Mezcla de reef_safe=TRUE y reef_safe=FALSE para probar la lógica de alertas
---  Dificultad indicada en el campo notes (Baja / Media / Alta)
--- ─────────────────────────────────────────────────────────────────────────────
-INSERT IGNORE INTO species_catalog
+INSERT INTO species_catalog
     (id, common_name, scientific_name, category, reef_safe, image_url, notes)
 VALUES
     (1,
@@ -85,50 +84,39 @@ VALUES
      'Protoreaster nodosus',
      'INVERTEBRADO', FALSE, NULL,
      'Aspecto espectacular pero consume corales, bivalvos y otros invertebrados. '
-     'Solo apta en biotopo de peces sin invertebrados ni corales. Dificultad: Alta.');
+     'Solo apta en biotopo de peces sin invertebrados ni corales. Dificultad: Alta.')
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ── 3. Acuarios ──────────────────────────────────────────────────────────────
---  marc  → 60 L marino de peces (plan FREE, solo puede tener 1)
---  elena → 500 L arrecife    (plan REEFMASTER, sin límite)
--- ─────────────────────────────────────────────────────────────────────────────
-INSERT IGNORE INTO aquariums
+INSERT INTO aquariums
     (id, name, liters, type, user_id)
 VALUES
     (1, 'Mi Primer Acuario', 60,  'MARINO_PECES',   1),
-    (2, 'Arrecife Elena',    500, 'MARINO_ARRECIFE', 2);
+    (2, 'Arrecife Elena',    500, 'MARINO_ARRECIFE', 2)
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ── 4. Fauna (Livestock) ─────────────────────────────────────────────────────
---  Fauna asociada a los acuarios, referenciando el catálogo de especies.
---  species_catalog_id nullable → permite especies personalizadas en el futuro.
--- ─────────────────────────────────────────────────────────────────────────────
-INSERT IGNORE INTO livestock
+INSERT INTO livestock
     (id, name, category, reef_safe, quantity, aquarium_id, species_catalog_id)
 VALUES
-    -- Acuario de marc (60 L marino de peces)
-    (1, 'Nemo y Marlin',  'PEZ', TRUE, 2, 1, 1),   -- 2x Pez Payaso
-    (2, 'Dory',           'PEZ', TRUE, 1, 1, 2),   -- 1x Cirujano Amarillo
-
-    -- Arrecife de elena (500 L)
-    (3, 'Coral Cuero',    'CORAL',        TRUE, 1, 2, 4),   -- Sarcophyton
-    (4, 'Coral Cerebro',  'CORAL',        TRUE, 1, 2, 5),   -- Favites abdita
-    (5, 'Equipo limpieza','INVERTEBRADO', TRUE, 3, 2, 6);   -- 3x Camarón Limpiador
+    (1, 'Nemo y Marlin',  'PEZ', TRUE, 2, 1, 1),
+    (2, 'Dory',           'PEZ', TRUE, 1, 1, 2),
+    (3, 'Coral Cuero',    'CORAL',        TRUE, 1, 2, 4),
+    (4, 'Coral Cerebro',  'CORAL',        TRUE, 1, 2, 5),
+    (5, 'Equipo limpieza','INVERTEBRADO', TRUE, 3, 2, 6)
+ON CONFLICT (id) DO NOTHING;
 
 
 -- ── 5. Equipamiento ──────────────────────────────────────────────────────────
---  power_watts + hours_per_day se usan en la fórmula de gasto energético:
---  coste_mes = (watts / 1000) * horas * 30 * precio_kwh
--- ─────────────────────────────────────────────────────────────────────────────
-INSERT IGNORE INTO equipment
+INSERT INTO equipment
     (id, name, power_watts, hours_per_day, aquarium_id)
 VALUES
-    -- Equipamiento acuario de marc (60 L)
     (1, 'Iluminación LED 60 L',  30,  10.0, 1),
     (2, 'Filtro interior',       15,  24.0, 1),
-
-    -- Equipamiento arrecife de elena (500 L)
     (3, 'Iluminación LED 500 L', 200, 12.0, 2),
     (4, 'Skimmer de proteínas',   80, 24.0, 2),
     (5, 'Bomba de circulación',   40, 24.0, 2),
-    (6, 'Calentador 300 W',      300,  8.0, 2);
+    (6, 'Calentador 300 W',      300,  8.0, 2)
+ON CONFLICT (id) DO NOTHING;
