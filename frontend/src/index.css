@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Paleta Deep Sea ──────────────────────────────────────────────────── */
+  --color-ocean-900: #050B18;
+  --color-ocean-800: #0A1628;
+  --color-ocean-700: #0F2040;
+  --color-ocean-600: #162A52;
+
+  /* Acentos bioluminiscentes */
+  --color-cyan:         #00D4FF;
+  --color-coral:        #FF6B35;
+  --color-reef-safe:    #00E5A0;
+  --color-reef-unsafe:  #FF4444;
+  --color-reef-warning: #FFB800;
+
+  /* Texto oceánico */
+  --color-text-primary:   #F0F8FF;
+  --color-text-secondary: #7A9BB5;
+  --color-text-muted:     #3A5A7A;
+
+  /* ── Tipografía ──────────────────────────────────────────────────────── */
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-body:    "Inter", sans-serif;
+  --font-mono:    "Geist Mono", "JetBrains Mono", monospace;
+
+  /* ── Sombras ─────────────────────────────────────────────────────────── */
+  --shadow-card:       0 4px 24px rgba(0, 0, 0, 0.35), 0 0 1px rgba(0, 212, 255, 0.08);
+  --shadow-glow:       0 0 24px rgba(0, 212, 255, 0.25);
+  --shadow-glow-coral: 0 0 24px rgba(255, 107, 53, 0.25);
+
+  /* ── Border radius ───────────────────────────────────────────────────── */
+  --radius-glass: 16px;
+
+  /* ── Animaciones ─────────────────────────────────────────────────────── */
+  --animate-shimmer:    shimmer    2s linear      infinite;
+  --animate-float:      float      6s ease-in-out infinite;
+  --animate-bubble:     bubble     8s ease-in-out infinite;
+  --animate-fade-in:    fade-in    0.5s ease      forwards;
+  --animate-slide-up:   slide-up   0.5s ease      forwards;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ocean-900);
+    color: var(--color-text-primary);
+  }
+
+  ::-webkit-scrollbar          { width: 6px; }
+  ::-webkit-scrollbar-track    { background: var(--color-ocean-800); }
+  ::-webkit-scrollbar-thumb    { background: var(--color-text-muted); border-radius: 3px; }
+}
+
+/* ── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes bubble {
+  0%, 100% { transform: translateY(0)    scale(1);    opacity: 0.25; }
+  50%       { transform: translateY(-40px) scale(1.06); opacity: 0.55; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+  50%       { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+}
