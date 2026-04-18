@@ -42,11 +42,11 @@ class ScrapeResponse(BaseModel):
 # ── Chat ──────────────────────────────────────────────────────────────────────
 
 class ChatError(BaseModel):
-    """Error producido durante la comunicación con Gemini."""
+    """Error producido durante la comunicación con el LLM."""
 
     code: str = Field(
         ...,
-        description="Código de error: GEMINI_ERROR | GEMINI_UNAVAILABLE | INVALID_REQUEST",
+        description="Código de error: GROQ_ERROR | GROQ_UNAVAILABLE | INVALID_REQUEST",
     )
     message: str = Field(..., description="Descripción legible del error.")
 
@@ -54,8 +54,8 @@ class ChatError(BaseModel):
 class ChatResponse(BaseModel):
     """Respuesta del asistente IA Thalassa."""
 
-    reply: str = Field(..., description="Texto de respuesta generado por Gemini.")
+    reply: str = Field(..., description="Texto de respuesta generado por Thalassa AI.")
     error: Optional[ChatError] = Field(
         default=None,
-        description="Presente solo si ocurrió un error al llamar a Gemini.",
+        description="Presente solo si ocurrió un error al llamar al LLM.",
     )

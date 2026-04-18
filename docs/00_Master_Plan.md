@@ -73,8 +73,8 @@ Inglés. La interfaz se diseña en inglés desde el inicio con la infraestructur
 |---|---|
 |Java + Spring Boot|API REST principal, lógica de negocio, CRUD|
 |Spring Security + JWT|Autenticación y autorización|
-|Python|Scraper de tiendas del sector + puente con la API de Gemini|
-|Google Gemini (API gratuita)|Motor del asistente de IA|
+|Python|Scraper de tiendas del sector + puente con la API de Groq (Llama 3.3)|
+|Groq (Llama 3.3 70B)|Motor del asistente de IA|
 |Docker / Docker Compose|Orquestación de servicios (Java, Python, BD)|
 |Base de Datos (PostgreSQL / MySQL)|Persistencia de datos|
 
@@ -82,7 +82,7 @@ Inglés. La interfaz se diseña en inglés desde el inicio con la infraestructur
 
 - **Frontend ↔ Java:** Axios → API REST (JWT en headers).
 - **Java ↔ Python:** Comunicación interna por red Docker (el servicio Java llama al servicio Python vía HTTP interno, nunca expuesto al exterior).
-- **Python ↔ Gemini:** Llamada directa a la API gratuita de Google Gemini desde el servicio Python.
+- **Python ↔ Groq:** Llamada directa a la API de Groq (modelo Llama 3.3 70B Versatile) desde el servicio Python.
 
 ---
 
@@ -104,15 +104,15 @@ Inglés. La interfaz se diseña en inglés desde el inicio con la infraestructur
                                     │                  │
                                     │   PYTHON         │
                                     │   Scraper        │
-                                    │   Gemini Bridge  │
+                                    │   Groq Bridge    │
                                     │                  │
                                     └────────┬─────────┘
                                              │
                               ┌──────────────┼──────────────┐
                               │              │              │
                        ┌──────▼──────┐ ┌─────▼─────┐ ┌─────▼─────┐
-                       │    Base     │ │  Tiendas  │ │  Google   │
-                       │   Datos    │ │  (Scrape) │ │  Gemini   │
+                       │    Base     │ │  Tiendas  │ │   Groq    │
+                       │   Datos    │ │  (Scrape) │ │  Llama3.3 │
                        └─────────────┘ └───────────┘ └───────────┘
 ```
 
@@ -274,7 +274,7 @@ src/main/java/com/thalassa/
 │   └── MarketService.java        # Llama al scraper Python vía HTTP interno
 │
 ├── chat/
-│   ├── ChatController.java       # POST /chat → proxy al servicio Python (Gemini)
+│   ├── ChatController.java       # POST /chat → proxy al servicio Python (Groq)
 │   └── ChatService.java          # Controla límite de 5 consultas/día (plan Free)
 │
 ├── plan/
@@ -297,8 +297,8 @@ python-service/
 │   │   ├── market_scraper.py     # Lógica de scraping de tiendas del sector
 │   │   ├── species_scraper.py    # Scraping de base de datos de especies (peces, corales, invertebrados)
 │   │   └── parsers/              # Parsers específicos por tienda/fuente
-│   ├── gemini/
-│   │   ├── gemini_client.py      # Wrapper de la API de Google Gemini
+│   ├── services/
+│   │   ├── groq_client.py        # Wrapper de la API de Groq (Llama 3.3 70B)
 │   │   └── prompts.py            # System prompts especializados en acuariofilia marina
 │   ├── routes/
 │   │   ├── market_routes.py      # Endpoints: /scrape/search, /scrape/species
@@ -1049,7 +1049,7 @@ Accesible desde el icono de engranaje en el header del detalle:
 
 **Ruta:** No tiene ruta propia. Se abre como drawer/modal desde cualquier sección.
 
-**System Prompt de Gemini:** Debe estar altamente especializado en acuariofilia marina. El prompt debe incluir contexto como:
+**System Prompt de Thalassa AI (Groq / Llama 3.3):** Debe estar altamente especializado en acuariofilia marina. El prompt debe incluir contexto como:
 
 - "You are an expert marine aquarist assistant."
 - Conocimiento sobre parámetros del agua, compatibilidad de especies, problemas comunes (ich, dinoflagellates, cyano, algae bloom), dosificación, equipamiento, cycling de acuarios nuevos.
@@ -1210,7 +1210,7 @@ Accesible desde el icono de engranaje en el header del detalle:
 3. El usuario escribe una pregunta (ej. "My calcium is at 350ppm, how do I raise it?").
 4. POST /chat con el mensaje + contexto del acuario activo (parámetros actuales).
 5. Backend (Java) verifica límite de consultas diarias (Free: 5/día).
-6. Si dentro del límite → proxea al servicio Python → Python llama a Gemini → respuesta.
+6. Si dentro del límite → proxea al servicio Python → Python llama a Groq (Llama 3.3) → respuesta.
 7. El chat muestra la respuesta del asistente con formato adecuado.
 8. Contador actualizado: "4 of 5 questions used today".
 ```
@@ -1257,7 +1257,7 @@ services:
     build: ./backend-python
     # NO exponer puerto al exterior
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
     networks:
       - thalassa-net
 
@@ -1285,7 +1285,7 @@ volumes:
 
 - El servicio Python **no expone puertos al exterior**. Solo es accesible desde la red interna Docker (`thalassa-net`).
 - Java se comunica con Python vía `http://thalassa-python:5000` (nombre del servicio Docker como hostname).
-- Las variables sensibles (JWT_SECRET, DB_PASSWORD, GEMINI_API_KEY) van en un archivo `.env` que **nunca se sube al repositorio**.
+- Las variables sensibles (JWT_SECRET, DB_PASSWORD, GROQ_API_KEY) van en un archivo `.env` que **nunca se sube al repositorio**.
 - En producción, el puerto de PostgreSQL tampoco se expone.
 
 ### 13.2 Comunicación Java ↔ Python
@@ -1308,7 +1308,7 @@ public WebClient pythonServiceClient() {
 |---|---|---|
 |GET|/scrape/search?q=...&category=...|Búsqueda en tiendas scrapeadas|
 |GET|/scrape/species?q=...|Búsqueda de especies (peces, corales, invertebrados)|
-|POST|/chat/message|Envía mensaje al agente Gemini y devuelve respuesta|
+|POST|/chat/message|Envía mensaje al agente Groq (Llama 3.3) y devuelve respuesta|
 
 **Flujo de una petición de chat:**
 
@@ -1319,17 +1319,17 @@ Frontend (Axios)
     → ChatService verifica límite diario
     → Si OK → WebClient POST a Python http://thalassa-python:5000/chat/message
       → Python construye prompt con contexto del acuario
-      → Python llama a Gemini API
+      → Python llama a Groq API (Llama 3.3 70B)
       → Python devuelve respuesta
     → Java devuelve respuesta al frontend
 ```
 
-### 13.3 API de Google Gemini (Python)
+### 13.3 API de Groq / Llama 3.3 (Python)
 
 **Configuración del agente:**
 
 ```python
-# gemini/prompts.py
+# services/prompts.py
 
 SYSTEM_PROMPT = """
 You are Thalassa AI, an expert marine aquarium assistant.
@@ -1350,7 +1350,7 @@ Respond in the same language the user writes in.
 """
 ```
 
-**Nota:** La API gratuita de Gemini tiene rate limits. Documentar los límites actuales y configurar retry logic con exponential backoff en el servicio Python.
+**Nota:** La API gratuita de Groq tiene rate limits (aprox. 30 RPM / 6000 tokens/min en free tier con Llama 3.3 70B). Configurar retry logic con exponential backoff en el servicio Python si se necesita mayor throughput.
 
 ### 13.4 Actualizaciones necesarias en el backend
 

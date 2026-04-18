@@ -21,9 +21,9 @@ class Settings(BaseSettings):
     tiendanimal_base_url: str = "https://www.tiendanimal.es"
     kiwoko_base_url: str = "https://www.kiwoko.com"
 
-    # ── Gemini ────────────────────────────────────────────────────────────────
-    gemini_api_key: str = ""
-    gemini_model: str = "gemini-1.5-flash"  # free-tier, 15 RPM / 1M TPM
+    # ── Groq ──────────────────────────────────────────────────────────────────
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
 
     model_config = SettingsConfigDict(
         env_file=".env",
