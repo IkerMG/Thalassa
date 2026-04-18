@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,4 +19,23 @@ class ScrapeRequest(BaseModel):
     store: StoreId = Field(
         default="all",
         description="Tienda en la que buscar. 'all' busca en todas las tiendas soportadas.",
+    )
+
+
+class ChatRequest(BaseModel):
+    """Mensaje enviado al asistente IA Thalassa."""
+
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description="Pregunta o mensaje del usuario.",
+        examples=["My calcium is at 350 ppm, how do I raise it safely?"],
+    )
+    aquarium_context: Optional[dict[str, Any]] = Field(
+        default=None,
+        description=(
+            "Contexto opcional del acuario activo (parámetros actuales, fauna, "
+            "volumen…). Permite respuestas personalizadas."
+        ),
     )

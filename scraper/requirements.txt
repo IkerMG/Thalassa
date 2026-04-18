@@ -22,3 +22,6 @@ fake-useragent==1.5.1
 
 # Variables de entorno
 python-dotenv==1.0.1
+
+# Google Gemini SDK
+google-generativeai==0.8.3

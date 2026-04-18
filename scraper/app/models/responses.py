@@ -37,3 +37,25 @@ class ScrapeResponse(BaseModel):
     results: list[ProductResult] = Field(default_factory=list)
     total: int = Field(..., ge=0, description="Número de resultados devueltos.")
     error: Optional[ScrapeError] = Field(default=None)
+
+
+# ── Chat ──────────────────────────────────────────────────────────────────────
+
+class ChatError(BaseModel):
+    """Error producido durante la comunicación con Gemini."""
+
+    code: str = Field(
+        ...,
+        description="Código de error: GEMINI_ERROR | GEMINI_UNAVAILABLE | INVALID_REQUEST",
+    )
+    message: str = Field(..., description="Descripción legible del error.")
+
+
+class ChatResponse(BaseModel):
+    """Respuesta del asistente IA Thalassa."""
+
+    reply: str = Field(..., description="Texto de respuesta generado por Gemini.")
+    error: Optional[ChatError] = Field(
+        default=None,
+        description="Presente solo si ocurrió un error al llamar a Gemini.",
+    )
