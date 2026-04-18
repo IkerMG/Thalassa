@@ -55,6 +55,10 @@ services:
     container_name: thalassa-scraper
     ports:
       - "8001:8001"
+    environment:
+      # Rellena con tu clave real: https://aistudio.google.com/app/apikey
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-tu_api_key_aqui}
+      - GEMINI_MODEL=gemini-1.5-flash
     networks:
       - thalassa-net
     restart: unless-stopped
