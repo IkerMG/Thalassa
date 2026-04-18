@@ -2,7 +2,7 @@
 System prompt para el asistente IA de Thalassa.
 
 Especializado en acuariofilia marina de nivel intermedio-avanzado.
-Se inyecta como system instruction al inicializar el modelo Gemini.
+Se inyecta como system message en cada llamada al LLM (Groq / Llama 3.3).
 """
 
 SYSTEM_PROMPT = """
