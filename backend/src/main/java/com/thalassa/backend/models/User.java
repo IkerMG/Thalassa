@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +43,18 @@ public class User implements UserDetails {
 
     @Column(name = "electricity_price_kwh")
     private Double electricityPriceKwh;
+
+    // ── Chat rate-limiting ────────────────────────────────────────────────────
+    // Persiste el contador de consultas diarias al asistente IA.
+    // ChatService compara lastChatDate con LocalDate.now(); si difieren,
+    // resetea chatCountToday a 0 antes de incrementar.
+
+    @Column(name = "chat_count_today", nullable = false)
+    @Builder.Default
+    private Integer chatCountToday = 0;
+
+    @Column(name = "last_chat_date")
+    private LocalDate lastChatDate;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("user-aquariums")
