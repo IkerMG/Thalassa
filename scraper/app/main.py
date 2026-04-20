@@ -1,19 +1,20 @@
 from fastapi import FastAPI
 
 from app.config import get_settings
-from app.routers import scraper_router
+from app.routers import chat_router, scraper_router
 
 settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Microservicio de scraping de precios para productos de acuariofilia.",
+    description="Microservicio de scraping de precios y chatbot IA para Thalassa.",
     docs_url="/docs",
     redoc_url="/redoc",
 )
 
 app.include_router(scraper_router.router)
+app.include_router(chat_router.router)
 
 
 @app.get("/ping", tags=["Health"])

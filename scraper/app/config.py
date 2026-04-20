@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     tiendanimal_base_url: str = "https://www.tiendanimal.es"
     kiwoko_base_url: str = "https://www.kiwoko.com"
 
+    # ── Groq ──────────────────────────────────────────────────────────────────
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

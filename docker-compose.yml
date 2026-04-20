@@ -55,6 +55,10 @@ services:
     container_name: thalassa-scraper
     ports:
       - "8001:8001"
+    environment:
+      # Rellena con tu clave real: https://console.groq.com/keys
+      - GROQ_API_KEY=${GROQ_API_KEY:-tu_api_key_aqui}
+      - GROQ_MODEL=llama-3.3-70b-versatile
     networks:
       - thalassa-net
     restart: unless-stopped
