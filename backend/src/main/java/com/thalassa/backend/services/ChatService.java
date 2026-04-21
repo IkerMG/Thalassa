@@ -46,6 +46,22 @@ public class ChatService {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    // ── Usage query ──────────────────────────────────────────────────────────
+
+    public com.thalassa.backend.dto.ChatUsageResponse getChatUsage() {
+        User user = getAuthenticatedUser();
+
+        // If the date changed, the real count is 0 (will reset on next message).
+        java.time.LocalDate today = java.time.LocalDate.now();
+        int used = today.equals(user.getLastChatDate()) ? user.getChatCountToday() : 0;
+        int limit = (user.getSubscriptionPlan() == SubscriptionPlan.REEFMASTER) ? -1 : freeDailyLimit;
+
+        return com.thalassa.backend.dto.ChatUsageResponse.builder()
+                .used(used)
+                .limit(limit)
+                .build();
+    }
+
     // ── Rate-limit ────────────────────────────────────────────────────────────
 
     /**

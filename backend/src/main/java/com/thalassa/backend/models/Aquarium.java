@@ -45,4 +45,9 @@ public class Aquarium {
     @JsonManagedReference("aquarium-equipment")
     @Builder.Default
     private List<Equipment> equipment = new ArrayList<>();
+
+    @OneToMany(mappedBy = "aquarium", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("aquarium-parameters")
+    @Builder.Default
+    private List<WaterParameter> waterParameters = new ArrayList<>();
 }

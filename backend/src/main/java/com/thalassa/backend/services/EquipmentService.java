@@ -61,6 +61,7 @@ public class EquipmentService {
                 .name(request.getName())
                 .powerWatts(request.getPowerWatts())
                 .hoursPerDay(request.getHoursPerDay())
+                .category(request.getCategory())
                 .aquarium(aquarium)
                 .build();
 
@@ -76,6 +77,7 @@ public class EquipmentService {
         equipment.setName(request.getName());
         equipment.setPowerWatts(request.getPowerWatts());
         equipment.setHoursPerDay(request.getHoursPerDay());
+        equipment.setCategory(request.getCategory());
 
         return mapToResponse(equipmentRepository.save(equipment));
     }
@@ -145,6 +147,7 @@ public class EquipmentService {
                 .name(e.getName())
                 .powerWatts(e.getPowerWatts())
                 .hoursPerDay(e.getHoursPerDay())
+                .category(e.getCategory())
                 .build();
     }
 }

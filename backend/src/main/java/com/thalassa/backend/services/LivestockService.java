@@ -56,7 +56,7 @@ public class LivestockService {
     }
 
     /**
-     * Añade un espécimen. Si el acuario es MARINO_ARRECIFE y el espécimen no es
+     * Añade un espécimen. Si el acuario es REEF y el espécimen no es
      * reef-safe, se incluye un campo warning en la respuesta (sin bloquear).
      */
     @Transactional
@@ -82,7 +82,7 @@ public class LivestockService {
         Livestock saved = livestockRepository.save(livestock);
 
         String warning = null;
-        if (aquarium.getType() == AquariumType.MARINO_ARRECIFE && Boolean.FALSE.equals(saved.getReefSafe())) {
+        if (aquarium.getType() == AquariumType.REEF && Boolean.FALSE.equals(saved.getReefSafe())) {
             warning = "Advertencia: este espécimen no es reef-safe y el acuario es de tipo arrecife.";
         }
 

@@ -32,6 +32,18 @@ public class WishlistItem {
     @Column(name = "store_name", nullable = false, length = 100)
     private String storeName;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private WishlistCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    @Builder.Default
+    private WishlistPriority priority = WishlistPriority.MEDIUM;
+
+    @Column(length = 500)
+    private String notes;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference("user-wishlist")

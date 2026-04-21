@@ -53,6 +53,9 @@ public class WishlistService {
                 .imgUrl(request.getImgUrl())
                 .productUrl(request.getProductUrl())
                 .storeName(request.getStoreName())
+                .category(request.getCategory())
+                .priority(request.getPriority())
+                .notes(request.getNotes())
                 .user(user)
                 .build();
 
@@ -81,6 +84,9 @@ public class WishlistService {
                 .imgUrl(item.getImgUrl())
                 .productUrl(item.getProductUrl())
                 .storeName(item.getStoreName())
+                .category(item.getCategory())
+                .priority(item.getPriority())
+                .notes(item.getNotes())
                 .build();
     }
 }

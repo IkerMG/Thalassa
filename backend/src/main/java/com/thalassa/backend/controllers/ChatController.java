@@ -2,8 +2,10 @@ package com.thalassa.backend.controllers;
 
 import com.thalassa.backend.dto.ChatRequest;
 import com.thalassa.backend.dto.ChatResponse;
+import com.thalassa.backend.dto.ChatUsageResponse;
 import com.thalassa.backend.services.ChatService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +30,14 @@ public class ChatController {
     @PostMapping
     public ResponseEntity<ChatResponse> sendMessage(@RequestBody ChatRequest request) {
         return ResponseEntity.ok(chatService.sendMessage(request));
+    }
+
+    /**
+     * GET /api/chat/usage
+     * Returns today's message count and the plan limit (-1 = unlimited).
+     */
+    @GetMapping("/usage")
+    public ResponseEntity<ChatUsageResponse> getChatUsage() {
+        return ResponseEntity.ok(chatService.getChatUsage());
     }
 }
