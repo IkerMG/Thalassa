@@ -79,6 +79,22 @@ public class User implements UserDetails {
 
     // ── UserDetails ──────────────────────────────────────────────────────────
 
+    /**
+     * Spring Security uses getUsername() as the principal identifier.
+     * We use email as the login key, so this must return email, not the display username.
+     * NOTE: Lombok's getter for the 'username' field is suppressed by this override.
+     *       Use getDisplayUsername() to access the display name.
+     */
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    /** Returns the human-readable display name (the 'username' DB column). */
+    public String getDisplayUsername() {
+        return username;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + subscriptionPlan.name()));

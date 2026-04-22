@@ -33,6 +33,12 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
+-- ── Drop stale check constraints (ddl-auto:update never removes old ones) ────
+-- Hibernate will recreate them correctly on the next boot.
+ALTER TABLE species_catalog DROP CONSTRAINT IF EXISTS species_catalog_category_check;
+ALTER TABLE livestock       DROP CONSTRAINT IF EXISTS livestock_category_check;
+ALTER TABLE aquariums       DROP CONSTRAINT IF EXISTS aquariums_type_check;
+
 -- ── Migrate legacy Spanish enum values (only runs if old values exist) ────────
 UPDATE species_catalog SET category = 'FISH'        WHERE category = 'PEZ';
 UPDATE species_catalog SET category = 'INVERTEBRATE' WHERE category = 'INVERTEBRADO';
@@ -121,3 +127,14 @@ VALUES
     (5, 'Bomba de circulación',   40, 24.0, 2),
     (6, 'Calentador 300 W',      300,  8.0, 2)
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ── 6. Sincronización de secuencias de PostgreSQL ─────────────────────────────
+-- Hibernate genera secuencias como <tabla>_id_seq para GenerationType.IDENTITY.
+-- Sin esto, tras insertar IDs hardcodeados la secuencia empieza desde 1
+-- y choca con los registros ya existentes al crear nuevos registros.
+SELECT setval('users_id_seq',          (SELECT MAX(id) FROM users));
+SELECT setval('species_catalog_id_seq',(SELECT MAX(id) FROM species_catalog));
+SELECT setval('aquariums_id_seq',      (SELECT MAX(id) FROM aquariums));
+SELECT setval('livestock_id_seq',      (SELECT MAX(id) FROM livestock));
+SELECT setval('equipment_id_seq',      (SELECT MAX(id) FROM equipment));

@@ -57,7 +57,7 @@ public class AuthService {
 
         return UserResponse.builder()
                 .id(saved.getId())
-                .username(saved.getUsername())
+                .username(saved.getDisplayUsername())
                 .email(saved.getEmail())
                 .subscriptionPlan(saved.getSubscriptionPlan())
                 .build();
@@ -79,7 +79,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .token(token)
-                .username(user.getUsername())
+                .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .subscriptionPlan(user.getSubscriptionPlan())
                 .build();

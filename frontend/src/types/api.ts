@@ -18,5 +18,16 @@ export interface AuthResponse {
   token: string;
   username: string;
   email: string;
-  plan: 'FREE' | 'REEFMASTER';
+  subscriptionPlan: 'FREE' | 'REEFMASTER';
+}
+
+export interface UserResponse {
+  id: number;
+  username: string;
+  email: string;
+  subscriptionPlan: 'FREE' | 'REEFMASTER';
+  electricityPriceKwh?: number | null;
+  locale?: string | null;
+  temperatureUnit?: string | null;
+  volumeUnit?: string | null;
 }

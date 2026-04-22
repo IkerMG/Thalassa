@@ -12,22 +12,17 @@ export function useAuth() {
       id: 0,
       email: res.email,
       username: res.username,
-      plan: res.plan,
+      plan: res.subscriptionPlan,
     };
     setAuth(res.token, userData);
     return res;
   };
 
   const register = async (data: RegisterRequest) => {
-    const res = await authApi.register(data);
-    const userData: User = {
-      id: 0,
-      email: res.email,
-      username: res.username,
-      plan: res.plan,
-    };
-    setAuth(res.token, userData);
-    return res;
+    // Register creates the account (returns UserResponse, no token).
+    // Auto-login immediately after so the user lands on the dashboard.
+    await authApi.register(data);
+    return login({ email: data.email, password: data.password });
   };
 
   const logout = () => clearAuth();

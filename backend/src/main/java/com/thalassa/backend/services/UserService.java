@@ -53,7 +53,7 @@ public class UserService {
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
-                .username(user.getUsername())
+                .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .subscriptionPlan(user.getSubscriptionPlan())
                 .electricityPriceKwh(user.getElectricityPriceKwh())

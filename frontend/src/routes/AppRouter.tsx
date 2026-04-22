@@ -10,6 +10,7 @@ import RegisterPage from '../features/auth/RegisterPage';
 
 // Protected pages — lazy loaded (reduces initial bundle)
 const DashboardView = lazy(() => import('../features/dashboard/DashboardView'));
+const AquariumDetailPage = lazy(() => import('../features/aquarium-detail/AquariumDetailPage'));
 
 function PageLoader() {
   return (
@@ -34,6 +35,7 @@ export default function AppRouter() {
           {/* ── Protected routes (redirect to /login if not authenticated) ── */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardView />} />
+            <Route path="/dashboard/aquarium/:id" element={<AquariumDetailPage />} />
           </Route>
 
           {/* ── Fallback ── */}
