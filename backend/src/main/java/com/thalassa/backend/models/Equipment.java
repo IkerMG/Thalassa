@@ -33,6 +33,10 @@ public class Equipment {
     @Column(name = "hours_per_day", nullable = false)
     private Double hoursPerDay;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private EquipmentCategory category;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aquarium_id", nullable = false)
     @JsonBackReference("aquarium-equipment")

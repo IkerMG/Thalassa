@@ -552,7 +552,90 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # ── Parámetros del agua (sub-recurso de acuario) ─────────────────────────
+  /api/aquariums/{id}/parameters:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Parámetros]
+      summary: Historial de parámetros del agua
+      description: Devuelve las mediciones históricas del acuario, ordenadas de más reciente a más antigua.
+      operationId: getWaterParameters
+      responses:
+        '200':
+          description: Historial de mediciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WaterParameterResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Parámetros]
+      summary: Registrar medición de parámetros
+      description: Añade una nueva medición al historial. Todos los parámetros son opcionales; registra solo los que hayas medido.
+      operationId: logWaterParameter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaterParameterRequest'
+      responses:
+        '201':
+          description: Medición registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaterParameterResponse'
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Dashboard ────────────────────────────────────────────────────────────
+  /api/dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Resumen global del dashboard
+      description: Estadísticas agregadas para el header del dashboard del usuario autenticado.
+      operationId: getDashboardSummary
+      responses:
+        '200':
+          description: Resumen del dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummaryResponse'
+
   # ── Chatbot IA ───────────────────────────────────────────────────────────
+  /api/chat/usage:
+    get:
+      tags: [Chat]
+      summary: Consultar uso del chat hoy
+      description: Devuelve el número de mensajes enviados hoy y el límite del plan (-1 = ilimitado).
+      operationId: getChatUsage
+      responses:
+        '200':
+          description: Uso del chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatUsageResponse'
+
   /api/chat:
     post:
       tags: [Chat]
@@ -661,13 +744,28 @@ components:
 
     AquariumType:
       type: string
-      description: Tipo de acuario marino
-      enum: [MARINO_PECES, MARINO_ARRECIFE]
+      description: Ecosystem type of the aquarium
+      enum: [REEF, FISH_ONLY, MIXED]
 
     LivestockCategory:
       type: string
-      description: Categoría taxonómica del espécimen
-      enum: [PEZ, CORAL, INVERTEBRADO]
+      description: Taxonomic category of the specimen
+      enum: [FISH, CORAL, INVERTEBRATE]
+
+    EquipmentCategory:
+      type: string
+      description: Functional category of the equipment
+      enum: [LIGHT, PUMP, SKIMMER, HEATER, OTHER]
+
+    WishlistCategory:
+      type: string
+      description: Category of the wishlisted product
+      enum: [EQUIPMENT, LIVESTOCK, SUPPLEMENT, OTHER]
+
+    WishlistPriority:
+      type: string
+      description: Priority level of the wishlist item
+      enum: [LOW, MEDIUM, HIGH]
 
     # ── Autenticación ─────────────────────────────────────────────────────────
 
@@ -734,17 +832,37 @@ components:
         electricityPriceKwh:
           type: number
           format: double
-          description: Precio del kWh en €. Null si no ha sido configurado.
+          nullable: true
+        locale:
+          type: string
+          description: "Interface language: en | de | es"
+          nullable: true
+        temperatureUnit:
+          type: string
+          description: "C or F"
+          nullable: true
+        volumeUnit:
+          type: string
+          description: "L or GAL"
+          nullable: true
 
     UpdateUserRequest:
       type: object
-      required: [electricityPriceKwh]
       properties:
         electricityPriceKwh:
           type: number
           format: double
           minimum: 0.0
-          description: Precio del kWh en € para el cálculo energético
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+        temperatureUnit:
+          type: string
+          nullable: true
+        volumeUnit:
+          type: string
+          nullable: true
 
     # ── Acuarios ──────────────────────────────────────────────────────────────
 
@@ -811,18 +929,17 @@ components:
           type: string
           minLength: 1
           maxLength: 100
-          description: Nombre del equipo
         powerWatts:
           type: integer
           format: int32
           minimum: 1
-          description: Potencia en vatios
         hoursPerDay:
           type: number
           format: double
           minimum: 0.1
           maximum: 24.0
-          description: Horas de funcionamiento diario
+        category:
+          $ref: '#/components/schemas/EquipmentCategory'
 
     EquipmentResponse:
       type: object
@@ -838,6 +955,9 @@ components:
         hoursPerDay:
           type: number
           format: double
+        category:
+          $ref: '#/components/schemas/EquipmentCategory'
+          nullable: true
 
     EquipmentEnergyCost:
       type: object
@@ -1035,6 +1155,17 @@ components:
           type: string
           maxLength: 100
           description: Nombre de la tienda
+        category:
+          $ref: '#/components/schemas/WishlistCategory'
+          nullable: true
+        priority:
+          $ref: '#/components/schemas/WishlistPriority'
+          nullable: true
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Notas personales sobre el producto
 
     WishlistItemResponse:
       type: object
@@ -1054,8 +1185,144 @@ components:
           type: string
         storeName:
           type: string
+        category:
+          $ref: '#/components/schemas/WishlistCategory'
+          nullable: true
+        priority:
+          $ref: '#/components/schemas/WishlistPriority'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    # ── Parámetros del agua ───────────────────────────────────────────────────
+
+    WaterParameterRequest:
+      type: object
+      description: Todos los campos son opcionales — registra solo los parámetros que hayas medido.
+      properties:
+        temperature:
+          type: number
+          format: double
+          nullable: true
+          description: Temperatura en °C (o °F según preferencia del usuario)
+        salinity:
+          type: number
+          format: double
+          nullable: true
+          description: Salinidad en ppt (partes por mil)
+        ph:
+          type: number
+          format: double
+          nullable: true
+          description: pH del agua
+        alkalinityDKH:
+          type: number
+          format: double
+          nullable: true
+          description: Alcalinidad en dKH
+        calciumPPM:
+          type: number
+          format: double
+          nullable: true
+          description: Calcio en ppm
+        magnesiumPPM:
+          type: number
+          format: double
+          nullable: true
+          description: Magnesio en ppm
+        nitratesPPM:
+          type: number
+          format: double
+          nullable: true
+          description: Nitratos en ppm
+        phosphatesPPM:
+          type: number
+          format: double
+          nullable: true
+          description: Fosfatos en ppm
+        measuredAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Momento de la medición. Si se omite, se usa la fecha y hora actuales.
+
+    WaterParameterResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        aquariumId:
+          type: integer
+          format: int64
+        temperature:
+          type: number
+          format: double
+          nullable: true
+        salinity:
+          type: number
+          format: double
+          nullable: true
+        ph:
+          type: number
+          format: double
+          nullable: true
+        alkalinityDKH:
+          type: number
+          format: double
+          nullable: true
+        calciumPPM:
+          type: number
+          format: double
+          nullable: true
+        magnesiumPPM:
+          type: number
+          format: double
+          nullable: true
+        nitratesPPM:
+          type: number
+          format: double
+          nullable: true
+        phosphatesPPM:
+          type: number
+          format: double
+          nullable: true
+        measuredAt:
+          type: string
+          format: date-time
+
+    # ── Dashboard ─────────────────────────────────────────────────────────────
+
+    DashboardSummaryResponse:
+      type: object
+      properties:
+        aquariumCount:
+          type: integer
+          format: int32
+          description: Número total de acuarios del usuario
+        totalLivestock:
+          type: integer
+          format: int32
+          description: Número total de especímenes en todos los acuarios
+        totalEquipment:
+          type: integer
+          format: int32
+          description: Número total de equipos en todos los acuarios
 
     # ── Chat ─────────────────────────────────────────────────────────────────
+
+    ChatUsageResponse:
+      type: object
+      properties:
+        used:
+          type: integer
+          format: int32
+          description: Mensajes enviados hoy
+        limit:
+          type: integer
+          format: int32
+          description: Límite diario del plan. -1 significa ilimitado (REEFMASTER).
 
     ChatRequest:
       type: object

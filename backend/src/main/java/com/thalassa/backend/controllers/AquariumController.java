@@ -9,9 +9,12 @@ import com.thalassa.backend.dto.EquipmentRequest;
 import com.thalassa.backend.dto.EquipmentResponse;
 import com.thalassa.backend.dto.LivestockRequest;
 import com.thalassa.backend.dto.LivestockResponse;
+import com.thalassa.backend.dto.WaterParameterRequest;
+import com.thalassa.backend.dto.WaterParameterResponse;
 import com.thalassa.backend.services.AquariumService;
 import com.thalassa.backend.services.EquipmentService;
 import com.thalassa.backend.services.LivestockService;
+import com.thalassa.backend.services.WaterParameterService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,13 +36,16 @@ public class AquariumController {
     private final AquariumService aquariumService;
     private final EquipmentService equipmentService;
     private final LivestockService livestockService;
+    private final WaterParameterService waterParameterService;
 
     public AquariumController(AquariumService aquariumService,
                               EquipmentService equipmentService,
-                              LivestockService livestockService) {
+                              LivestockService livestockService,
+                              WaterParameterService waterParameterService) {
         this.aquariumService = aquariumService;
         this.equipmentService = equipmentService;
         this.livestockService = livestockService;
+        this.waterParameterService = waterParameterService;
     }
 
     // ── Acuarios ──────────────────────────────────────────────────────────────
@@ -142,8 +148,7 @@ public class AquariumController {
 
     /**
      * POST /api/aquariums/{id}/livestock
-     * Añade un espécimen al acuario. Devuelve advertencia si no es reef-safe
-     * en un acuario de tipo MARINO_ARRECIFE.
+     * Añade un espécimen al acuario. Devuelve advertencia si no es reef-safe en REEF.
      */
     @PostMapping("/{id}/livestock")
     public ResponseEntity<AddLivestockResponse> addLivestock(
@@ -151,5 +156,28 @@ public class AquariumController {
             @Valid @RequestBody LivestockRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(livestockService.addLivestock(id, request));
+    }
+
+    // ── Sub-recurso: Parámetros del agua ──────────────────────────────────────
+
+    /**
+     * GET /api/aquariums/{id}/parameters
+     * Historial de mediciones de agua del acuario, orden descendente.
+     */
+    @GetMapping("/{id}/parameters")
+    public ResponseEntity<List<WaterParameterResponse>> getParameters(@PathVariable Long id) {
+        return ResponseEntity.ok(waterParameterService.getHistory(id));
+    }
+
+    /**
+     * POST /api/aquariums/{id}/parameters
+     * Registra una nueva medición de parámetros del agua.
+     */
+    @PostMapping("/{id}/parameters")
+    public ResponseEntity<WaterParameterResponse> logParameter(
+            @PathVariable Long id,
+            @Valid @RequestBody WaterParameterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(waterParameterService.logParameter(id, request));
     }
 }

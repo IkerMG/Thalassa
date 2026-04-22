@@ -144,7 +144,7 @@
                             <modelPackage>com.thalassa.backend.dto</modelPackage>
 
                             <!--
-                                Los tres enums ya existen en com.thalassa.backend.models.
+                                Los enums ya existen en com.thalassa.backend.models.
                                 El generador NO los crea; simplemente importa la clase existente
                                 cuando los encuentra referenciados en el YAML.
                             -->
@@ -152,6 +152,9 @@
                                 <importMapping>SubscriptionPlan=com.thalassa.backend.models.SubscriptionPlan</importMapping>
                                 <importMapping>AquariumType=com.thalassa.backend.models.AquariumType</importMapping>
                                 <importMapping>LivestockCategory=com.thalassa.backend.models.LivestockCategory</importMapping>
+                                <importMapping>EquipmentCategory=com.thalassa.backend.models.EquipmentCategory</importMapping>
+                                <importMapping>WishlistCategory=com.thalassa.backend.models.WishlistCategory</importMapping>
+                                <importMapping>WishlistPriority=com.thalassa.backend.models.WishlistPriority</importMapping>
                             </importMappings>
 
                             <!--

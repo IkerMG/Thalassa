@@ -32,7 +32,18 @@ public class UserService {
     @Transactional
     public UserResponse updateElectricityPrice(UpdateUserRequest request) {
         User user = getAuthenticatedUser();
-        user.setElectricityPriceKwh(request.getElectricityPriceKwh());
+        if (request.getElectricityPriceKwh() != null) {
+            user.setElectricityPriceKwh(request.getElectricityPriceKwh());
+        }
+        if (request.getLocale() != null) {
+            user.setLocale(request.getLocale());
+        }
+        if (request.getTemperatureUnit() != null) {
+            user.setTemperatureUnit(request.getTemperatureUnit());
+        }
+        if (request.getVolumeUnit() != null) {
+            user.setVolumeUnit(request.getVolumeUnit());
+        }
         User saved = userRepository.save(user);
         return mapToResponse(saved);
     }
@@ -42,10 +53,13 @@ public class UserService {
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
-                .username(user.getUsername())
+                .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .subscriptionPlan(user.getSubscriptionPlan())
                 .electricityPriceKwh(user.getElectricityPriceKwh())
+                .locale(user.getLocale())
+                .temperatureUnit(user.getTemperatureUnit())
+                .volumeUnit(user.getVolumeUnit())
                 .build();
     }
 }

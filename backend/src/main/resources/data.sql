@@ -33,6 +33,20 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
+-- ── Drop stale check constraints (ddl-auto:update never removes old ones) ────
+-- Hibernate will recreate them correctly on the next boot.
+ALTER TABLE species_catalog DROP CONSTRAINT IF EXISTS species_catalog_category_check;
+ALTER TABLE livestock       DROP CONSTRAINT IF EXISTS livestock_category_check;
+ALTER TABLE aquariums       DROP CONSTRAINT IF EXISTS aquariums_type_check;
+
+-- ── Migrate legacy Spanish enum values (only runs if old values exist) ────────
+UPDATE species_catalog SET category = 'FISH'        WHERE category = 'PEZ';
+UPDATE species_catalog SET category = 'INVERTEBRATE' WHERE category = 'INVERTEBRADO';
+UPDATE livestock       SET category = 'FISH'        WHERE category = 'PEZ';
+UPDATE livestock       SET category = 'INVERTEBRATE' WHERE category = 'INVERTEBRADO';
+UPDATE aquariums       SET type = 'FISH_ONLY'        WHERE type = 'MARINO_PECES';
+UPDATE aquariums       SET type = 'REEF'             WHERE type = 'MARINO_ARRECIFE';
+
 -- ── 2. Catálogo de Especies ───────────────────────────────────────────────────
 INSERT INTO species_catalog
     (id, common_name, scientific_name, category, reef_safe, image_url, notes)
@@ -40,19 +54,19 @@ VALUES
     (1,
      'Pez Payaso',
      'Amphiprion ocellaris',
-     'PEZ', TRUE, NULL,
+     'FISH', TRUE, NULL,
      'Especie icónica, ideal para principiantes. Convive perfectamente con anémonas del género Heteractis. Dificultad: Baja.'),
 
     (2,
      'Cirujano Amarillo',
      'Zebrasoma flavescens',
-     'PEZ', TRUE, NULL,
+     'FISH', TRUE, NULL,
      'Excelente ramoneador de algas filamentosas. Requiere espacio de nado libre; mínimo recomendado 300 L. Dificultad: Media.'),
 
     (3,
      'Pez León',
      'Pterois volitans',
-     'PEZ', FALSE, NULL,
+     'FISH', FALSE, NULL,
      'Espinas con veneno hemolítico. Depreda peces pequeños e invertebrados. No apto para acuarios mixtos con fauna pequeña. Dificultad: Alta.'),
 
     (4,
@@ -70,13 +84,13 @@ VALUES
     (6,
      'Camarón Limpiador',
      'Lysmata amboinensis',
-     'INVERTEBRADO', TRUE, NULL,
+     'INVERTEBRATE', TRUE, NULL,
      'Establece estaciones de limpieza donde retira parásitos de otros peces. Muy beneficioso en cualquier arrecife. Dificultad: Baja.'),
 
     (7,
      'Estrella de Mar Chocolate',
      'Protoreaster nodosus',
-     'INVERTEBRADO', FALSE, NULL,
+     'INVERTEBRATE', FALSE, NULL,
      'Aspecto espectacular pero consume corales, bivalvos y otros invertebrados. Solo apta en biotopo de peces sin invertebrados ni corales. Dificultad: Alta.')
 ON CONFLICT (id) DO NOTHING;
 
@@ -85,8 +99,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO aquariums
     (id, name, liters, type, user_id)
 VALUES
-    (1, 'Mi Primer Acuario', 60,  'MARINO_PECES',   1),
-    (2, 'Arrecife Elena',    500, 'MARINO_ARRECIFE', 2)
+    (1, 'Mi Primer Acuario', 60,  'FISH_ONLY', 1),
+    (2, 'Arrecife Elena',    500, 'REEF',      2)
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -94,11 +108,11 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO livestock
     (id, name, category, reef_safe, quantity, aquarium_id, species_catalog_id)
 VALUES
-    (1, 'Nemo y Marlin',  'PEZ', TRUE, 2, 1, 1),
-    (2, 'Dory',           'PEZ', TRUE, 1, 1, 2),
-    (3, 'Coral Cuero',    'CORAL',        TRUE, 1, 2, 4),
-    (4, 'Coral Cerebro',  'CORAL',        TRUE, 1, 2, 5),
-    (5, 'Equipo limpieza','INVERTEBRADO', TRUE, 3, 2, 6)
+    (1, 'Nemo y Marlin',  'FISH',        TRUE, 2, 1, 1),
+    (2, 'Dory',           'FISH',        TRUE, 1, 1, 2),
+    (3, 'Coral Cuero',    'CORAL',       TRUE, 1, 2, 4),
+    (4, 'Coral Cerebro',  'CORAL',       TRUE, 1, 2, 5),
+    (5, 'Equipo limpieza','INVERTEBRATE',TRUE, 3, 2, 6)
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -113,3 +127,14 @@ VALUES
     (5, 'Bomba de circulación',   40, 24.0, 2),
     (6, 'Calentador 300 W',      300,  8.0, 2)
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ── 6. Sincronización de secuencias de PostgreSQL ─────────────────────────────
+-- Hibernate genera secuencias como <tabla>_id_seq para GenerationType.IDENTITY.
+-- Sin esto, tras insertar IDs hardcodeados la secuencia empieza desde 1
+-- y choca con los registros ya existentes al crear nuevos registros.
+SELECT setval('users_id_seq',          (SELECT MAX(id) FROM users));
+SELECT setval('species_catalog_id_seq',(SELECT MAX(id) FROM species_catalog));
+SELECT setval('aquariums_id_seq',      (SELECT MAX(id) FROM aquariums));
+SELECT setval('livestock_id_seq',      (SELECT MAX(id) FROM livestock));
+SELECT setval('equipment_id_seq',      (SELECT MAX(id) FROM equipment));

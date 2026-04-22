@@ -1,7 +1,7 @@
 package com.thalassa.backend.models;
 
 public enum LivestockCategory {
-    PEZ,
+    FISH,
     CORAL,
-    INVERTEBRADO
+    INVERTEBRATE
 }

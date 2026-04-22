@@ -44,10 +44,21 @@ public class User implements UserDetails {
     @Column(name = "electricity_price_kwh")
     private Double electricityPriceKwh;
 
+    // ── i18n / display preferences (Master Plan §10.6) ───────────────────────
+
+    @Column(length = 5)
+    @Builder.Default
+    private String locale = "en";
+
+    @Column(name = "temperature_unit", length = 1)
+    @Builder.Default
+    private String temperatureUnit = "C";
+
+    @Column(name = "volume_unit", length = 3)
+    @Builder.Default
+    private String volumeUnit = "L";
+
     // ── Chat rate-limiting ────────────────────────────────────────────────────
-    // Persiste el contador de consultas diarias al asistente IA.
-    // ChatService compara lastChatDate con LocalDate.now(); si difieren,
-    // resetea chatCountToday a 0 antes de incrementar.
 
     @Column(name = "chat_count_today", nullable = false)
     @Builder.Default
@@ -67,6 +78,22 @@ public class User implements UserDetails {
     private List<WishlistItem> wishlistItems = new ArrayList<>();
 
     // ── UserDetails ──────────────────────────────────────────────────────────
+
+    /**
+     * Spring Security uses getUsername() as the principal identifier.
+     * We use email as the login key, so this must return email, not the display username.
+     * NOTE: Lombok's getter for the 'username' field is suppressed by this override.
+     *       Use getDisplayUsername() to access the display name.
+     */
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    /** Returns the human-readable display name (the 'username' DB column). */
+    public String getDisplayUsername() {
+        return username;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
