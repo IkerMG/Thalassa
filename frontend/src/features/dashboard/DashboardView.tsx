@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Fish, Wrench, Layers, ChevronRight } from 'lucide-react';
+import { Plus, Fish, Wrench, Layers, ChevronRight, Bot } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useAquariumStore } from '../../store/aquariumStore';
 import { aquariumApi } from '../../api/aquariumApi';
@@ -137,6 +137,7 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
 
 export default function DashboardView() {
   const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const { aquariums, setAquariums, addAquarium } = useAquariumStore();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,12 +180,18 @@ export default function DashboardView() {
             Welcome back, <span className="text-white">{user?.username}</span>
           </p>
         </div>
-        {canCreate && (
-          <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
-            <Plus size={16} className="mr-1" />
-            New Aquarium
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" size="md" onClick={() => navigate('/dashboard/chat')}>
+            <Bot size={15} />
+            Thalassa AI
           </Button>
-        )}
+          {canCreate && (
+            <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
+              <Plus size={16} />
+              New Aquarium
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Global stats */}
