@@ -2,7 +2,7 @@ version: "3.9"
 
 # =============================================================================
 # Thalassa — Docker Compose
-# Sprint 4: completar configuración de servicios, volúmenes y redes
+# Copia .env.example a .env y rellena los valores antes de levantar.
 # =============================================================================
 
 services:
@@ -18,10 +18,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      # - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/thalassa
-      # - SPRING_DATASOURCE_USERNAME=thalassa
-      # - SPRING_DATASOURCE_PASSWORD=changeme
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/thalassa
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      - PYTHON_SERVICE_URL=http://scraper:8001
     depends_on:
       - db
       - scraper
@@ -56,9 +60,14 @@ services:
     ports:
       - "8001:8001"
     environment:
-      # Rellena con tu clave real: https://console.groq.com/keys
-      - GROQ_API_KEY=${GROQ_API_KEY:-tu_api_key_aqui}
+      - GROQ_API_KEY=${GROQ_API_KEY}
       - GROQ_MODEL=llama-3.3-70b-versatile
+    healthcheck:
+      test: ["CMD-SHELL", "[ -n \"$$GROQ_API_KEY\" ] && [ \"$$GROQ_API_KEY\" != 'tu_api_key_aqui' ] && echo OK || (echo 'GROQ_API_KEY not set or placeholder' && exit 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -69,12 +78,12 @@ services:
   db:
     image: postgres:16-alpine
     container_name: thalassa-db
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       POSTGRES_DB: thalassa
-      POSTGRES_USER: thalassa
-      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:

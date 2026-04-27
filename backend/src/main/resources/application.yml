@@ -3,28 +3,28 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/thalassa
-    username: thalassa
-    password: changeme
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/thalassa}
+    username: ${SPRING_DATASOURCE_USERNAME:thalassa}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    # Garantiza que data.sql se ejecuta DESPUÉS de que Hibernate genere las tablas
     defer-datasource-initialization: true
   sql:
     init:
-      # 'always' ejecuta data.sql en cada arranque (idempotente con ON CONFLICT DO NOTHING)
       mode: always
 
 jwt:
-  secret: thalassa-super-secret-key-change-this-in-production-0123456789abcdef
+  secret: ${JWT_SECRET}
   expiration: 86400000
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
 
 python:
   service:

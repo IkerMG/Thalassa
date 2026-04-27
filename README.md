@@ -58,22 +58,62 @@ Vault de **Obsidian** con toda la documentación del proyecto:
 
 ## Requisitos Previos
 
-- Java 21+
-- Node.js 20+
-- Python 3.12+
-- Docker & Docker Compose (para entorno integrado)
+- Docker & Docker Compose (recomendado para entorno completo)
+- Java 21+ y Maven 3.9+ (si ejecutas el backend fuera de Docker)
+- Node.js 20+ (si ejecutas el frontend fuera de Docker)
 
 ---
 
-## Puesta en Marcha (desarrollo local)
+## Setup y Puesta en Marcha
 
-Cada módulo tiene su propio proceso de arranque. Consulta el `README.md` de cada subcarpeta para instrucciones detalladas.
+### 1. Variables de entorno
 
-Para levantar el entorno completo con Docker:
+```bash
+cp .env.example .env
+```
+
+Edita `.env` y rellena **todos** los valores:
+
+| Variable | Descripción |
+|----------|-------------|
+| `JWT_SECRET` | Secreto para firmar JWTs (mínimo 32 chars). Genera con `openssl rand -hex 64`. |
+| `JWT_REFRESH_SECRET` | Secreto para refresh tokens. Idem. |
+| `POSTGRES_USER` | Usuario de PostgreSQL (ej: `thalassa`). |
+| `POSTGRES_PASSWORD` | Contraseña de PostgreSQL. |
+| `GROQ_API_KEY` | API key de [Groq](https://console.groq.com/keys) para el chatbot IA. |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos separados por coma (ej: `http://localhost:5173`). |
+| `SPRING_PROFILES_ACTIVE` | Perfil Spring: `dev` (local) o `prod`. |
+
+### 2. Levantar con Docker (recomendado)
 
 ```bash
 docker compose up --build
 ```
+
+Servicios disponibles:
+- Backend API: `http://localhost:8080`
+- Frontend: `http://localhost:5173`
+- Scraper: `http://localhost:8001` (solo red interna)
+
+### 3. Desarrollo con hot-reload
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Backend:**
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+> El backend necesita que PostgreSQL esté corriendo. Puedes levantar solo la BD con:
+> ```bash
+> docker compose up db
+> ```
 
 ---
 
