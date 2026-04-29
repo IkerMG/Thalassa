@@ -8,7 +8,7 @@ import com.thalassa.backend.models.SubscriptionPlan;
 import com.thalassa.backend.models.User;
 import com.thalassa.backend.repositories.AquariumRepository;
 import com.thalassa.backend.repositories.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -51,8 +51,7 @@ public class ChatService {
     public com.thalassa.backend.dto.ChatUsageResponse getChatUsage() {
         User user = getAuthenticatedUser();
 
-        // If the date changed, the real count is 0 (will reset on next message).
-        java.time.LocalDate today = java.time.LocalDate.now();
+        LocalDate today = LocalDate.now();
         int used = today.equals(user.getLastChatDate()) ? user.getChatCountToday() : 0;
         int limit = (user.getSubscriptionPlan() == SubscriptionPlan.REEFMASTER) ? -1 : freeDailyLimit;
 
@@ -65,73 +64,61 @@ public class ChatService {
     // ── Rate-limit ────────────────────────────────────────────────────────────
 
     /**
-     * Verifica y actualiza el contador diario de mensajes del usuario.
-     * Si la fecha cambió (nuevo día), resetea el contador.
-     * Solo aplica a usuarios con plan FREE.
-     *
-     * @throws AccessDeniedException si el usuario FREE ha superado el límite diario.
+     * Solo verifica la cuota sin tocarla.
+     * Lanza excepción si el usuario FREE ya agotó su límite diario.
      */
-    private void checkAndIncrementRateLimit(User user) {
-        if (user.getSubscriptionPlan() == SubscriptionPlan.REEFMASTER) {
-            return; // Sin límite para REEFMASTER
-        }
+    private void checkRateLimit(User user) {
+        if (user.getSubscriptionPlan() == SubscriptionPlan.REEFMASTER) return;
 
         LocalDate today = LocalDate.now();
+        int count = today.equals(user.getLastChatDate()) ? user.getChatCountToday() : 0;
 
-        if (!today.equals(user.getLastChatDate())) {
-            // Nuevo día — reinicia el contador
-            user.setChatCountToday(0);
-            user.setLastChatDate(today);
-        }
-
-        if (user.getChatCountToday() >= freeDailyLimit) {
+        if (count >= freeDailyLimit) {
             throw new RateLimitExceededException(
                     "Has alcanzado el límite diario de " + freeDailyLimit +
                     " mensajes con el plan FREE. Actualiza a REEFMASTER para consultas ilimitadas.");
         }
+    }
 
+    /**
+     * Incrementa el contador diario. Solo llamar tras una respuesta exitosa de Python.
+     * Resetea el contador si el día cambió desde la última consulta.
+     */
+    private void incrementRateLimit(User user) {
+        if (user.getSubscriptionPlan() == SubscriptionPlan.REEFMASTER) return;
+
+        LocalDate today = LocalDate.now();
+        if (!today.equals(user.getLastChatDate())) {
+            user.setChatCountToday(0);
+            user.setLastChatDate(today);
+        }
         user.setChatCountToday(user.getChatCountToday() + 1);
     }
 
     // ── Operaciones ───────────────────────────────────────────────────────────
 
     /**
-     * Envía el mensaje del usuario al microservicio Python Gemini.
-     *
-     * <p>Flujo:
-     * <ol>
-     *   <li>Verifica y actualiza el rate-limit del usuario autenticado.</li>
-     *   <li>Si se proporcionó {@code aquariumId}, carga el acuario y construye el contexto.</li>
-     *   <li>Llama a {@code POST /chat/message} en el microservicio Python.</li>
-     *   <li>Persiste el contador actualizado.</li>
-     *   <li>Devuelve la respuesta del asistente.</li>
-     * </ol>
-     *
-     * <p>Política de errores — siempre devuelve HTTP 200:
-     * <ul>
-     *   <li>Timeout / conexión rechazada → {@code errorCode = "GEMINI_UNAVAILABLE"}, reply vacío.</li>
-     *   <li>Error HTTP del scraper       → {@code errorCode = "GEMINI_ERROR"}, reply vacío.</li>
-     *   <li>Python devuelve error propio → se propaga el código que manda Python.</li>
-     * </ul>
+     * Patrón "reservar y confirmar": verifica cuota → llama Python → solo incrementa en éxito.
+     * El usuario FREE no pierde una consulta por un corte del servicio IA (GEMINI_UNAVAILABLE).
      */
     @Transactional
     public ChatResponse sendMessage(ChatRequest request) {
         User user = getAuthenticatedUser();
 
-        // Verifica y actualiza el rate-limit ANTES de llamar a Python
-        checkAndIncrementRateLimit(user);
+        checkRateLimit(user);
 
-        // Construye el contexto del acuario si se proporcionó ID
         Map<String, Object> aquariumContext = null;
         if (request.getAquariumId() != null) {
             aquariumContext = buildAquariumContext(request.getAquariumId(), user.getId());
         }
 
-        // Llama al microservicio Python
         ChatResponse response = callPythonChat(request.getMessage(), aquariumContext);
 
-        // Persiste el contador de mensajes (incluso si Gemini falló — el límite cuenta la llamada)
-        userRepository.save(user);
+        // No contar si Python era inalcanzable (fallo de infraestructura)
+        if (!"GEMINI_UNAVAILABLE".equals(response.getErrorCode())) {
+            incrementRateLimit(user);
+            userRepository.save(user);
+        }
 
         return response;
     }

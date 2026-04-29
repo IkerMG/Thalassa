@@ -1,6 +1,7 @@
 package com.thalassa.backend.repositories;
 
 import com.thalassa.backend.models.Aquarium;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,20 +11,15 @@ import java.util.Optional;
 @Repository
 public interface AquariumRepository extends JpaRepository<Aquarium, Long> {
 
-    /**
-     * Lista todos los acuarios pertenecientes al usuario autenticado.
-     */
     List<Aquarium> findByUserId(Long userId);
 
-    /**
-     * Cuenta los acuarios del usuario — usado para el gate freemium.
-     */
     long countByUserId(Long userId);
 
     /**
-     * Búsqueda por ID combinada con verificación de propiedad.
-     * Si el acuario existe pero pertenece a otro usuario, devuelve Optional.empty()
-     * (tratado como 404, no revelamos que el ID existe).
+     * Carga el acuario junto con sus colecciones en una sola query JOIN.
+     * Elimina el N+1 (B-6) y evita LazyInitializationException (B-11)
+     * en cualquier contexto que acceda a equipment o livestock.
      */
+    @EntityGraph(attributePaths = {"equipment", "livestock"})
     Optional<Aquarium> findByIdAndUserId(Long id, Long userId);
 }
