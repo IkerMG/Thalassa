@@ -96,6 +96,14 @@
             <version>0.2.6</version>
         </dependency>
 
+        <!-- Flyway — versionado de schema de BD (9.x, gestionado por Spring Boot BOM) -->
+        <!-- En Flyway 9.x el soporte PostgreSQL viene incluido en flyway-core. -->
+        <!-- El módulo flyway-database-postgresql solo existe en Flyway 10.x+.  -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

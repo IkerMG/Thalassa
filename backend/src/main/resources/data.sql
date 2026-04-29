@@ -1,24 +1,21 @@
 -- ============================================================
---  Thalassa – Seed de datos de prueba
---  Contraseña de TODOS los usuarios: 123456
---  Hash BCrypt generado con BCryptPasswordEncoder (cost 10)
+--  Thalassa — Seed de datos de DESARROLLO (solo entorno dev)
 --
---  Se usa INSERT ... ON CONFLICT (id) DO NOTHING para que el
---  script sea idempotente: puede ejecutarse en cada arranque
---  sin duplicar registros. Sintaxis compatible con PostgreSQL.
+--  Solo se ejecuta cuando spring.sql.init.mode=always (perfil dev).
+--  El schema y los datos de referencia (species_catalog) son
+--  gestionados por Flyway: V1__init_schema.sql y V2__seed_reference_data.sql.
+--
+--  Contraseña de TODOS los usuarios de prueba: 123456
+--  Hash BCrypt generado con BCryptPasswordEncoder (cost 10)
 --
 --  Orden de inserción (respeta Foreign Keys):
 --    1. users
---    2. species_catalog
---    3. aquariums      → FK users.id
---    4. livestock      → FK aquariums.id + species_catalog.id
---    5. equipment      → FK aquariums.id
+--    2. aquariums      → FK users.id
+--    3. livestock      → FK aquariums.id + species_catalog.id
+--    4. equipment      → FK aquariums.id
 -- ============================================================
 
--- ── 1. Usuarios ───────────────────────────────────────────────────────────────
---  marc  → plan FREE  · sin precio de electricidad configurado
---  elena → plan REEFMASTER · tiene precio kWh configurado para la calculadora
--- ─────────────────────────────────────────────────────────────────────────────
+-- ── 1. Usuarios de prueba ─────────────────────────────────────────────────────
 INSERT INTO users
     (id, username, email, password, subscription_plan, electricity_price_kwh,
      chat_count_today, last_chat_date)
@@ -33,69 +30,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
--- ── Drop stale check constraints (ddl-auto:update never removes old ones) ────
--- Hibernate will recreate them correctly on the next boot.
-ALTER TABLE species_catalog DROP CONSTRAINT IF EXISTS species_catalog_category_check;
-ALTER TABLE livestock       DROP CONSTRAINT IF EXISTS livestock_category_check;
-ALTER TABLE aquariums       DROP CONSTRAINT IF EXISTS aquariums_type_check;
-
--- ── Migrate legacy Spanish enum values (only runs if old values exist) ────────
-UPDATE species_catalog SET category = 'FISH'        WHERE category = 'PEZ';
-UPDATE species_catalog SET category = 'INVERTEBRATE' WHERE category = 'INVERTEBRADO';
-UPDATE livestock       SET category = 'FISH'        WHERE category = 'PEZ';
-UPDATE livestock       SET category = 'INVERTEBRATE' WHERE category = 'INVERTEBRADO';
-UPDATE aquariums       SET type = 'FISH_ONLY'        WHERE type = 'MARINO_PECES';
-UPDATE aquariums       SET type = 'REEF'             WHERE type = 'MARINO_ARRECIFE';
-
--- ── 2. Catálogo de Especies ───────────────────────────────────────────────────
-INSERT INTO species_catalog
-    (id, common_name, scientific_name, category, reef_safe, image_url, notes)
-VALUES
-    (1,
-     'Pez Payaso',
-     'Amphiprion ocellaris',
-     'FISH', TRUE, NULL,
-     'Especie icónica, ideal para principiantes. Convive perfectamente con anémonas del género Heteractis. Dificultad: Baja.'),
-
-    (2,
-     'Cirujano Amarillo',
-     'Zebrasoma flavescens',
-     'FISH', TRUE, NULL,
-     'Excelente ramoneador de algas filamentosas. Requiere espacio de nado libre; mínimo recomendado 300 L. Dificultad: Media.'),
-
-    (3,
-     'Pez León',
-     'Pterois volitans',
-     'FISH', FALSE, NULL,
-     'Espinas con veneno hemolítico. Depreda peces pequeños e invertebrados. No apto para acuarios mixtos con fauna pequeña. Dificultad: Alta.'),
-
-    (4,
-     'Coral Cuero',
-     'Sarcophyton sp.',
-     'CORAL', TRUE, NULL,
-     'Coral blando de cuidado sencillo. Tolera variaciones moderadas de parámetros y flujo bajo-medio. Ideal para empezar con corales. Dificultad: Baja.'),
-
-    (5,
-     'Coral Cerebro Verde',
-     'Favites abdita',
-     'CORAL', TRUE, NULL,
-     'Coral duro LPS de crecimiento lento. Requiere iluminación intensa (PAR > 150) y flujo medio. Sensible a cambios bruscos de parámetros. Dificultad: Media.'),
-
-    (6,
-     'Camarón Limpiador',
-     'Lysmata amboinensis',
-     'INVERTEBRATE', TRUE, NULL,
-     'Establece estaciones de limpieza donde retira parásitos de otros peces. Muy beneficioso en cualquier arrecife. Dificultad: Baja.'),
-
-    (7,
-     'Estrella de Mar Chocolate',
-     'Protoreaster nodosus',
-     'INVERTEBRATE', FALSE, NULL,
-     'Aspecto espectacular pero consume corales, bivalvos y otros invertebrados. Solo apta en biotopo de peces sin invertebrados ni corales. Dificultad: Alta.')
-ON CONFLICT (id) DO NOTHING;
-
-
--- ── 3. Acuarios ──────────────────────────────────────────────────────────────
+-- ── 2. Acuarios de prueba ─────────────────────────────────────────────────────
 INSERT INTO aquariums
     (id, name, liters, type, user_id)
 VALUES
@@ -104,19 +39,19 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
--- ── 4. Fauna (Livestock) ─────────────────────────────────────────────────────
+-- ── 3. Fauna (Livestock) de prueba ────────────────────────────────────────────
 INSERT INTO livestock
     (id, name, category, reef_safe, quantity, aquarium_id, species_catalog_id)
 VALUES
-    (1, 'Nemo y Marlin',  'FISH',        TRUE, 2, 1, 1),
-    (2, 'Dory',           'FISH',        TRUE, 1, 1, 2),
-    (3, 'Coral Cuero',    'CORAL',       TRUE, 1, 2, 4),
-    (4, 'Coral Cerebro',  'CORAL',       TRUE, 1, 2, 5),
-    (5, 'Equipo limpieza','INVERTEBRATE',TRUE, 3, 2, 6)
+    (1, 'Nemo y Marlin',   'FISH',        TRUE, 2, 1, 1),
+    (2, 'Dory',            'FISH',        TRUE, 1, 1, 2),
+    (3, 'Coral Cuero',     'CORAL',       TRUE, 1, 2, 4),
+    (4, 'Coral Cerebro',   'CORAL',       TRUE, 1, 2, 5),
+    (5, 'Equipo limpieza', 'INVERTEBRATE',TRUE, 3, 2, 6)
 ON CONFLICT (id) DO NOTHING;
 
 
--- ── 5. Equipamiento ──────────────────────────────────────────────────────────
+-- ── 4. Equipamiento de prueba ─────────────────────────────────────────────────
 INSERT INTO equipment
     (id, name, power_watts, hours_per_day, aquarium_id)
 VALUES
@@ -129,12 +64,10 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 
--- ── 6. Sincronización de secuencias de PostgreSQL ─────────────────────────────
--- Hibernate genera secuencias como <tabla>_id_seq para GenerationType.IDENTITY.
--- Sin esto, tras insertar IDs hardcodeados la secuencia empieza desde 1
--- y choca con los registros ya existentes al crear nuevos registros.
-SELECT setval('users_id_seq',          (SELECT MAX(id) FROM users));
-SELECT setval('species_catalog_id_seq',(SELECT MAX(id) FROM species_catalog));
-SELECT setval('aquariums_id_seq',      (SELECT MAX(id) FROM aquariums));
-SELECT setval('livestock_id_seq',      (SELECT MAX(id) FROM livestock));
-SELECT setval('equipment_id_seq',      (SELECT MAX(id) FROM equipment));
+-- ── 5. Sincronización de secuencias ──────────────────────────────────────────
+-- Necesario tras insertar registros con IDs explícitos para que los nuevos
+-- registros no colisionen con los ya existentes.
+SELECT setval('users_id_seq',           (SELECT MAX(id) FROM users));
+SELECT setval('aquariums_id_seq',       (SELECT MAX(id) FROM aquariums));
+SELECT setval('livestock_id_seq',       (SELECT MAX(id) FROM livestock));
+SELECT setval('equipment_id_seq',       (SELECT MAX(id) FROM equipment));
