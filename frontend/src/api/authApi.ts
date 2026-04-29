@@ -7,4 +7,7 @@ export const authApi = {
 
   register: (data: RegisterRequest) =>
     api.post<UserResponse>('/auth/register', data).then((r) => r.data),
+
+  logout: (refreshToken: string) =>
+    api.post('/auth/logout', { refreshToken }).then(() => undefined),
 };

@@ -14,7 +14,7 @@ export function useAuth() {
       username: res.username,
       plan: res.subscriptionPlan,
     };
-    setAuth(res.token, userData);
+    setAuth(res.token, res.refreshToken ?? null, userData);
     return res;
   };
 
@@ -25,7 +25,17 @@ export function useAuth() {
     return login({ email: data.email, password: data.password });
   };
 
-  const logout = () => clearAuth();
+  const logout = async () => {
+    const currentRefreshToken = useAuthStore.getState().refreshToken;
+    if (currentRefreshToken) {
+      try {
+        await authApi.logout(currentRefreshToken);
+      } catch {
+        // Token already revoked or expired — proceed with local logout anyway
+      }
+    }
+    clearAuth();
+  };
 
   return { token, user, isAuthenticated, login, register, logout };
 }

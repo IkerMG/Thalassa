@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
@@ -26,9 +26,20 @@ function PageLoader() {
   );
 }
 
+function AuthExpiredGuard() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const handle = () => navigate('/login', { replace: true });
+    window.addEventListener('auth:expired', handle);
+    return () => window.removeEventListener('auth:expired', handle);
+  }, [navigate]);
+  return null;
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <AuthExpiredGuard />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ── Public routes (redirect to /dashboard if already logged in) ── */}

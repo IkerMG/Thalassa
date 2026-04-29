@@ -16,6 +16,7 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   token: string;
+  refreshToken?: string | null;
   username: string;
   email: string;
   subscriptionPlan: 'FREE' | 'REEFMASTER';

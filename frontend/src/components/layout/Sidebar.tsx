@@ -33,8 +33,8 @@ export default function Sidebar() {
     { to: '/dashboard/chat', icon: <Bot size={18} />, label: 'AI Assistant' },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/', { replace: true });
   };
 
