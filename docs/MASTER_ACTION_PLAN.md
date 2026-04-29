@@ -1,9 +1,7 @@
 # MASTER ACTION PLAN — Thalassa
 
 > **Documento:** Hoja de ruta táctica de ejecución hacia versión final
-> **Fecha:** 2026-04-27
 > **Rama base:** `ui/master-plan-sync`
-> **Audiencia:** Agente IA ejecutor (Sonnet) y desarrollador humano supervisor
 > **Insumo:** [docs/NEXT_STEPS_AUDIT.md](docs/NEXT_STEPS_AUDIT.md)
 > **Estado del proyecto:** MVP funcional end-to-end, requiere hardening de seguridad y madurez UX antes de producción.
 
