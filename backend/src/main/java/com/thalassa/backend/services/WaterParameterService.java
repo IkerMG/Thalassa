@@ -8,12 +8,14 @@ import com.thalassa.backend.models.User;
 import com.thalassa.backend.models.WaterParameter;
 import com.thalassa.backend.repositories.AquariumRepository;
 import com.thalassa.backend.repositories.WaterParameterRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class WaterParameterService {
@@ -33,13 +35,26 @@ public class WaterParameterService {
 
     // ── Operaciones ───────────────────────────────────────────────────────────
 
-    public List<WaterParameterResponse> getHistory(Long aquariumId) {
+    /**
+     * Historial paginado con filtro de rango opcional.
+     * Si {@code from}/{@code to} son null se usa el rango máximo posible.
+     * El tamaño de página se limita a 200 para proteger la base de datos.
+     */
+    public Page<WaterParameterResponse> getHistory(
+            Long aquariumId, LocalDateTime from, LocalDateTime to, int page, int size) {
         User user = getAuthenticatedUser();
         verifyOwnership(aquariumId, user.getId());
-        return parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+
+        LocalDateTime effectiveFrom = (from != null) ? from : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime effectiveTo   = (to   != null) ? to   : LocalDateTime.now().plusDays(1);
+        int           cappedSize    = Math.min(size, 200);
+
+        PageRequest pageable = PageRequest.of(page, cappedSize, Sort.by("measuredAt").descending());
+
+        return parameterRepository
+                .findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
+                        aquariumId, effectiveFrom, effectiveTo, pageable)
+                .map(this::mapToResponse);
     }
 
     @Transactional

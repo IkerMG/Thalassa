@@ -16,6 +16,8 @@ import com.thalassa.backend.services.EquipmentService;
 import com.thalassa.backend.services.LivestockService;
 import com.thalassa.backend.services.WaterParameterService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,8 +27,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -162,11 +166,16 @@ public class AquariumController {
 
     /**
      * GET /api/aquariums/{id}/parameters
-     * Historial de mediciones de agua del acuario, orden descendente.
+     * Historial paginado de mediciones. Params: from, to (ISO datetime), page (0-based), size (max 200).
      */
     @GetMapping("/{id}/parameters")
-    public ResponseEntity<List<WaterParameterResponse>> getParameters(@PathVariable Long id) {
-        return ResponseEntity.ok(waterParameterService.getHistory(id));
+    public ResponseEntity<Page<WaterParameterResponse>> getParameters(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return ResponseEntity.ok(waterParameterService.getHistory(id, from, to, page, size));
     }
 
     /**

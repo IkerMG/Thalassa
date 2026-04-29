@@ -2,13 +2,14 @@ package com.thalassa.backend.services;
 
 import com.thalassa.backend.dto.WishlistItemRequest;
 import com.thalassa.backend.dto.WishlistItemResponse;
+import com.thalassa.backend.dto.WishlistUpdateRequest;
 import com.thalassa.backend.exceptions.ResourceNotFoundException;
 import com.thalassa.backend.models.User;
 import com.thalassa.backend.models.WishlistItem;
 import com.thalassa.backend.repositories.WishlistRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -58,6 +59,24 @@ public class WishlistService {
                 .notes(request.getNotes())
                 .user(user)
                 .build();
+
+        return mapToResponse(wishlistRepository.save(item));
+    }
+
+    /**
+     * Actualiza notas y/o prioridad de un item de la wishlist.
+     * Valida ownership antes de modificar.
+     */
+    @Transactional
+    public WishlistItemResponse updateWishlistItem(Long itemId, WishlistUpdateRequest request) {
+        User user = getAuthenticatedUser();
+        WishlistItem item = wishlistRepository.findByIdAndUserId(itemId, user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Item de wishlist no encontrado."));
+
+        item.setNotes(request.getNotes());
+        if (request.getPriority() != null) {
+            item.setPriority(request.getPriority());
+        }
 
         return mapToResponse(wishlistRepository.save(item));
     }

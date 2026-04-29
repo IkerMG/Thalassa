@@ -585,6 +585,29 @@ paths:
         schema:
           type: integer
           format: int64
+    put:
+      tags: [Wishlist]
+      summary: Actualizar notas y prioridad de un item
+      operationId: updateWishlistItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistUpdateRequest'
+      responses:
+        '200':
+          description: Item actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItemResponse'
+        '404':
+          description: Item no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags: [Wishlist]
       summary: Eliminar producto de la wishlist
@@ -610,18 +633,48 @@ paths:
           format: int64
     get:
       tags: [Parámetros]
-      summary: Historial de parámetros del agua
-      description: Devuelve las mediciones históricas del acuario, ordenadas de más reciente a más antigua.
+      summary: Historial paginado de parámetros del agua
+      description: |
+        Devuelve las mediciones históricas del acuario, ordenadas de más reciente a más antigua.
+        Soporta paginación y filtrado por rango de fechas.
       operationId: getWaterParameters
+      parameters:
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Inicio del rango (ISO 8601). Si se omite, desde el principio de los tiempos.
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Fin del rango (ISO 8601). Si se omite, hasta ahora.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Número de página (0-based)
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+          description: Tamaño de página (máximo 200)
       responses:
         '200':
-          description: Historial de mediciones
+          description: Historial de mediciones paginado
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/WaterParameterResponse'
+                $ref: '#/components/schemas/WaterParameterPageResponse'
         '404':
           description: Acuario no encontrado
           content:
@@ -1256,7 +1309,43 @@ components:
           type: string
           nullable: true
 
+    # ── Wishlist (update) ─────────────────────────────────────────────────────
+
+    WishlistUpdateRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Notas personales sobre el producto
+        priority:
+          $ref: '#/components/schemas/WishlistPriority'
+          nullable: true
+
     # ── Parámetros del agua ───────────────────────────────────────────────────
+
+    WaterParameterPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaterParameterResponse'
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de mediciones que coinciden con el filtro
+        totalPages:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+          description: Número de página actual (0-based)
+        size:
+          type: integer
+          format: int32
 
     WaterParameterRequest:
       type: object
