@@ -16,22 +16,22 @@ import java.util.function.Function;
 public class JwtUtil {
 
     private final String secret;
-    private final long expiration;
+    private final long accessExpirationMs;
 
     public JwtUtil(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long expiration) {
+            @Value("${app.jwt.access-expiration-ms}") long accessExpirationMs) {
         this.secret = secret;
-        this.expiration = expiration;
+        this.accessExpirationMs = accessExpirationMs;
     }
 
     // ── Generación ────────────────────────────────────────────────────────────
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
-                .subject(userDetails.getUsername())   // getUsername() devuelve el email (ver UserDetailsServiceImpl)
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + accessExpirationMs))
                 .signWith(getSigningKey())
                 .compact();
     }

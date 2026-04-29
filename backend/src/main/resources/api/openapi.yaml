@@ -55,7 +55,7 @@ paths:
     post:
       tags: [Autenticación]
       summary: Iniciar sesión
-      description: Autentica con email + password y devuelve el JWT.
+      description: Autentica con email + password y devuelve el access token JWT (15 min) y el refresh token opaco (30 días).
       operationId: login
       security: []
       requestBody:
@@ -77,6 +77,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/refresh:
+    post:
+      tags: [Autenticación]
+      summary: Renovar access token
+      description: |
+        Rota el refresh token y emite un nuevo access token JWT (15 min) y un nuevo refresh token (30 días).
+        El refresh token recibido queda revocado inmediatamente.
+        Si se detecta reutilización de un token ya revocado, se invalidan todos los tokens del usuario.
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Tokens renovados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Refresh token inválido, expirado o ya utilizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags: [Autenticación]
+      summary: Cerrar sesión
+      description: Revoca el refresh token. Idempotente — no falla si el token ya estaba revocado.
+      operationId: logout
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '204':
+          description: Sesión cerrada correctamente
 
   # ── Usuario ───────────────────────────────────────────────────────────────
   /api/users/me:
@@ -788,13 +835,26 @@ components:
       properties:
         token:
           type: string
-          description: JWT de acceso
+          description: JWT de acceso (TTL 15 min)
+        refreshToken:
+          type: string
+          nullable: true
+          description: Refresh token opaco (TTL 30 días). Solo presente en login y refresh.
         username:
           type: string
         email:
           type: string
         subscriptionPlan:
           $ref: '#/components/schemas/SubscriptionPlan'
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+          description: Refresh token opaco recibido en el login
 
     RegisterRequest:
       type: object
@@ -813,7 +873,8 @@ components:
         password:
           type: string
           minLength: 8
-          description: Contraseña (mínimo 8 caracteres)
+          pattern: '^(?=.*[A-Za-z])(?=.*\d).{8,}'
+          description: 'Contraseña: mínimo 8 caracteres, al menos una letra y un número'
 
     # ── Usuario ───────────────────────────────────────────────────────────────
 
