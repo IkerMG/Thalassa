@@ -31,6 +31,8 @@ import Modal from '../../components/ui/Modal';
 import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/shared/EmptyState';
 import { toast } from '../../lib/toast';
+import ParameterChartSkeleton from '../../components/shared/skeletons/ParameterChartSkeleton';
+import LivestockListSkeleton from '../../components/shared/skeletons/LivestockListSkeleton';
 import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
@@ -766,8 +768,26 @@ export default function AquariumDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <Spinner size={32} />
+      <div className="min-h-full flex flex-col">
+        {/* Header skeleton */}
+        <div className="border-b border-[rgba(255,255,255,0.08)] px-6 py-4 animate-pulse">
+          <div className="h-3 w-20 bg-[rgba(255,255,255,0.05)] rounded mb-3" />
+          <div className="flex items-center gap-3">
+            <div className="h-5 w-40 bg-[rgba(255,255,255,0.07)] rounded" />
+            <div className="h-4 w-12 bg-[rgba(255,255,255,0.05)] rounded" />
+            <div className="h-3 w-8 bg-[rgba(255,255,255,0.04)] rounded" />
+          </div>
+        </div>
+        {/* Tab bar skeleton */}
+        <div className="flex border-b border-[rgba(255,255,255,0.08)] px-6 gap-1 animate-pulse">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-10 w-24 bg-[rgba(255,255,255,0.04)] rounded my-1" />
+          ))}
+        </div>
+        {/* Content skeleton — overview tab */}
+        <div className="flex-1">
+          <ParameterChartSkeleton />
+        </div>
       </div>
     );
   }

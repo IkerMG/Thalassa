@@ -9,9 +9,9 @@ import type { AquariumSummary, AquariumType, AquariumRequest } from '../../types
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
-import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/shared/EmptyState';
 import { toast } from '../../lib/toast';
+import DashboardCardSkeleton from '../../components/shared/skeletons/DashboardCardSkeleton';
 
 const TYPE_LABELS: Record<AquariumType, string> = {
   REEF: 'Reef',
@@ -162,8 +162,33 @@ export default function DashboardView() {
 
   if (loading) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <Spinner size={32} />
+      <div className="min-h-full p-6 max-w-5xl mx-auto">
+        {/* Header skeleton */}
+        <div className="mb-8 flex items-start justify-between animate-pulse">
+          <div className="flex flex-col gap-2">
+            <div className="h-7 w-32 bg-[rgba(255,255,255,0.07)] rounded" />
+            <div className="h-3.5 w-48 bg-[rgba(255,255,255,0.05)] rounded" />
+          </div>
+          <div className="h-9 w-28 bg-[rgba(255,255,255,0.06)] rounded-lg" />
+        </div>
+        {/* Stat cards skeleton */}
+        <div className="grid grid-cols-3 gap-4 mb-8 animate-pulse">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[rgba(255,255,255,0.06)]" />
+              <div className="flex flex-col gap-1.5">
+                <div className="h-5 w-8 bg-[rgba(255,255,255,0.07)] rounded" />
+                <div className="h-2.5 w-16 bg-[rgba(255,255,255,0.05)] rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Aquarium cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <DashboardCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
