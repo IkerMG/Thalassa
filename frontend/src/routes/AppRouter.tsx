@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 
@@ -39,6 +40,7 @@ function AuthExpiredGuard() {
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <Toaster richColors position="top-right" closeButton />
       <AuthExpiredGuard />
       <Suspense fallback={<PageLoader />}>
         <Routes>
