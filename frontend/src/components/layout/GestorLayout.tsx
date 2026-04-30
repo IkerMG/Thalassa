@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useIsDesktop } from '../../hooks/useMediaQuery';
 import Sidebar from './Sidebar';
 import BottomTabBar from './BottomTabBar';
+import ChatDrawer from '../../features/chat/ChatDrawer';
 
 export default function GestorLayout() {
   const isDesktop = useIsDesktop();
@@ -14,13 +15,16 @@ export default function GestorLayout() {
       <main
         className={[
           'flex-1 overflow-auto',
-          isDesktop ? '' : 'pb-16', // space for bottom tab bar on mobile
+          isDesktop ? '' : 'pb-16',
         ].join(' ')}
       >
         <Outlet />
       </main>
 
       {!isDesktop && <BottomTabBar />}
+
+      {/* Chat drawer — always mounted so history persists across navigation */}
+      <ChatDrawer />
     </div>
   );
 }

@@ -1,16 +1,18 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Wrench, ShoppingBag, Bot, User } from 'lucide-react';
+import { useUIStore } from '../../store/uiStore';
 
-// Master Plan §8.2 — 5 items: Dashboard, Tools, Market, AI, Profile
 const tabs = [
   { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'DASHBOARD' },
   { to: '/dashboard/calculator/dosing', icon: <Wrench size={22} />, label: 'TOOLS' },
   { to: '/dashboard/market', icon: <ShoppingBag size={22} />, label: 'MARKET' },
-  { to: '/dashboard/chat', icon: <Bot size={22} />, label: 'AI' },
   { to: '/dashboard/profile', icon: <User size={22} />, label: 'PROFILE' },
 ];
 
 export default function BottomTabBar() {
+  const isChatOpen = useUIStore((s) => s.isChatOpen);
+  const openChat = useUIStore((s) => s.openChat);
+
   return (
     <nav
       className="
@@ -35,6 +37,19 @@ export default function BottomTabBar() {
           <span className="text-[9px] font-mono tracking-wider">{tab.label}</span>
         </NavLink>
       ))}
+
+      {/* AI tab — opens drawer, not a route */}
+      <button
+        onClick={openChat}
+        className={[
+          'flex-1 flex flex-col items-center justify-center gap-1 transition-colors duration-150 cursor-pointer',
+          isChatOpen ? 'text-[#59D3FF]' : 'text-[#666] hover:text-white',
+        ].join(' ')}
+        aria-label="Abrir asistente IA"
+      >
+        <Bot size={22} />
+        <span className="text-[9px] font-mono tracking-wider">AI</span>
+      </button>
     </nav>
   );
 }

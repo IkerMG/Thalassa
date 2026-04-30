@@ -12,6 +12,7 @@ import Input from '../../components/ui/Input';
 import EmptyState from '../../components/shared/EmptyState';
 import { toast } from '../../lib/toast';
 import DashboardCardSkeleton from '../../components/shared/skeletons/DashboardCardSkeleton';
+import { useUIStore } from '../../store/uiStore';
 
 const TYPE_LABELS: Record<AquariumType, string> = {
   REEF: 'Reef',
@@ -136,6 +137,7 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
 export default function DashboardView() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const openChat = useUIStore((s) => s.openChat);
   const { aquariums, setAquariums, addAquarium } = useAquariumStore();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -204,7 +206,7 @@ export default function DashboardView() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="secondary" size="md" onClick={() => navigate('/dashboard/chat')}>
+          <Button variant="secondary" size="md" onClick={openChat}>
             <Bot size={15} />
             Thalassa AI
           </Button>

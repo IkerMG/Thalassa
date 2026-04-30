@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
+import { useUIStore } from '../../store/uiStore';
 
 interface NavItem {
   to: string;
@@ -23,6 +24,8 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const plan = useAuthStore((s) => s.user?.plan ?? 'FREE');
+  const isChatOpen = useUIStore((s) => s.isChatOpen);
+  const openChat = useUIStore((s) => s.openChat);
 
   const navItems: NavItem[] = [
     { to: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
@@ -30,7 +33,6 @@ export default function Sidebar() {
     { to: '/dashboard/calculator/energy', icon: <Zap size={18} />, label: 'Energy Calc', isPro: plan === 'FREE' },
     { to: '/dashboard/market', icon: <ShoppingBag size={18} />, label: 'Market' },
     { to: '/dashboard/wishlist', icon: <Heart size={18} />, label: 'Wishlist' },
-    { to: '/dashboard/chat', icon: <Bot size={18} />, label: 'AI Assistant' },
   ];
 
   const handleLogout = async () => {
@@ -76,6 +78,20 @@ export default function Sidebar() {
             )}
           </NavLink>
         ))}
+
+        {/* AI Assistant — opens drawer, not a route */}
+        <button
+          onClick={openChat}
+          className={[
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
+            isChatOpen
+              ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
+              : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
+          ].join(' ')}
+        >
+          <Bot size={18} />
+          <span className="flex-1">AI Assistant</span>
+        </button>
 
         <div className="my-3 border-t border-[rgba(255,255,255,0.06)]" />
 
