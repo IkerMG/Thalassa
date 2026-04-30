@@ -739,10 +739,12 @@ export default function AquariumDetailPage() {
   const [aquarium, setAquarium] = useState<AquariumDetail | null>(null);
   const [parameters, setParameters] = useState<WaterParameter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!aquariumId) return;
+    setFetchError(null);
     try {
       const [aq, params] = await Promise.all([
         aquariumApi.detail(aquariumId),
@@ -750,8 +752,13 @@ export default function AquariumDetailPage() {
       ]);
       setAquarium(aq);
       setParameters(params);
-    } catch {
-      navigate('/dashboard', { replace: true });
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        setFetchError('No se pudieron cargar los datos del acuario.');
+      }
     } finally {
       setLoading(false);
     }
@@ -761,7 +768,29 @@ export default function AquariumDetailPage() {
 
   const handleLogged = (p: WaterParameter) => setParameters((prev) => [p, ...prev]);
 
-  if (loading || !aquarium) {
+  if (loading) {
+    return (
+      <div className="min-h-full flex items-center justify-center">
+        <Spinner size={32} />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-full flex flex-col items-center justify-center gap-4">
+        <p className="text-[#A0A0A0] text-sm">{fetchError}</p>
+        <button
+          onClick={() => { setLoading(true); fetchData(); }}
+          className="px-4 py-2 rounded bg-[#59D3FF] text-[#0A0F1E] text-sm font-medium hover:bg-[#7DDEFF] transition-colors cursor-pointer"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (!aquarium) {
     return (
       <div className="min-h-full flex items-center justify-center">
         <Spinner size={32} />
