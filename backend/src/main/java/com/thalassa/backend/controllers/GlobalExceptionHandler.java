@@ -3,6 +3,7 @@ package com.thalassa.backend.controllers;
 import com.thalassa.backend.dto.ErrorResponse;
 import com.thalassa.backend.exceptions.AccessDeniedException;
 import com.thalassa.backend.exceptions.InvalidRefreshTokenException;
+import com.thalassa.backend.exceptions.InvalidTokenException;
 import com.thalassa.backend.exceptions.RateLimitExceededException;
 import com.thalassa.backend.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error(ex.getMessage()));
+    }
+
+    /** Token de reseteo de contraseña inválido, expirado o ya usado → 400 Bad Request */
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error(ex.getMessage()));
     }
 
     /** Recurso no encontrado o no pertenece al usuario autenticado → 404 Not Found */

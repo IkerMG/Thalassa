@@ -2,10 +2,13 @@ package com.thalassa.backend.controllers;
 
 import com.thalassa.backend.dto.AuthRequest;
 import com.thalassa.backend.dto.AuthResponse;
+import com.thalassa.backend.dto.ForgotPasswordRequest;
 import com.thalassa.backend.dto.RefreshTokenRequest;
 import com.thalassa.backend.dto.RegisterRequest;
+import com.thalassa.backend.dto.ResetPasswordRequest;
 import com.thalassa.backend.dto.UserResponse;
 import com.thalassa.backend.services.AuthService;
+import com.thalassa.backend.services.PasswordResetService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
     /** POST /api/auth/register — crea la cuenta (sin JWT). */
@@ -57,6 +62,26 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
         authService.logout(request.getRefreshToken());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /api/auth/forgot-password
+     * Siempre devuelve 204 — no revela si el email está registrado.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /api/auth/reset-password
+     * Valida el token, actualiza la contraseña y revoca todos los refresh tokens del usuario.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 }

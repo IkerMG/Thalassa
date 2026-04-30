@@ -125,6 +125,51 @@ paths:
         '204':
           description: Sesión cerrada correctamente
 
+  /api/auth/forgot-password:
+    post:
+      tags: [Autenticación]
+      summary: Solicitar reseteo de contraseña
+      description: |
+        Genera un token de un solo uso (TTL 1 hora) y lo envía por email.
+        Siempre devuelve 204, independientemente de si el email está registrado,
+        para no revelar información sobre los usuarios existentes.
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '204':
+          description: Solicitud procesada (el link se enviará si el email existe)
+
+  /api/auth/reset-password:
+    post:
+      tags: [Autenticación]
+      summary: Resetear contraseña con token
+      description: |
+        Valida el token, actualiza la contraseña y revoca todos los refresh tokens
+        del usuario (fuerza re-login en todos los dispositivos).
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '204':
+          description: Contraseña actualizada correctamente
+        '400':
+          description: Token inválido, expirado o ya utilizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ── Usuario ───────────────────────────────────────────────────────────────
   /api/users/me:
     get:
@@ -908,6 +953,30 @@ components:
           type: string
           minLength: 1
           description: Refresh token opaco recibido en el login
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email de la cuenta cuya contraseña se quiere resetear
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Token de reseteo recibido por email
+        newPassword:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[A-Za-z])(?=.*\d).{8,}'
+          description: 'Nueva contraseña: mínimo 8 caracteres, al menos una letra y un número'
 
     RegisterRequest:
       type: object
