@@ -10,4 +10,10 @@ export const authApi = {
 
   logout: (refreshToken: string) =>
     api.post('/auth/logout', { refreshToken }).then(() => undefined),
+
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }).then(() => undefined),
+
+  resetPassword: (token: string, newPassword: string) =>
+    api.post('/auth/reset-password', { token, newPassword }).then(() => undefined),
 };

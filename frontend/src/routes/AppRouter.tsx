@@ -9,6 +9,8 @@ import ErrorBoundary from '../components/shared/ErrorBoundary';
 import LandingPage from '../features/landing/LandingPage';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
+import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '../features/auth/ResetPasswordPage';
 
 // Protected pages — lazy loaded (reduces initial bundle)
 const DashboardView = lazy(() => import('../features/dashboard/DashboardView'));
@@ -51,6 +53,8 @@ export default function AppRouter() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
 
           {/* ── Protected routes (redirect to /login if not authenticated) ── */}
