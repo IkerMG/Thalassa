@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { Toaster } from 'sonner';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
+import ErrorBoundary from '../components/shared/ErrorBoundary';
 
 // Public pages — loaded immediately (landing needs fast paint)
 import LandingPage from '../features/landing/LandingPage';
@@ -42,6 +43,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Toaster richColors position="top-right" closeButton />
       <AuthExpiredGuard />
+      <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ── Public routes (redirect to /dashboard if already logged in) ── */}
@@ -67,6 +69,7 @@ export default function AppRouter() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
