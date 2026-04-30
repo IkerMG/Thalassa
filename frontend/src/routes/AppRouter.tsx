@@ -15,7 +15,6 @@ import ResetPasswordPage from '../features/auth/ResetPasswordPage';
 // Protected pages — lazy loaded (reduces initial bundle)
 const DashboardView = lazy(() => import('../features/dashboard/DashboardView'));
 const AquariumDetailPage = lazy(() => import('../features/aquarium-detail/AquariumDetailPage'));
-const ChatView = lazy(() => import('../features/chat/ChatView'));
 const MarketPage = lazy(() => import('../features/market/MarketPage'));
 const WishlistPage = lazy(() => import('../features/wishlist/WishlistPage'));
 const ProfilePage = lazy(() => import('../features/profile/ProfilePage'));
@@ -61,7 +60,6 @@ export default function AppRouter() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardView />} />
             <Route path="/dashboard/aquarium/:id" element={<AquariumDetailPage />} />
-            <Route path="/dashboard/chat" element={<ChatView />} />
             <Route path="/dashboard/market" element={<MarketPage />} />
             <Route path="/dashboard/wishlist" element={<WishlistPage />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
