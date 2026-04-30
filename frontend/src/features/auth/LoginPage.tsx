@@ -1,30 +1,39 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button';
+import { loginSchema, type LoginFormValues } from '../../lib/schemas/auth.schemas';
+
+const inputClass = `
+  w-full bg-[#0D0D0D] text-white placeholder-[#666] text-sm
+  border border-[rgba(255,255,255,0.08)] rounded-lg
+  pl-10 pr-4 py-3
+  focus:outline-none focus:border-[rgba(89,211,255,0.40)]
+  transition-colors duration-200
+`;
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [apiError, setApiError] = useState('');
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const onSubmit = async (data: LoginFormValues) => {
+    setApiError('');
     try {
-      await login({ email, password });
+      await login(data);
       navigate('/dashboard', { replace: true });
     } catch {
-      setError('Invalid email or password.');
-    } finally {
-      setLoading(false);
+      setApiError('Invalid email or password.');
     }
   };
 
@@ -44,60 +53,46 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-[#A0A0A0]">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           {/* Email */}
           <div>
-            <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-              Email
-            </label>
+            <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" />
               <input
+                {...register('email')}
                 type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="
-                  w-full bg-[#0D0D0D] text-white placeholder-[#666] text-sm
-                  border border-[rgba(255,255,255,0.08)] rounded-lg
-                  pl-10 pr-4 py-3
-                  focus:outline-none focus:border-[rgba(89,211,255,0.40)]
-                  transition-colors duration-200
-                "
+                className={inputClass}
               />
             </div>
+            {errors.email && (
+              <p className="mt-1 text-xs text-[#F87171]">{errors.email.message}</p>
+            )}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-              Password
-            </label>
+            <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" />
               <input
+                {...register('password')}
                 type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="
-                  w-full bg-[#0D0D0D] text-white placeholder-[#666] text-sm
-                  border border-[rgba(255,255,255,0.08)] rounded-lg
-                  pl-10 pr-4 py-3
-                  focus:outline-none focus:border-[rgba(89,211,255,0.40)]
-                  transition-colors duration-200
-                "
+                className={inputClass}
               />
             </div>
+            {errors.password && (
+              <p className="mt-1 text-xs text-[#F87171]">{errors.password.message}</p>
+            )}
           </div>
 
-          {/* Error */}
-          {error && (
+          {/* API error banner */}
+          {apiError && (
             <div className="flex items-center gap-2 text-[#F87171] text-sm bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.20)] rounded-lg px-3 py-2.5">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
+              {apiError}
             </div>
           )}
 
@@ -105,7 +100,7 @@ export default function LoginPage() {
             type="submit"
             variant="primary"
             size="lg"
-            isLoading={loading}
+            isLoading={isSubmitting}
             className="w-full mt-2"
           >
             Sign In
