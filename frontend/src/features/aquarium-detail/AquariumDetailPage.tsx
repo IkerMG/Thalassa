@@ -30,6 +30,7 @@ import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/shared/EmptyState';
+import { toast } from '../../lib/toast';
 import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
@@ -78,14 +79,12 @@ interface LogModalProps {
 function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalProps) {
   const [values, setValues] = useState<Partial<Record<ParameterKey, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleClose = () => { setValues({}); setError(''); onClose(); };
+  const handleClose = () => { setValues({}); onClose(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       const payload: WaterParameterRequest = {};
       for (const key of PARAMETER_KEYS) {
@@ -98,7 +97,7 @@ function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalPr
       onLogged(logged);
       handleClose();
     } catch {
-      setError('Failed to save measurement.');
+      toast.error('No se pudo guardar la medición.');
     } finally {
       setLoading(false);
     }
@@ -124,7 +123,6 @@ function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalPr
             );
           })}
         </div>
-        {error && <p className="text-xs text-[#F87171] mt-3">{error}</p>}
         <div className="flex gap-3 justify-end mt-5">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="primary" size="md" disabled={loading}>
@@ -152,15 +150,13 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
   const [reefSafe, setReefSafe] = useState(true);
   const [quantity, setQuantity] = useState('1');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleClose = () => { setName(''); setCategory('FISH'); setReefSafe(true); setQuantity('1'); setError(''); onClose(); };
+  const handleClose = () => { setName(''); setCategory('FISH'); setReefSafe(true); setQuantity('1'); onClose(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
-    setError('');
     try {
       const res = await aquariumApi.addLivestock(aquariumId, {
         name: name.trim(), category, reefSafe, quantity: Number(quantity),
@@ -168,7 +164,7 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
       onAdded(res.livestock, res.warning);
       handleClose();
     } catch {
-      setError('Failed to add livestock.');
+      toast.error('No se pudo añadir el animal.');
     } finally {
       setLoading(false);
     }
@@ -208,7 +204,6 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
             </p>
           </div>
         )}
-        {error && <p className="text-xs text-[#F87171]">{error}</p>}
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="primary" size="md" disabled={loading}>
@@ -235,15 +230,13 @@ function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentM
   const [watts, setWatts] = useState('');
   const [hours, setHours] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleClose = () => { setName(''); setCategory('OTHER'); setWatts(''); setHours(''); setError(''); onClose(); };
+  const handleClose = () => { setName(''); setCategory('OTHER'); setWatts(''); setHours(''); onClose(); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !watts || !hours) return;
     setLoading(true);
-    setError('');
     try {
       const item = await aquariumApi.addEquipment(aquariumId, {
         name: name.trim(), category, powerWatts: Number(watts), hoursPerDay: Number(hours),
@@ -251,7 +244,7 @@ function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentM
       onAdded(item);
       handleClose();
     } catch {
-      setError('Failed to add equipment.');
+      toast.error('No se pudo añadir el equipo.');
     } finally {
       setLoading(false);
     }
@@ -279,7 +272,6 @@ function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentM
           <Input label="Power (W)" type="number" min={1} placeholder="e.g. 100" value={watts} onChange={(e) => setWatts(e.target.value)} required />
           <Input label="Hours / day" type="number" min={0.1} max={24} step={0.5} placeholder="e.g. 10" value={hours} onChange={(e) => setHours(e.target.value)} required />
         </div>
-        {error && <p className="text-xs text-[#F87171]">{error}</p>}
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="primary" size="md" disabled={loading}>
@@ -531,6 +523,8 @@ function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
     try {
       await aquariumApi.deleteLivestock(id);
       onLivestockChange(aquarium.livestock.filter((l) => l.id !== id));
+    } catch {
+      toast.error('No se pudo eliminar el animal.');
     } finally {
       setDeletingId(null);
     }
@@ -639,6 +633,8 @@ function EquipmentTab({ aquarium, onEquipmentChange }: EquipmentTabProps) {
     try {
       await aquariumApi.deleteEquipment(id);
       onEquipmentChange(aquarium.equipment.filter((e) => e.id !== id));
+    } catch {
+      toast.error('No se pudo eliminar el equipo.');
     } finally {
       setDeletingId(null);
     }

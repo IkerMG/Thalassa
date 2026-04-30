@@ -11,6 +11,7 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/shared/EmptyState';
+import { toast } from '../../lib/toast';
 
 const TYPE_LABELS: Record<AquariumType, string> = {
   REEF: 'Reef',
@@ -62,9 +63,8 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
   const [liters, setLiters] = useState('');
   const [type, setType] = useState<AquariumType>('REEF');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const reset = () => { setName(''); setLiters(''); setType('REEF'); setError(''); };
+  const reset = () => { setName(''); setLiters(''); setType('REEF'); };
 
   const handleClose = () => { reset(); onClose(); };
 
@@ -72,7 +72,6 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
     e.preventDefault();
     if (!name.trim() || !liters) return;
     setLoading(true);
-    setError('');
     try {
       const data: AquariumRequest = { name: name.trim(), liters: Number(liters), type };
       const created = await aquariumApi.create(data);
@@ -80,7 +79,7 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
       handleClose();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(msg ?? 'Failed to create aquarium.');
+      toast.error(msg ?? 'No se pudo crear el acuario.');
     } finally {
       setLoading(false);
     }
@@ -119,7 +118,6 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
             <option value="MIXED">Mixed</option>
           </select>
         </div>
-        {error && <p className="text-xs text-[#F87171]">{error}</p>}
         <div className="flex gap-3 justify-end pt-1">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>
             Cancel
