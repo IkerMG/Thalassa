@@ -40,7 +40,8 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
           <h2 className="text-base font-semibold text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="text-[#666] hover:text-white transition-colors p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)] cursor-pointer"
+            aria-label="Close"
+            className="text-[#666] hover:text-white transition-colors p-1 rounded-lg hover:bg-[rgba(255,255,255,0.06)]"
           >
             <X size={18} />
           </button>

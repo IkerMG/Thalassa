@@ -601,7 +601,8 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
                 </div>
                 <button
                   onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
-                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 cursor-pointer"
+                  aria-label={`Delete ${item.name}`}
+                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -707,7 +708,8 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                 </div>
                 <button
                   onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
-                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 cursor-pointer shrink-0"
+                  aria-label={`Delete ${item.name}`}
+                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>
