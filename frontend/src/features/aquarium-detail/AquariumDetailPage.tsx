@@ -32,6 +32,7 @@ import ParameterChartSkeleton from '../../components/shared/skeletons/ParameterC
 import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
+import Sparkline from '../../components/shared/Sparkline';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { measurementLogSchema, type MeasurementLogFormValues } from '../../lib/schemas/parameter.schemas';
@@ -75,6 +76,13 @@ const STATUS_CONFIG: Record<
   warning: { color: 'text-[#FBBF24]', icon: <TriangleAlert size={12} /> },
   danger:  { color: 'text-[#F87171]', icon: <TriangleAlert size={12} /> },
   unknown: { color: 'text-[#666]',    icon: <Clock size={12} /> },
+};
+
+const STATUS_COLORS: Record<ParameterStatus, string> = {
+  good:    '#34D399',
+  warning: '#FBBF24',
+  danger:  '#F87171',
+  unknown: '#666666',
 };
 
 // ── Log Measurement Modal ─────────────────────────────────────────────────────
@@ -315,13 +323,24 @@ function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps
 interface OverviewTabProps {
   aquarium: AquariumDetail;
   lastParam: WaterParameter | null;
+  parameters: WaterParameter[];
   onLogClick: () => void;
 }
 
-function OverviewTab({ aquarium, lastParam, onLogClick }: OverviewTabProps) {
+function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTabProps) {
   const fishCount = aquarium.livestock.filter((l) => l.category === 'FISH').reduce((a, l) => a + l.quantity, 0);
   const coralCount = aquarium.livestock.filter((l) => l.category === 'CORAL').reduce((a, l) => a + l.quantity, 0);
   const invertCount = aquarium.livestock.filter((l) => l.category === 'INVERTEBRATE').reduce((a, l) => a + l.quantity, 0);
+
+  // Last 7 non-null values per parameter, chronological order (oldest → newest)
+  const sparkData: Record<ParameterKey, number[]> = {} as Record<ParameterKey, number[]>;
+  for (const key of PARAMETER_KEYS) {
+    sparkData[key] = parameters
+      .slice(0, 7)
+      .map((p) => p[key])
+      .filter((v): v is number => v !== null && v !== undefined)
+      .reverse();
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -366,6 +385,7 @@ function OverviewTab({ aquarium, lastParam, onLogClick }: OverviewTabProps) {
                   <p className="text-[10px] text-text-tertiary mt-1">
                     {r.min}–{r.max} {r.unit}
                   </p>
+                  <Sparkline data={sparkData[key]} color={STATUS_COLORS[status]} />
                 </div>
               );
             })}
@@ -813,6 +833,7 @@ export default function AquariumDetailPage() {
           <OverviewTab
             aquarium={aquarium}
             lastParam={lastParam}
+            parameters={parameters}
             onLogClick={() => setLogOpen(true)}
           />
         </Tabs.Content>
