@@ -42,7 +42,7 @@ export default function ProfilePage() {
       {/* Settings — coming soon */}
       <div className="bg-black border border-[rgba(255,255,255,0.06)] rounded-2xl p-6 flex flex-col items-center text-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
-          <Settings size={20} className="text-[#444]" />
+          <Settings size={20} className="text-text-tertiary" />
         </div>
         <p className="text-[#555] text-sm">La edición de preferencias estará disponible próximamente.</p>
         <span className="text-[10px] font-mono tracking-widest text-[#59D3FF] border border-[rgba(89,211,255,0.25)] rounded-full px-3 py-1">

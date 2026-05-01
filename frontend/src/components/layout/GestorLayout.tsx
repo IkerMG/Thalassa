@@ -13,6 +13,7 @@ export default function GestorLayout() {
 
       {/* Main content area */}
       <main
+        id="main-content"
         className={[
           'flex-1 overflow-auto',
           isDesktop ? '' : 'pb-16',

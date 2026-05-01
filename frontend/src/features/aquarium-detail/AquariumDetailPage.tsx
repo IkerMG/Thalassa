@@ -357,13 +357,13 @@ function OverviewTab({ aquarium, lastParam, onLogClick }: OverviewTabProps) {
                     {sc.icon}
                     <span className="text-[10px] font-medium uppercase tracking-wide">{r.label}</span>
                   </div>
-                  <p className={`font-mono text-xl font-medium ${value !== null ? 'text-white' : 'text-[#444]'}`}>
+                  <p className={`font-mono text-xl font-medium ${value !== null ? 'text-white' : 'text-text-tertiary'}`}>
                     {formatParamValue(key, value)}
                     {value !== null && r.unit && (
                       <span className="text-xs text-[#666] ml-1">{r.unit}</span>
                     )}
                   </p>
-                  <p className="text-[10px] text-[#444] mt-1">
+                  <p className="text-[10px] text-text-tertiary mt-1">
                     {r.min}–{r.max} {r.unit}
                   </p>
                 </div>
@@ -372,7 +372,7 @@ function OverviewTab({ aquarium, lastParam, onLogClick }: OverviewTabProps) {
           </div>
         )}
         {lastParam && (
-          <p className="text-[11px] text-[#444] mt-2">
+          <p className="text-[11px] text-text-tertiary mt-2">
             Last logged: {formatDate(lastParam.measuredAt)}
           </p>
         )}
@@ -469,7 +469,7 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
         <div className="flex items-center gap-2 mb-4">
           <span className="text-sm font-medium text-white">{r.label}</span>
           {r.unit && <span className="text-xs text-[#666]">({r.unit})</span>}
-          <span className="text-[10px] text-[#444] ml-auto">
+          <span className="text-[10px] text-text-tertiary ml-auto">
             Optimal: {r.min}–{r.max}
           </span>
         </div>
@@ -507,7 +507,7 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
                             st === 'good' ? 'text-[#34D399]' :
                             st === 'warning' ? 'text-[#FBBF24]' :
                             st === 'danger' ? 'text-[#F87171]' :
-                            'text-[#444]',
+                            'text-text-tertiary',
                           ].join(' ')}
                         >
                           {formatParamValue(k, val)}
@@ -579,7 +579,7 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
                 </div>
                 <button
                   onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
-                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer"
+                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 cursor-pointer"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -685,7 +685,7 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                 </div>
                 <button
                   onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
-                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer shrink-0"
+                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 cursor-pointer shrink-0"
                 >
                   <Trash2 size={14} />
                 </button>
