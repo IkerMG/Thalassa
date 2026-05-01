@@ -12,6 +12,14 @@ export function formatChartDate(iso: string): string {
   return format(parseISO(iso), 'MM/dd');
 }
 
+export function formatPH(value: number): string {
+  return value.toFixed(1);
+}
+
+export function formatSalinity(value: number): string {
+  return value.toFixed(3);
+}
+
 export type TimeRange = '7d' | '30d' | '3m' | 'all';
 
 export function filterByTimeRange<T extends { measuredAt: string }>(
