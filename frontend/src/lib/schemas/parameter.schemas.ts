@@ -1,10 +1,9 @@
 import { z } from 'zod';
 
-const optionalPositiveFloat = z.coerce
-  .number({ invalid_type_error: 'Must be a number' })
-  .min(0, 'Must be 0 or greater')
-  .nullable()
-  .optional();
+const optionalPositiveFloat = z.preprocess(
+  (v) => (v === '' || v == null ? undefined : v),
+  z.coerce.number({ invalid_type_error: 'Must be a number' }).min(0, 'Must be 0 or greater').optional()
+);
 
 export const measurementLogSchema = z.object({
   temperature: optionalPositiveFloat,

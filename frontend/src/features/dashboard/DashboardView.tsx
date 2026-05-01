@@ -11,6 +11,9 @@ import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import EmptyState from '../../components/shared/EmptyState';
 import { toast } from '../../lib/toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { aquariumCreateSchema, type AquariumCreateFormValues } from '../../lib/schemas/aquarium.schemas';
 import DashboardCardSkeleton from '../../components/shared/skeletons/DashboardCardSkeleton';
 import { useUIStore } from '../../store/uiStore';
 
@@ -60,58 +63,52 @@ interface CreateModalProps {
 }
 
 function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
-  const [name, setName] = useState('');
-  const [liters, setLiters] = useState('');
-  const [type, setType] = useState<AquariumType>('REEF');
-  const [loading, setLoading] = useState(false);
-
-  const reset = () => { setName(''); setLiters(''); setType('REEF'); };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AquariumCreateFormValues>({
+    resolver: zodResolver(aquariumCreateSchema),
+    defaultValues: { name: '', type: 'REEF' },
+  });
 
   const handleClose = () => { reset(); onClose(); };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !liters) return;
-    setLoading(true);
+  const onSubmit = async (data: AquariumCreateFormValues) => {
     try {
-      const data: AquariumRequest = { name: name.trim(), liters: Number(liters), type };
-      const created = await aquariumApi.create(data);
+      const created = await aquariumApi.create({ ...data, name: data.name.trim() });
       onCreated(created);
       handleClose();
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       toast.error(msg ?? 'No se pudo crear el acuario.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Modal open={open} onClose={handleClose} title="New Aquarium">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <Input
           label="Name"
           placeholder="e.g. My Reef Tank"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+          {...register('name')}
+          error={errors.name?.message}
         />
         <Input
           label="Volume (liters)"
           type="number"
           placeholder="e.g. 200"
           min={1}
-          value={liters}
-          onChange={(e) => setLiters(e.target.value)}
-          required
+          {...register('liters')}
+          error={errors.liters?.message}
         />
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
             Ecosystem Type
           </label>
           <select
-            value={type}
-            onChange={(e) => setType(e.target.value as AquariumType)}
+            {...register('type')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
             <option value="REEF">Reef</option>
@@ -123,8 +120,8 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" size="md" disabled={loading}>
-            {loading ? 'Creating…' : 'Create Aquarium'}
+          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating…' : 'Create Aquarium'}
           </Button>
         </div>
       </form>

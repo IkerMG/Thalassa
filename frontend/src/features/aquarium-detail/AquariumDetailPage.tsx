@@ -36,6 +36,11 @@ import LivestockListSkeleton from '../../components/shared/skeletons/LivestockLi
 import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { measurementLogSchema, type MeasurementLogFormValues } from '../../lib/schemas/parameter.schemas';
+import { livestockSchema, type LivestockFormValues } from '../../lib/schemas/livestock.schemas';
+import { equipmentSchema, type EquipmentFormValues } from '../../lib/schemas/equipment.schemas';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -79,35 +84,33 @@ interface LogModalProps {
 }
 
 function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalProps) {
-  const [values, setValues] = useState<Partial<Record<ParameterKey, string>>>({});
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<MeasurementLogFormValues>({ resolver: zodResolver(measurementLogSchema) });
 
-  const handleClose = () => { setValues({}); onClose(); };
+  const handleClose = () => { reset(); onClose(); };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: MeasurementLogFormValues) => {
     try {
       const payload: WaterParameterRequest = {};
       for (const key of PARAMETER_KEYS) {
-        const v = values[key];
-        if (v !== undefined && v !== '') {
-          (payload as Record<string, number>)[key] = parseFloat(v);
-        }
+        const v = data[key];
+        if (v !== undefined && v !== null) payload[key] = v;
       }
       const logged = await parameterApi.log(aquariumId, payload);
       onLogged(logged);
       handleClose();
     } catch {
       toast.error('No se pudo guardar la medición.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Modal open={open} onClose={handleClose} title="Log New Measurement" maxWidth="max-w-xl">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <p className="text-xs text-[#666] mb-4">All fields are optional — log only what you've measured.</p>
         <div className="grid grid-cols-2 gap-3">
           {PARAMETER_KEYS.map((key) => {
@@ -119,16 +122,16 @@ function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalPr
                 type="number"
                 step="any"
                 placeholder={`${r.min}–${r.max}`}
-                value={values[key] ?? ''}
-                onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
+                {...register(key)}
+                error={errors[key]?.message}
               />
             );
           })}
         </div>
         <div className="flex gap-3 justify-end mt-5">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={loading}>
-            {loading ? 'Saving…' : 'Save Measurement'}
+          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving…' : 'Save Measurement'}
           </Button>
         </div>
       </form>
@@ -147,40 +150,43 @@ interface AddLivestockModalProps {
 }
 
 function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }: AddLivestockModalProps) {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<LivestockCategory>('FISH');
-  const [reefSafe, setReefSafe] = useState(true);
-  const [quantity, setQuantity] = useState('1');
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<LivestockFormValues>({
+    resolver: zodResolver(livestockSchema),
+    defaultValues: { category: 'FISH', reefSafe: true, quantity: 1 },
+  });
 
-  const handleClose = () => { setName(''); setCategory('FISH'); setReefSafe(true); setQuantity('1'); onClose(); };
+  const reefSafe = watch('reefSafe');
+  const handleClose = () => { reset(); onClose(); };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
+  const onSubmit = async (data: LivestockFormValues) => {
     try {
-      const res = await aquariumApi.addLivestock(aquariumId, {
-        name: name.trim(), category, reefSafe, quantity: Number(quantity),
-      });
+      const res = await aquariumApi.addLivestock(aquariumId, { ...data, name: data.name.trim() });
       onAdded(res.livestock, res.warning);
       handleClose();
     } catch {
       toast.error('No se pudo añadir el animal.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Modal open={open} onClose={handleClose} title="Add Animal">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input label="Name" placeholder="e.g. Clownfish" value={name} onChange={(e) => setName(e.target.value)} required />
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+        <Input
+          label="Name"
+          placeholder="e.g. Clownfish"
+          {...register('name')}
+          error={errors.name?.message}
+        />
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">Category</label>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as LivestockCategory)}
+            {...register('category')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
             <option value="FISH">Fish</option>
@@ -188,12 +194,17 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
             <option value="INVERTEBRATE">Invertebrate</option>
           </select>
         </div>
-        <Input label="Quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} required />
+        <Input
+          label="Quantity"
+          type="number"
+          min={1}
+          {...register('quantity')}
+          error={errors.quantity?.message}
+        />
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
-            checked={reefSafe}
-            onChange={(e) => setReefSafe(e.target.checked)}
+            {...register('reefSafe')}
             className="w-4 h-4 accent-[#59D3FF]"
           />
           <span className="text-sm text-[#A0A0A0]">Reef Safe</span>
@@ -208,8 +219,8 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
         )}
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={loading}>
-            {loading ? 'Adding…' : 'Add Animal'}
+          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+            {isSubmitting ? 'Adding…' : 'Add Animal'}
           </Button>
         </div>
       </form>
@@ -227,40 +238,41 @@ interface AddEquipmentModalProps {
 }
 
 function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentModalProps) {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState<EquipmentCategory>('OTHER');
-  const [watts, setWatts] = useState('');
-  const [hours, setHours] = useState('');
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<EquipmentFormValues>({
+    resolver: zodResolver(equipmentSchema),
+    defaultValues: { category: 'OTHER' },
+  });
 
-  const handleClose = () => { setName(''); setCategory('OTHER'); setWatts(''); setHours(''); onClose(); };
+  const handleClose = () => { reset(); onClose(); };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !watts || !hours) return;
-    setLoading(true);
+  const onSubmit = async (data: EquipmentFormValues) => {
     try {
-      const item = await aquariumApi.addEquipment(aquariumId, {
-        name: name.trim(), category, powerWatts: Number(watts), hoursPerDay: Number(hours),
-      });
+      const item = await aquariumApi.addEquipment(aquariumId, { ...data, name: data.name.trim() });
       onAdded(item);
       handleClose();
     } catch {
       toast.error('No se pudo añadir el equipo.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Modal open={open} onClose={handleClose} title="Add Equipment">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input label="Name" placeholder="e.g. LED Light" value={name} onChange={(e) => setName(e.target.value)} required />
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+        <Input
+          label="Name"
+          placeholder="e.g. LED Light"
+          {...register('name')}
+          error={errors.name?.message}
+        />
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">Category</label>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as EquipmentCategory)}
+            {...register('category')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
             <option value="LIGHT">Light</option>
@@ -271,13 +283,29 @@ function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentM
           </select>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Input label="Power (W)" type="number" min={1} placeholder="e.g. 100" value={watts} onChange={(e) => setWatts(e.target.value)} required />
-          <Input label="Hours / day" type="number" min={0.1} max={24} step={0.5} placeholder="e.g. 10" value={hours} onChange={(e) => setHours(e.target.value)} required />
+          <Input
+            label="Power (W)"
+            type="number"
+            min={1}
+            placeholder="e.g. 100"
+            {...register('powerWatts')}
+            error={errors.powerWatts?.message}
+          />
+          <Input
+            label="Hours / day"
+            type="number"
+            min={0.1}
+            max={24}
+            step={0.5}
+            placeholder="e.g. 10"
+            {...register('hoursPerDay')}
+            error={errors.hoursPerDay?.message}
+          />
         </div>
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={loading}>
-            {loading ? 'Adding…' : 'Add Equipment'}
+          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
+            {isSubmitting ? 'Adding…' : 'Add Equipment'}
           </Button>
         </div>
       </form>
