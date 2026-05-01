@@ -10,6 +10,16 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.6, ease: 'easeOut', delay },
 });
 
+const gridContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const gridItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
 // ── Navbar ─────────────────────────────────────────────────────────────────
 function Navbar() {
   return (
@@ -128,11 +138,17 @@ function Features() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {features.map((f, i) => (
+        <motion.div
+          variants={gridContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          {features.map((f) => (
             <motion.div
               key={f.title}
-              {...fadeUp(i * 0.08)}
+              variants={gridItem}
               className="
                 bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-6
                 hover:border-[rgba(255,255,255,0.15)] transition-all duration-200
@@ -145,7 +161,7 @@ function Features() {
               <p className="text-sm text-[#A0A0A0] leading-relaxed">{f.desc}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -160,10 +176,16 @@ function Pricing() {
           <h2 className="text-3xl font-bold text-white mb-4">Choose Your Plan</h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+        <motion.div
+          variants={gridContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto"
+        >
           {/* FREE */}
           <motion.div
-            {...fadeUp(0.05)}
+            variants={gridItem}
             className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-7"
           >
             <div className="text-sm text-[#A0A0A0] mb-1">Free</div>
@@ -187,7 +209,7 @@ function Pricing() {
 
           {/* REEFMASTER */}
           <motion.div
-            {...fadeUp(0.1)}
+            variants={gridItem}
             className="
               bg-black border border-[rgba(89,211,255,0.40)] rounded-xl p-7 relative
               shadow-[0_0_30px_rgba(89,211,255,0.08)]
@@ -209,7 +231,7 @@ function Pricing() {
               <Button variant="primary" size="md" className="w-full">Go ReefMaster</Button>
             </Link>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
