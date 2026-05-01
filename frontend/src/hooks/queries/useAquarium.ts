@@ -8,5 +8,10 @@ export function useAquarium(id: number) {
     queryKey: aquariumQueryKey(id),
     queryFn: () => aquariumApi.detail(id),
     enabled: !!id,
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 404) return false;
+      return failureCount < 2;
+    },
   });
 }

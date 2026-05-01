@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
 import {
@@ -13,9 +13,7 @@ import {
   CheckCircle2,
   Clock,
 } from 'lucide-react';
-import { aquariumApi } from '../../api/aquariumApi';
-import { parameterApi } from '../../api/parameterApi';
-import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory, EquipmentItem, LivestockItem } from '../../types/aquarium';
+import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory } from '../../types/aquarium';
 import type { WaterParameter, ParameterKey, WaterParameterRequest } from '../../types/parameter';
 import {
   PARAMETER_KEYS,
@@ -28,11 +26,9 @@ import { formatDate, filterByTimeRange, type TimeRange } from '../../utils/forma
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
-import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/shared/EmptyState';
 import { toast } from '../../lib/toast';
 import ParameterChartSkeleton from '../../components/shared/skeletons/ParameterChartSkeleton';
-import LivestockListSkeleton from '../../components/shared/skeletons/LivestockListSkeleton';
 import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
@@ -41,6 +37,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { measurementLogSchema, type MeasurementLogFormValues } from '../../lib/schemas/parameter.schemas';
 import { livestockSchema, type LivestockFormValues } from '../../lib/schemas/livestock.schemas';
 import { equipmentSchema, type EquipmentFormValues } from '../../lib/schemas/equipment.schemas';
+import { useAquarium } from '../../hooks/queries/useAquarium';
+import { useWaterParameters } from '../../hooks/queries/useWaterParameters';
+import { useLogParameter } from '../../hooks/mutations/useLogParameter';
+import { useAddLivestock } from '../../hooks/mutations/useAddLivestock';
+import { useDeleteLivestock } from '../../hooks/mutations/useDeleteLivestock';
+import { useAddEquipment } from '../../hooks/mutations/useAddEquipment';
+import { useDeleteEquipment } from '../../hooks/mutations/useDeleteEquipment';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -80,32 +83,27 @@ interface LogModalProps {
   open: boolean;
   onClose: () => void;
   aquariumId: number;
-  onLogged: (p: WaterParameter) => void;
 }
 
-function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalProps) {
+function LogMeasurementModal({ open, onClose, aquariumId }: LogModalProps) {
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<MeasurementLogFormValues>({ resolver: zodResolver(measurementLogSchema) });
+
+  const { mutate, isPending } = useLogParameter();
 
   const handleClose = () => { reset(); onClose(); };
 
-  const onSubmit = async (data: MeasurementLogFormValues) => {
-    try {
-      const payload: WaterParameterRequest = {};
-      for (const key of PARAMETER_KEYS) {
-        const v = data[key];
-        if (v !== undefined && v !== null) payload[key] = v;
-      }
-      const logged = await parameterApi.log(aquariumId, payload);
-      onLogged(logged);
-      handleClose();
-    } catch {
-      toast.error('No se pudo guardar la medición.');
+  const onSubmit = (data: MeasurementLogFormValues) => {
+    const payload: WaterParameterRequest = {};
+    for (const key of PARAMETER_KEYS) {
+      const v = data[key];
+      if (v !== undefined && v !== null) payload[key] = v;
     }
+    mutate({ aquariumId, data: payload }, { onSuccess: handleClose });
   };
 
   return (
@@ -130,8 +128,8 @@ function LogMeasurementModal({ open, onClose, aquariumId, onLogged }: LogModalPr
         </div>
         <div className="flex gap-3 justify-end mt-5">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving…' : 'Save Measurement'}
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Saving…' : 'Save Measurement'}
           </Button>
         </div>
       </form>
@@ -146,32 +144,34 @@ interface AddLivestockModalProps {
   onClose: () => void;
   aquariumId: number;
   aquariumType: AquariumType;
-  onAdded: (item: LivestockItem, warning?: string | null) => void;
 }
 
-function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }: AddLivestockModalProps) {
+function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLivestockModalProps) {
   const {
     register,
     handleSubmit,
     watch,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LivestockFormValues>({
     resolver: zodResolver(livestockSchema),
     defaultValues: { category: 'FISH', reefSafe: true, quantity: 1 },
   });
 
+  const { mutate, isPending } = useAddLivestock();
   const reefSafe = watch('reefSafe');
   const handleClose = () => { reset(); onClose(); };
 
-  const onSubmit = async (data: LivestockFormValues) => {
-    try {
-      const res = await aquariumApi.addLivestock(aquariumId, { ...data, name: data.name.trim() });
-      onAdded(res.livestock, res.warning);
-      handleClose();
-    } catch {
-      toast.error('No se pudo añadir el animal.');
-    }
+  const onSubmit = (data: LivestockFormValues) => {
+    mutate(
+      { aquariumId, data: { ...data, name: data.name.trim() } },
+      {
+        onSuccess: (res) => {
+          if (res.warning) toast.info(res.warning);
+          handleClose();
+        },
+      }
+    );
   };
 
   return (
@@ -219,8 +219,8 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType, onAdded }:
         )}
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-            {isSubmitting ? 'Adding…' : 'Add Animal'}
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Adding…' : 'Add Animal'}
           </Button>
         </div>
       </form>
@@ -234,30 +234,27 @@ interface AddEquipmentModalProps {
   open: boolean;
   onClose: () => void;
   aquariumId: number;
-  onAdded: (item: EquipmentItem) => void;
 }
 
-function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentModalProps) {
+function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps) {
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: { category: 'OTHER' },
   });
 
+  const { mutate, isPending } = useAddEquipment();
   const handleClose = () => { reset(); onClose(); };
 
-  const onSubmit = async (data: EquipmentFormValues) => {
-    try {
-      const item = await aquariumApi.addEquipment(aquariumId, { ...data, name: data.name.trim() });
-      onAdded(item);
-      handleClose();
-    } catch {
-      toast.error('No se pudo añadir el equipo.');
-    }
+  const onSubmit = (data: EquipmentFormValues) => {
+    mutate(
+      { aquariumId, data: { ...data, name: data.name.trim() } },
+      { onSuccess: handleClose }
+    );
   };
 
   return (
@@ -304,8 +301,8 @@ function AddEquipmentModal({ open, onClose, aquariumId, onAdded }: AddEquipmentM
         </div>
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-            {isSubmitting ? 'Adding…' : 'Add Equipment'}
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Adding…' : 'Add Equipment'}
           </Button>
         </div>
       </form>
@@ -407,7 +404,6 @@ function OverviewTab({ aquarium, lastParam, onLogClick }: OverviewTabProps) {
 interface ParametersTabProps {
   aquariumId: number;
   parameters: WaterParameter[];
-  onLogged: (p: WaterParameter) => void;
 }
 
 const TIME_RANGE_LABELS: Record<TimeRange, string> = {
@@ -417,7 +413,7 @@ const TIME_RANGE_LABELS: Record<TimeRange, string> = {
   'all': 'All time',
 };
 
-function ParametersTab({ aquariumId, parameters, onLogged }: ParametersTabProps) {
+function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
   const [activeParam, setActiveParam] = useState<ParameterKey>('temperature');
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [logOpen, setLogOpen] = useState(false);
@@ -530,7 +526,6 @@ function ParametersTab({ aquariumId, parameters, onLogged }: ParametersTabProps)
         open={logOpen}
         onClose={() => setLogOpen(false)}
         aquariumId={aquariumId}
-        onLogged={(p) => { onLogged(p); setLogOpen(false); }}
       />
     </div>
   );
@@ -540,30 +535,11 @@ function ParametersTab({ aquariumId, parameters, onLogged }: ParametersTabProps)
 
 interface LivestockTabProps {
   aquarium: AquariumDetail;
-  onLivestockChange: (updated: LivestockItem[]) => void;
 }
 
-function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
+function LivestockTab({ aquarium }: LivestockTabProps) {
   const [addOpen, setAddOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
-
-  const handleDelete = async (id: number) => {
-    setDeletingId(id);
-    try {
-      await aquariumApi.deleteLivestock(id);
-      onLivestockChange(aquarium.livestock.filter((l) => l.id !== id));
-    } catch {
-      toast.error('No se pudo eliminar el animal.');
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
-  const handleAdded = (item: LivestockItem, warn?: string | null) => {
-    onLivestockChange([...aquarium.livestock, item]);
-    if (warn) setWarning(warn);
-  };
+  const { mutate: deleteLivestock } = useDeleteLivestock();
 
   return (
     <div className="p-6 space-y-4">
@@ -576,16 +552,6 @@ function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
           Add Animal
         </Button>
       </div>
-
-      {warning && (
-        <div className="flex items-start gap-2 bg-[rgba(251,191,36,0.08)] border border-[rgba(251,191,36,0.20)] rounded-lg p-3">
-          <TriangleAlert size={14} className="text-[#FBBF24] mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-xs text-[#FBBF24]">{warning}</p>
-          </div>
-          <button onClick={() => setWarning(null)} className="text-[#666] hover:text-white text-xs cursor-pointer">✕</button>
-        </div>
-      )}
 
       {aquarium.livestock.length === 0 ? (
         <EmptyState
@@ -612,11 +578,10 @@ function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
                   <p className="text-xs text-[#666] mt-0.5">×{item.quantity}</p>
                 </div>
                 <button
-                  onClick={() => handleDelete(item.id)}
-                  disabled={deletingId === item.id}
-                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer disabled:opacity-40"
+                  onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
+                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer"
                 >
-                  {deletingId === item.id ? <Spinner size={14} /> : <Trash2 size={14} />}
+                  <Trash2 size={14} />
                 </button>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -635,7 +600,6 @@ function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
         onClose={() => setAddOpen(false)}
         aquariumId={aquarium.id}
         aquariumType={aquarium.type}
-        onAdded={handleAdded}
       />
     </div>
   );
@@ -645,30 +609,17 @@ function LivestockTab({ aquarium, onLivestockChange }: LivestockTabProps) {
 
 interface EquipmentTabProps {
   aquarium: AquariumDetail;
-  onEquipmentChange: (updated: EquipmentItem[]) => void;
 }
 
-function EquipmentTab({ aquarium, onEquipmentChange }: EquipmentTabProps) {
+function EquipmentTab({ aquarium }: EquipmentTabProps) {
   const [addOpen, setAddOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { mutate: deleteEquipment } = useDeleteEquipment();
 
   const totalWatts = aquarium.equipment.reduce((a, e) => a + e.powerWatts, 0);
   const totalKwhMonth = aquarium.equipment.reduce(
     (a, e) => a + (e.powerWatts / 1000) * e.hoursPerDay * 30,
     0
   );
-
-  const handleDelete = async (id: number) => {
-    setDeletingId(id);
-    try {
-      await aquariumApi.deleteEquipment(id);
-      onEquipmentChange(aquarium.equipment.filter((e) => e.id !== id));
-    } catch {
-      toast.error('No se pudo eliminar el equipo.');
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   return (
     <div className="p-6 space-y-4">
@@ -733,11 +684,10 @@ function EquipmentTab({ aquarium, onEquipmentChange }: EquipmentTabProps) {
                   </p>
                 </div>
                 <button
-                  onClick={() => handleDelete(item.id)}
-                  disabled={deletingId === item.id}
-                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer disabled:opacity-40 shrink-0"
+                  onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
+                  className="text-[#444] hover:text-[#F87171] transition-colors p-1 cursor-pointer shrink-0"
                 >
-                  {deletingId === item.id ? <Spinner size={14} /> : <Trash2 size={14} />}
+                  <Trash2 size={14} />
                 </button>
               </div>
             );
@@ -749,7 +699,6 @@ function EquipmentTab({ aquarium, onEquipmentChange }: EquipmentTabProps) {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         aquariumId={aquarium.id}
-        onAdded={(item) => onEquipmentChange([...aquarium.equipment, item])}
       />
     </div>
   );
@@ -761,40 +710,18 @@ export default function AquariumDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const aquariumId = Number(id);
-
-  const [aquarium, setAquarium] = useState<AquariumDetail | null>(null);
-  const [parameters, setParameters] = useState<WaterParameter[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
   const [logOpen, setLogOpen] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    if (!aquariumId) return;
-    setFetchError(null);
-    try {
-      const [aq, params] = await Promise.all([
-        aquariumApi.detail(aquariumId),
-        parameterApi.getHistory(aquariumId),
-      ]);
-      setAquarium(aq);
-      setParameters(params);
-    } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 404) {
-        navigate('/dashboard', { replace: true });
-      } else {
-        setFetchError('No se pudieron cargar los datos del acuario.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [aquariumId, navigate]);
+  const { data: aquarium, isLoading, error, refetch } = useAquarium(aquariumId);
+  const { data: parameters = [] } = useWaterParameters(aquariumId);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const is404 = (error as { response?: { status?: number } })?.response?.status === 404;
 
-  const handleLogged = (p: WaterParameter) => setParameters((prev) => [p, ...prev]);
+  useEffect(() => {
+    if (is404) navigate('/dashboard', { replace: true });
+  }, [is404, navigate]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-full flex flex-col">
         {/* Header skeleton */}
@@ -812,7 +739,7 @@ export default function AquariumDetailPage() {
             <div key={i} className="h-10 w-24 bg-[rgba(255,255,255,0.04)] rounded my-1" />
           ))}
         </div>
-        {/* Content skeleton — overview tab */}
+        {/* Content skeleton */}
         <div className="flex-1">
           <ParameterChartSkeleton />
         </div>
@@ -820,12 +747,12 @@ export default function AquariumDetailPage() {
     );
   }
 
-  if (fetchError) {
+  if (error && !is404) {
     return (
       <div className="min-h-full flex flex-col items-center justify-center gap-4">
-        <p className="text-[#A0A0A0] text-sm">{fetchError}</p>
+        <p className="text-[#A0A0A0] text-sm">No se pudieron cargar los datos del acuario.</p>
         <button
-          onClick={() => { setLoading(true); fetchData(); }}
+          onClick={() => refetch()}
           className="px-4 py-2 rounded bg-[#59D3FF] text-[#0A0F1E] text-sm font-medium hover:bg-[#7DDEFF] transition-colors cursor-pointer"
         >
           Reintentar
@@ -834,13 +761,7 @@ export default function AquariumDetailPage() {
     );
   }
 
-  if (!aquarium) {
-    return (
-      <div className="min-h-full flex items-center justify-center">
-        <Spinner size={32} />
-      </div>
-    );
-  }
+  if (!aquarium) return null;
 
   const lastParam = parameters[0] ?? null;
 
@@ -900,26 +821,15 @@ export default function AquariumDetailPage() {
           <ParametersTab
             aquariumId={aquarium.id}
             parameters={parameters}
-            onLogged={handleLogged}
           />
         </Tabs.Content>
 
         <Tabs.Content value="livestock" className="flex-1 outline-none">
-          <LivestockTab
-            aquarium={aquarium}
-            onLivestockChange={(updated) =>
-              setAquarium((a) => a ? { ...a, livestock: updated } : a)
-            }
-          />
+          <LivestockTab aquarium={aquarium} />
         </Tabs.Content>
 
         <Tabs.Content value="equipment" className="flex-1 outline-none">
-          <EquipmentTab
-            aquarium={aquarium}
-            onEquipmentChange={(updated) =>
-              setAquarium((a) => a ? { ...a, equipment: updated } : a)
-            }
-          />
+          <EquipmentTab aquarium={aquarium} />
         </Tabs.Content>
       </Tabs.Root>
 
@@ -927,7 +837,6 @@ export default function AquariumDetailPage() {
         open={logOpen}
         onClose={() => setLogOpen(false)}
         aquariumId={aquarium.id}
-        onLogged={(p) => { handleLogged(p); setLogOpen(false); }}
       />
     </div>
   );

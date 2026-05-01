@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Fish, Wrench, Layers, ChevronRight, Bot } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useAquariumStore } from '../../store/aquariumStore';
-import { aquariumApi } from '../../api/aquariumApi';
-import { dashboardApi, type DashboardSummary } from '../../api/dashboardApi';
-import type { AquariumSummary, AquariumType, AquariumRequest } from '../../types/aquarium';
+import type { AquariumSummary, AquariumType } from '../../types/aquarium';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
 import EmptyState from '../../components/shared/EmptyState';
-import { toast } from '../../lib/toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { aquariumCreateSchema, type AquariumCreateFormValues } from '../../lib/schemas/aquarium.schemas';
 import DashboardCardSkeleton from '../../components/shared/skeletons/DashboardCardSkeleton';
 import { useUIStore } from '../../store/uiStore';
+import { useAquariums } from '../../hooks/queries/useAquariums';
+import { useDashboardSummary } from '../../hooks/queries/useDashboardSummary';
+import { useCreateAquarium } from '../../hooks/mutations/useCreateAquarium';
 
 const TYPE_LABELS: Record<AquariumType, string> = {
   REEF: 'Reef',
@@ -59,31 +58,25 @@ function AquariumCard({ aq }: { aq: AquariumSummary }) {
 interface CreateModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated: (aq: AquariumSummary) => void;
 }
 
-function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
+function CreateAquariumModal({ open, onClose }: CreateModalProps) {
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<AquariumCreateFormValues>({
     resolver: zodResolver(aquariumCreateSchema),
     defaultValues: { name: '', type: 'REEF' },
   });
 
+  const { mutate, isPending } = useCreateAquarium();
+
   const handleClose = () => { reset(); onClose(); };
 
-  const onSubmit = async (data: AquariumCreateFormValues) => {
-    try {
-      const created = await aquariumApi.create({ ...data, name: data.name.trim() });
-      onCreated(created);
-      handleClose();
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      toast.error(msg ?? 'No se pudo crear el acuario.');
-    }
+  const onSubmit = (data: AquariumCreateFormValues) => {
+    mutate({ ...data, name: data.name.trim() }, { onSuccess: handleClose });
   };
 
   return (
@@ -120,8 +113,8 @@ function CreateAquariumModal({ open, onClose, onCreated }: CreateModalProps) {
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" size="md" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating…' : 'Create Aquarium'}
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Creating…' : 'Create Aquarium'}
           </Button>
         </div>
       </form>
@@ -135,31 +128,15 @@ export default function DashboardView() {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const openChat = useUIStore((s) => s.openChat);
-  const { aquariums, setAquariums, addAquarium } = useAquariumStore();
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+
+  const { data: aquariums = [], isLoading } = useAquariums();
+  const { data: summary } = useDashboardSummary();
 
   const isFree = user?.plan === 'FREE';
   const canCreate = !isFree || aquariums.length === 0;
 
-  useEffect(() => {
-    Promise.all([aquariumApi.list(), dashboardApi.getSummary()])
-      .then(([list, sum]) => {
-        setAquariums(list);
-        setSummary(sum);
-      })
-      .finally(() => setLoading(false));
-  }, [setAquariums]);
-
-  const handleCreated = (aq: AquariumSummary) => {
-    addAquarium(aq);
-    setSummary((s) =>
-      s ? { ...s, aquariumCount: s.aquariumCount + 1 } : s
-    );
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-full p-6 max-w-5xl mx-auto">
         {/* Header skeleton */}
@@ -278,7 +255,6 @@ export default function DashboardView() {
       <CreateAquariumModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onCreated={handleCreated}
       />
     </div>
   );
