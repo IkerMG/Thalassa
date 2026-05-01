@@ -156,7 +156,7 @@ public class ChatService {
      * Llama a POST /chat/message en el microservicio Python.
      * Siempre devuelve un ChatResponse; si hay error de red, usa errorCode.
      */
-    private ChatResponse callPythonChat(String message, Map<String, Object> aquariumContext) {
+    ChatResponse callPythonChat(String message, Map<String, Object> aquariumContext) {
         // Request body interno que el microservicio Python espera
         record PythonChatRequest(String message, Map<String, Object> aquarium_context) {}
         record PythonChatError(String code, String message) {}
