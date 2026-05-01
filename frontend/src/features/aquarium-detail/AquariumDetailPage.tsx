@@ -12,6 +12,7 @@ import {
   TriangleAlert,
   CheckCircle2,
   Clock,
+  Settings,
 } from 'lucide-react';
 import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory } from '../../types/aquarium';
 import type { WaterParameter, ParameterKey, WaterParameterRequest } from '../../types/parameter';
@@ -45,6 +46,7 @@ import { useAddLivestock } from '../../hooks/mutations/useAddLivestock';
 import { useDeleteLivestock } from '../../hooks/mutations/useDeleteLivestock';
 import { useAddEquipment } from '../../hooks/mutations/useAddEquipment';
 import { useDeleteEquipment } from '../../hooks/mutations/useDeleteEquipment';
+import AquariumSettingsModal from './AquariumSettingsModal';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -731,6 +733,7 @@ export default function AquariumDetailPage() {
   const navigate = useNavigate();
   const aquariumId = Number(id);
   const [logOpen, setLogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data: aquarium, isLoading, error, refetch } = useAquarium(aquariumId);
   const { data: parameters = [] } = useWaterParameters(aquariumId);
@@ -796,12 +799,21 @@ export default function AquariumDetailPage() {
           <ArrowLeft size={14} />
           Dashboard
         </button>
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-white">{aquarium.name}</h1>
-          <span className="text-[10px] font-medium text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-2 py-0.5">
-            {TYPE_LABELS[aquarium.type]}
-          </span>
-          <span className="text-xs text-[#666]">{aquarium.liters} L</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold text-white">{aquarium.name}</h1>
+            <span className="text-[10px] font-medium text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-2 py-0.5">
+              {TYPE_LABELS[aquarium.type]}
+            </span>
+            <span className="text-xs text-[#666]">{aquarium.liters} L</span>
+          </div>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Aquarium settings"
+            className="text-[#666] hover:text-white transition-colors p-1 cursor-pointer"
+          >
+            <Settings size={18} />
+          </button>
         </div>
       </div>
 
@@ -858,6 +870,12 @@ export default function AquariumDetailPage() {
         open={logOpen}
         onClose={() => setLogOpen(false)}
         aquariumId={aquarium.id}
+      />
+
+      <AquariumSettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        aquarium={aquarium}
       />
     </div>
   );
