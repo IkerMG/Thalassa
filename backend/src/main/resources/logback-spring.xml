@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- ── Dev profile: legible en consola ──────────────────────────────────── -->
+  <springProfile name="!prod">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %cyan([%X{traceId:-}]) %magenta([uid:%X{userId:-}]) %logger{36} - %msg%n</pattern>
+      </encoder>
+    </appender>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="com.thalassa" level="DEBUG"/>
+  </springProfile>
+
+  <!-- ── Prod profile: JSON estructurado para ingestión por Docker/ELK ────── -->
+  <springProfile name="prod">
+    <appender name="JSON_STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <!-- Campos personalizados incluidos en cada línea JSON -->
+        <customFields>{"service":"thalassa-backend"}</customFields>
+        <!-- Incluye traceId y userId del MDC como campos de primer nivel -->
+        <includeMdcKeyName>traceId</includeMdcKeyName>
+        <includeMdcKeyName>userId</includeMdcKeyName>
+      </encoder>
+    </appender>
+
+    <root level="INFO">
+      <appender-ref ref="JSON_STDOUT"/>
+    </root>
+
+    <!-- Silenciar ruido de frameworks en prod -->
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+  </springProfile>
+
+</configuration>

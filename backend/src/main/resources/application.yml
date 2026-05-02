@@ -37,3 +37,15 @@ python:
 
 chat:
   free-daily-limit: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    tags:
+      application: thalassa-backend
