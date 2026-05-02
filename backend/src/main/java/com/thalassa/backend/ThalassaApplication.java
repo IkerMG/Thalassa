@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class ThalassaApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ThalassaApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(ThalassaApplication.class, args);
+  }
 }

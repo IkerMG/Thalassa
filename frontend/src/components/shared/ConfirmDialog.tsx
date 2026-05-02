@@ -106,10 +106,6 @@ export default function ConfirmDialog({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onOpenChange(false); }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
-      aria-describedby="confirm-dialog-description"
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -117,6 +113,10 @@ export default function ConfirmDialog({
       {/* Panel */}
       <div
         ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
         className="relative w-full max-w-sm bg-[#0A0A0A] border border-[rgba(255,255,255,0.08)] rounded-xl p-6 z-10 flex flex-col gap-4"
       >
         <div className="flex flex-col gap-1.5">

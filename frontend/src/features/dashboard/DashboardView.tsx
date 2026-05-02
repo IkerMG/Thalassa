@@ -126,7 +126,6 @@ function CreateAquariumModal({ open, onClose }: CreateModalProps) {
 
 export default function DashboardView() {
   const user = useAuthStore((s) => s.user);
-  const navigate = useNavigate();
   const openChat = useUIStore((s) => s.openChat);
   const [createOpen, setCreateOpen] = useState(false);
 

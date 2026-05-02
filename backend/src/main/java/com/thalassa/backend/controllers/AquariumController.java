@@ -16,6 +16,8 @@ import com.thalassa.backend.services.EquipmentService;
 import com.thalassa.backend.services.LivestockService;
 import com.thalassa.backend.services.WaterParameterService;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -30,163 +32,130 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/aquariums")
 public class AquariumController {
 
-    private final AquariumService aquariumService;
-    private final EquipmentService equipmentService;
-    private final LivestockService livestockService;
-    private final WaterParameterService waterParameterService;
+  private final AquariumService aquariumService;
+  private final EquipmentService equipmentService;
+  private final LivestockService livestockService;
+  private final WaterParameterService waterParameterService;
 
-    public AquariumController(AquariumService aquariumService,
-                              EquipmentService equipmentService,
-                              LivestockService livestockService,
-                              WaterParameterService waterParameterService) {
-        this.aquariumService = aquariumService;
-        this.equipmentService = equipmentService;
-        this.livestockService = livestockService;
-        this.waterParameterService = waterParameterService;
-    }
+  public AquariumController(
+      AquariumService aquariumService,
+      EquipmentService equipmentService,
+      LivestockService livestockService,
+      WaterParameterService waterParameterService) {
+    this.aquariumService = aquariumService;
+    this.equipmentService = equipmentService;
+    this.livestockService = livestockService;
+    this.waterParameterService = waterParameterService;
+  }
 
-    // ── Acuarios ──────────────────────────────────────────────────────────────
+  // ── Acuarios ──────────────────────────────────────────────────────────────
 
-    /**
-     * GET /api/aquariums
-     * Lista todos los acuarios del usuario autenticado (vista resumen).
-     */
-    @GetMapping
-    public ResponseEntity<List<AquariumSummaryResponse>> listAquariums() {
-        return ResponseEntity.ok(aquariumService.listAquariums());
-    }
+  /** GET /api/aquariums Lista todos los acuarios del usuario autenticado (vista resumen). */
+  @GetMapping
+  public ResponseEntity<List<AquariumSummaryResponse>> listAquariums() {
+    return ResponseEntity.ok(aquariumService.listAquariums());
+  }
 
-    /**
-     * POST /api/aquariums
-     * Crea un nuevo acuario. Gate freemium: FREE solo puede tener 1.
-     */
-    @PostMapping
-    public ResponseEntity<AquariumSummaryResponse> createAquarium(
-            @Valid @RequestBody AquariumRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(aquariumService.createAquarium(request));
-    }
+  /** POST /api/aquariums Crea un nuevo acuario. Gate freemium: FREE solo puede tener 1. */
+  @PostMapping
+  public ResponseEntity<AquariumSummaryResponse> createAquarium(
+      @Valid @RequestBody AquariumRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(aquariumService.createAquarium(request));
+  }
 
-    /**
-     * GET /api/aquariums/{id}
-     * Detalle completo del acuario: datos base + equipamiento + fauna.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<AquariumDetailResponse> getAquariumDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(aquariumService.getAquariumDetail(id));
-    }
+  /** GET /api/aquariums/{id} Detalle completo del acuario: datos base + equipamiento + fauna. */
+  @GetMapping("/{id}")
+  public ResponseEntity<AquariumDetailResponse> getAquariumDetail(@PathVariable Long id) {
+    return ResponseEntity.ok(aquariumService.getAquariumDetail(id));
+  }
 
-    /**
-     * PUT /api/aquariums/{id}
-     * Actualiza nombre, litros y tipo del acuario.
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<AquariumSummaryResponse> updateAquarium(
-            @PathVariable Long id,
-            @Valid @RequestBody AquariumRequest request) {
-        return ResponseEntity.ok(aquariumService.updateAquarium(id, request));
-    }
+  /** PUT /api/aquariums/{id} Actualiza nombre, litros y tipo del acuario. */
+  @PutMapping("/{id}")
+  public ResponseEntity<AquariumSummaryResponse> updateAquarium(
+      @PathVariable Long id, @Valid @RequestBody AquariumRequest request) {
+    return ResponseEntity.ok(aquariumService.updateAquarium(id, request));
+  }
 
-    /**
-     * DELETE /api/aquariums/{id}
-     * Elimina el acuario y en cascada todo su equipamiento y fauna.
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAquarium(@PathVariable Long id) {
-        aquariumService.deleteAquarium(id);
-        return ResponseEntity.noContent().build();
-    }
+  /** DELETE /api/aquariums/{id} Elimina el acuario y en cascada todo su equipamiento y fauna. */
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteAquarium(@PathVariable Long id) {
+    aquariumService.deleteAquarium(id);
+    return ResponseEntity.noContent().build();
+  }
 
-    // ── Sub-recurso: Equipamiento ─────────────────────────────────────────────
+  // ── Sub-recurso: Equipamiento ─────────────────────────────────────────────
 
-    /**
-     * GET /api/aquariums/{id}/equipment
-     * Lista el equipamiento del acuario.
-     */
-    @GetMapping("/{id}/equipment")
-    public ResponseEntity<List<EquipmentResponse>> listEquipment(@PathVariable Long id) {
-        return ResponseEntity.ok(equipmentService.listEquipment(id));
-    }
+  /** GET /api/aquariums/{id}/equipment Lista el equipamiento del acuario. */
+  @GetMapping("/{id}/equipment")
+  public ResponseEntity<List<EquipmentResponse>> listEquipment(@PathVariable Long id) {
+    return ResponseEntity.ok(equipmentService.listEquipment(id));
+  }
 
-    /**
-     * POST /api/aquariums/{id}/equipment
-     * Añade un equipo al acuario.
-     */
-    @PostMapping("/{id}/equipment")
-    public ResponseEntity<EquipmentResponse> addEquipment(
-            @PathVariable Long id,
-            @Valid @RequestBody EquipmentRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(equipmentService.addEquipment(id, request));
-    }
+  /** POST /api/aquariums/{id}/equipment Añade un equipo al acuario. */
+  @PostMapping("/{id}/equipment")
+  public ResponseEntity<EquipmentResponse> addEquipment(
+      @PathVariable Long id, @Valid @RequestBody EquipmentRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(equipmentService.addEquipment(id, request));
+  }
 
-    // ── Sub-recurso: Energía ──────────────────────────────────────────────────
+  // ── Sub-recurso: Energía ──────────────────────────────────────────────────
 
-    /**
-     * GET /api/aquariums/{id}/energy
-     * Calcula el coste energético mensual del acuario.
-     * Requiere que el usuario tenga el precio del kWh configurado en su perfil.
-     */
-    @GetMapping("/{id}/energy")
-    public ResponseEntity<EnergyResponse> calculateEnergy(@PathVariable Long id) {
-        return ResponseEntity.ok(equipmentService.calculateEnergy(id));
-    }
+  /**
+   * GET /api/aquariums/{id}/energy Calcula el coste energético mensual del acuario. Requiere que el
+   * usuario tenga el precio del kWh configurado en su perfil.
+   */
+  @GetMapping("/{id}/energy")
+  public ResponseEntity<EnergyResponse> calculateEnergy(@PathVariable Long id) {
+    return ResponseEntity.ok(equipmentService.calculateEnergy(id));
+  }
 
-    // ── Sub-recurso: Fauna ────────────────────────────────────────────────────
+  // ── Sub-recurso: Fauna ────────────────────────────────────────────────────
 
-    /**
-     * GET /api/aquariums/{id}/livestock
-     * Lista la fauna del acuario.
-     */
-    @GetMapping("/{id}/livestock")
-    public ResponseEntity<List<LivestockResponse>> listLivestock(@PathVariable Long id) {
-        return ResponseEntity.ok(livestockService.listLivestock(id));
-    }
+  /** GET /api/aquariums/{id}/livestock Lista la fauna del acuario. */
+  @GetMapping("/{id}/livestock")
+  public ResponseEntity<List<LivestockResponse>> listLivestock(@PathVariable Long id) {
+    return ResponseEntity.ok(livestockService.listLivestock(id));
+  }
 
-    /**
-     * POST /api/aquariums/{id}/livestock
-     * Añade un espécimen al acuario. Devuelve advertencia si no es reef-safe en REEF.
-     */
-    @PostMapping("/{id}/livestock")
-    public ResponseEntity<AddLivestockResponse> addLivestock(
-            @PathVariable Long id,
-            @Valid @RequestBody LivestockRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(livestockService.addLivestock(id, request));
-    }
+  /**
+   * POST /api/aquariums/{id}/livestock Añade un espécimen al acuario. Devuelve advertencia si no es
+   * reef-safe en REEF.
+   */
+  @PostMapping("/{id}/livestock")
+  public ResponseEntity<AddLivestockResponse> addLivestock(
+      @PathVariable Long id, @Valid @RequestBody LivestockRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(livestockService.addLivestock(id, request));
+  }
 
-    // ── Sub-recurso: Parámetros del agua ──────────────────────────────────────
+  // ── Sub-recurso: Parámetros del agua ──────────────────────────────────────
 
-    /**
-     * GET /api/aquariums/{id}/parameters
-     * Historial paginado de mediciones. Params: from, to (ISO datetime), page (0-based), size (max 200).
-     */
-    @GetMapping("/{id}/parameters")
-    public ResponseEntity<Page<WaterParameterResponse>> getParameters(
-            @PathVariable Long id,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
-            @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "50") int size) {
-        return ResponseEntity.ok(waterParameterService.getHistory(id, from, to, page, size));
-    }
+  /**
+   * GET /api/aquariums/{id}/parameters Historial paginado de mediciones. Params: from, to (ISO
+   * datetime), page (0-based), size (max 200).
+   */
+  @GetMapping("/{id}/parameters")
+  public ResponseEntity<Page<WaterParameterResponse>> getParameters(
+      @PathVariable Long id,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime to,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "50") int size) {
+    return ResponseEntity.ok(waterParameterService.getHistory(id, from, to, page, size));
+  }
 
-    /**
-     * POST /api/aquariums/{id}/parameters
-     * Registra una nueva medición de parámetros del agua.
-     */
-    @PostMapping("/{id}/parameters")
-    public ResponseEntity<WaterParameterResponse> logParameter(
-            @PathVariable Long id,
-            @Valid @RequestBody WaterParameterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(waterParameterService.logParameter(id, request));
-    }
+  /** POST /api/aquariums/{id}/parameters Registra una nueva medición de parámetros del agua. */
+  @PostMapping("/{id}/parameters")
+  public ResponseEntity<WaterParameterResponse> logParameter(
+      @PathVariable Long id, @Valid @RequestBody WaterParameterRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(waterParameterService.logParameter(id, request));
+  }
 }

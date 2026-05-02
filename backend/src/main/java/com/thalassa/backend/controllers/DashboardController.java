@@ -11,18 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
-    private final DashboardService dashboardService;
+  private final DashboardService dashboardService;
 
-    public DashboardController(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
-    }
+  public DashboardController(DashboardService dashboardService) {
+    this.dashboardService = dashboardService;
+  }
 
-    /**
-     * GET /api/dashboard/summary
-     * Global stats for the authenticated user's dashboard header.
-     */
-    @GetMapping("/summary")
-    public ResponseEntity<DashboardSummaryResponse> getSummary() {
-        return ResponseEntity.ok(dashboardService.getSummary());
-    }
+  /** GET /api/dashboard/summary Global stats for the authenticated user's dashboard header. */
+  @GetMapping("/summary")
+  public ResponseEntity<DashboardSummaryResponse> getSummary() {
+    return ResponseEntity.ok(dashboardService.getSummary());
+  }
 }
