@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Clock,
   Settings,
+  Download,
 } from 'lucide-react';
 import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory } from '../../types/aquarium';
 import type { WaterParameter, ParameterKey, WaterParameterRequest } from '../../types/parameter';
@@ -39,6 +40,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { measurementLogSchema, type MeasurementLogFormValues } from '../../lib/schemas/parameter.schemas';
 import { livestockSchema, type LivestockFormValues } from '../../lib/schemas/livestock.schemas';
 import { equipmentSchema, type EquipmentFormValues } from '../../lib/schemas/equipment.schemas';
+import { parameterApi } from '../../api/parameterApi';
 import { useAquarium } from '../../hooks/queries/useAquarium';
 import { useWaterParameters } from '../../hooks/queries/useWaterParameters';
 import { useLogParameter } from '../../hooks/mutations/useLogParameter';
@@ -439,13 +441,23 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
   const [activeParam, setActiveParam] = useState<ParameterKey>('temperature');
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [logOpen, setLogOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const filtered = filterByTimeRange(parameters, timeRange);
   const r = PARAMETER_RANGES[activeParam];
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await parameterApi.exportCsv(aquariumId);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           {PARAMETER_KEYS.map((key) => (
             <button
@@ -462,10 +474,22 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
             </button>
           ))}
         </div>
-        <Button variant="secondary" size="sm" onClick={() => setLogOpen(true)}>
-          <Plus size={14} className="mr-1" />
-          Log
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExport}
+            disabled={exporting || parameters.length === 0}
+            title={parameters.length === 0 ? 'No data to export' : 'Export CSV'}
+          >
+            <Download size={14} className="mr-1" />
+            {exporting ? 'Exporting…' : 'Export CSV'}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setLogOpen(true)}>
+            <Plus size={14} className="mr-1" />
+            Log
+          </Button>
+        </div>
       </div>
 
       {/* Time filter */}

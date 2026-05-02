@@ -8,10 +8,16 @@ import com.thalassa.backend.models.User;
 import com.thalassa.backend.models.WaterParameter;
 import com.thalassa.backend.repositories.AquariumRepository;
 import com.thalassa.backend.repositories.WaterParameterRepository;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +86,47 @@ public class WaterParameterService {
     return mapToResponse(parameterRepository.save(param));
   }
 
+  /** Exports all parameter history for an aquarium as a UTF-8 CSV byte array. */
+  public ResponseEntity<byte[]> exportCsv(Long aquariumId) {
+    User user = getAuthenticatedUser();
+    Aquarium aquarium = verifyOwnership(aquariumId, user.getId());
+
+    List<WaterParameter> params =
+        parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId);
+    Collections.reverse(params); // chronological: oldest first
+
+    StringBuilder csv = new StringBuilder();
+    csv.append(
+        "measuredAt,temperature,salinity,ph,alkalinityDKH,calciumPPM,magnesiumPPM,nitratesPPM,phosphatesPPM\n");
+    for (WaterParameter p : params) {
+      csv.append(p.getMeasuredAt()).append(',')
+          .append(csv(p.getTemperature())).append(',')
+          .append(csv(p.getSalinity())).append(',')
+          .append(csv(p.getPh())).append(',')
+          .append(csv(p.getAlkalinityDKH())).append(',')
+          .append(csv(p.getCalciumPPM())).append(',')
+          .append(csv(p.getMagnesiumPPM())).append(',')
+          .append(csv(p.getNitratesPPM())).append(',')
+          .append(csv(p.getPhosphatesPPM())).append('\n');
+    }
+
+    String safeName = aquarium.getName().replaceAll("[^a-zA-Z0-9_-]", "_");
+    String filename =
+        "parameters_" + safeName + "_" + LocalDate.now() + ".csv";
+    byte[] bytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+        .body(bytes);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private static String csv(Double value) {
+    return value != null ? value.toString() : "";
+  }
 
   private Aquarium verifyOwnership(Long aquariumId, Long userId) {
     return aquariumRepository

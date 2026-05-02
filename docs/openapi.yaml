@@ -864,6 +864,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # ── Export ──────────────────────────────────────────────────────────────────
+  /api/aquariums/{id}/parameters/export:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+    get:
+      tags: [Acuarios]
+      summary: Exportar historial de parámetros como CSV
+      operationId: exportParameters
+      responses:
+        '200':
+          description: CSV con el historial completo de mediciones
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Acuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ── Notificaciones ──────────────────────────────────────────────────────────
   /api/notifications:
     get:

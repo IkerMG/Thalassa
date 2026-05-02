@@ -158,4 +158,13 @@ public class AquariumController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(waterParameterService.logParameter(id, request));
   }
+
+  /**
+   * GET /api/aquariums/{id}/parameters/export Descarga el historial completo de mediciones como
+   * CSV.
+   */
+  @GetMapping("/{id}/parameters/export")
+  public ResponseEntity<byte[]> exportParameters(@PathVariable Long id) {
+    return waterParameterService.exportCsv(id);
+  }
 }
