@@ -140,6 +140,34 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # Backup — pg_dump diario con retención 7/4/12
+  # ---------------------------------------------------------------------------
+  backup:
+    image: postgres:16-alpine
+    container_name: thalassa-backup
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=thalassa
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - BACKUP_DIR=/backups
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    # Instala el script como cron job a las 03:00 UTC y arranca crond
+    command: >
+      sh -c "chmod +x /backup.sh &&
+             echo '0 3 * * * /backup.sh >> /backups/backup.log 2>&1' | crontab - &&
+             crond -f -l 8"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Base de datos — PostgreSQL
   # ---------------------------------------------------------------------------
   db:
@@ -168,6 +196,7 @@ services:
 # =============================================================================
 volumes:
   db_data:
+  backup_data:
   # Almacena el certificado Let's Encrypt entre reinicios.
   # El archivo acme.json necesita permisos 600 en el host:
   #   mkdir -p /opt/thalassa/acme && touch /opt/thalassa/acme/acme.json && chmod 600 /opt/thalassa/acme/acme.json
