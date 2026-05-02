@@ -116,6 +116,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Sentry — error tracking (Spring Boot 3 / Jakarta) -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>8.13.3</version>
+        </dependency>
+
         <!-- Logstash Logback Encoder — JSON structured logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>

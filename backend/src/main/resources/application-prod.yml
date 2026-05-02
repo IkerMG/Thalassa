@@ -14,6 +14,10 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
+sentry:
+  traces-sample-rate: 0.1
+  environment: production
+
 management:
   endpoints:
     web:

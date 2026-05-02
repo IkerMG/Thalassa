@@ -38,6 +38,10 @@ python:
 chat:
   free-daily-limit: 5
 
+sentry:
+  dsn: ${SENTRY_DSN:}      # vacío = Sentry desactivado
+  traces-sample-rate: 0.0
+
 management:
   endpoints:
     web:
