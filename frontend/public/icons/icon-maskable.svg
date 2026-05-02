@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable: safe area is central 80% (409x409). Background fills entire canvas. -->
+  <rect width="512" height="512" fill="#0A0A0A"/>
+  <!-- Wave — scaled down to stay within safe area -->
+  <path d="M102 295 Q152 248 202 295 Q252 342 302 295 Q352 248 410 295"
+        fill="none" stroke="#59D3FF" stroke-width="24" stroke-linecap="round"/>
+  <path d="M102 335 Q152 288 202 335 Q252 382 302 335 Q352 288 410 335"
+        fill="none" stroke="#59D3FF" stroke-width="16" stroke-linecap="round" opacity="0.5"/>
+  <!-- T lettermark — centered in safe area -->
+  <text x="256" y="220" font-family="system-ui, sans-serif" font-size="120"
+        font-weight="700" fill="#59D3FF" text-anchor="middle" dominant-baseline="middle">T</text>
+</svg>
