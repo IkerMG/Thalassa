@@ -1,0 +1,12 @@
+{
+  "title": "Perfil",
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "de": "Deutsch",
+    "es": "Español"
+  },
+  "settings": {
+    "comingSoonText": "La edición de preferencias estará disponible próximamente."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "types": {
+    "REEF": "Arrecife",
+    "FISH_ONLY": "Solo peces",
+    "MIXED": "Mixto"
+  },
+  "tabs": {
+    "overview": "Resumen",
+    "parameters": "Parámetros",
+    "livestock": "Animales",
+    "equipment": "Equipos"
+  },
+  "actions": {
+    "logMeasurement": "Registrar medición",
+    "addAnimal": "Añadir animal",
+    "addEquipment": "Añadir equipo",
+    "exportCsv": "Exportar CSV"
+  }
+}

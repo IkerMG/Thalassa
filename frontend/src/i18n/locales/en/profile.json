@@ -1,0 +1,12 @@
+{
+  "title": "Profile",
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "de": "Deutsch",
+    "es": "Español"
+  },
+  "settings": {
+    "comingSoonText": "Preference editing will be available soon."
+  }
+}

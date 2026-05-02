@@ -1,0 +1,19 @@
+{
+  "types": {
+    "REEF": "Reef",
+    "FISH_ONLY": "Fish Only",
+    "MIXED": "Mixed"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "parameters": "Parameters",
+    "livestock": "Livestock",
+    "equipment": "Equipment"
+  },
+  "actions": {
+    "logMeasurement": "Log Measurement",
+    "addAnimal": "Add Animal",
+    "addEquipment": "Add Equipment",
+    "exportCsv": "Export CSV"
+  }
+}

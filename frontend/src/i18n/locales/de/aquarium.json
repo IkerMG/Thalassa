@@ -1,0 +1,19 @@
+{
+  "types": {
+    "REEF": "Riff",
+    "FISH_ONLY": "Nur Fische",
+    "MIXED": "Gemischt"
+  },
+  "tabs": {
+    "overview": "Übersicht",
+    "parameters": "Parameter",
+    "livestock": "Tiere",
+    "equipment": "Geräte"
+  },
+  "actions": {
+    "logMeasurement": "Messung eintragen",
+    "addAnimal": "Tier hinzufügen",
+    "addEquipment": "Gerät hinzufügen",
+    "exportCsv": "CSV exportieren"
+  }
+}

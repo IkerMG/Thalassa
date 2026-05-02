@@ -6,6 +6,7 @@ import './index.css';
 import AppRouter from './routes/AppRouter';
 import queryClient from './lib/queryClient';
 import { initSentry } from './lib/sentry';
+import './i18n';
 
 initSentry();
 
