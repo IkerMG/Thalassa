@@ -8,6 +8,40 @@ version: "3.9"
 services:
 
   # ---------------------------------------------------------------------------
+  # Reverse proxy — Traefik (TLS + routing)
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.3
+    container_name: thalassa-traefik
+    command:
+      # Docker provider: solo servicios con traefik.enable=true
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=thalassa-net"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP → HTTPS (Traefik intercepta /.well-known/acme-challenge
+      # antes del redirect, por lo que HTTP-01 sigue funcionando)
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      # Let's Encrypt HTTP-01
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "acme_data:/acme"
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Backend — Spring Boot (Java)
   # ---------------------------------------------------------------------------
   backend:
@@ -15,6 +49,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: thalassa-backend
+    # En producción se pueden eliminar estos puertos para que el backend solo
+    # sea accesible a través de Traefik y nunca directamente desde el host.
     ports:
       - "8080:8080"
     environment:
@@ -32,12 +68,19 @@ services:
       scraper:
         condition: service_healthy
     healthcheck:
-      # Alpine (eclipse-temurin:*-alpine) usa busybox wget, no curl
       test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      # Router HTTPS para /api/** — más específico que el frontend, gana automáticamente
+      - "traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api.middlewares=hsts@docker"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -50,11 +93,25 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: thalassa-frontend
+    # Puerto directo útil en dev; en producción se puede eliminar.
     ports:
       - "5173:80"
     depends_on:
       backend:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      # Router HTTPS para el resto del tráfico (SPA)
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend.middlewares=hsts@docker"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # Middleware HSTS — se define aquí, se referencia desde ambos routers
+      - "traefik.http.middlewares.hsts.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.hsts.headers.stsPreload=true"
+      - "traefik.http.middlewares.hsts.headers.forceSTSHeader=true"
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -111,6 +168,10 @@ services:
 # =============================================================================
 volumes:
   db_data:
+  # Almacena el certificado Let's Encrypt entre reinicios.
+  # El archivo acme.json necesita permisos 600 en el host:
+  #   mkdir -p /opt/thalassa/acme && touch /opt/thalassa/acme/acme.json && chmod 600 /opt/thalassa/acme/acme.json
+  acme_data:
 
 # =============================================================================
 # Redes
