@@ -395,6 +395,20 @@ export interface components {
       errorCode?: string | null;
     };
 
+    // ── Notificaciones ───────────────────────────────────────────────────────
+    /** @enum {string} */
+    NotificationType: "INFO" | "WARNING" | "SUCCESS";
+    NotificationResponse: {
+      /** @format int64 */
+      id?: number;
+      title?: string;
+      message?: string;
+      type?: components["schemas"]["NotificationType"];
+      read?: boolean;
+      /** @format date-time */
+      createdAt?: string;
+    };
+
     // ── Error ────────────────────────────────────────────────────────────────
     ErrorResponse: {
       /** @description Descripción legible del error */
@@ -623,5 +637,8 @@ export interface operations {
       200: { content: { "application/json": components["schemas"]["SpeciesCatalogResponse"] } };
       404: { content: { "application/json": components["schemas"]["ErrorResponse"] } };
     };
+  };
+  getNotifications: {
+    responses: { 200: { content: { "application/json": components["schemas"]["NotificationResponse"][] } } };
   };
 }

@@ -4,6 +4,7 @@ import { useIsDesktop } from '../../hooks/useMediaQuery';
 import Sidebar from './Sidebar';
 import BottomTabBar from './BottomTabBar';
 import ChatDrawer from '../../features/chat/ChatDrawer';
+import NotificationBell from '../shared/NotificationBell';
 
 export default function GestorLayout() {
   const isDesktop = useIsDesktop();
@@ -33,6 +34,13 @@ export default function GestorLayout() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Mobile notification bell — top-right corner, above content */}
+      {!isDesktop && (
+        <div className="fixed top-3 right-3 z-40">
+          <NotificationBell />
+        </div>
+      )}
 
       {!isDesktop && <BottomTabBar />}
 

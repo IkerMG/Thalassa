@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
+import NotificationBell from '../shared/NotificationBell';
 
 interface NavItem {
   to: string;
@@ -48,9 +49,10 @@ export default function Sidebar() {
         flex flex-col
       "
     >
-      {/* Logo */}
-      <div className="px-6 py-5 border-b border-[rgba(255,255,255,0.08)]">
+      {/* Logo + NotificationBell */}
+      <div className="px-6 py-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between">
         <span className="text-lg font-bold tracking-widest text-white">THALASSA</span>
+        <NotificationBell />
       </div>
 
       {/* Nav items */}
