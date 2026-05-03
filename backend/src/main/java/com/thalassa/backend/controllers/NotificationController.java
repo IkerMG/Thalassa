@@ -2,7 +2,7 @@ package com.thalassa.backend.controllers;
 
 import com.thalassa.backend.dto.NotificationResponse;
 import com.thalassa.backend.dto.NotificationType;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +24,7 @@ public class NotificationController {
                 .message("pH reading of 8.2 recorded for Reef Tank #1.")
                 .type(NotificationType.SUCCESS)
                 .read(false)
-                .createdAt(OffsetDateTime.now().minusMinutes(10))
+                .createdAt(LocalDateTime.now().minusMinutes(10))
                 .build(),
             NotificationResponse.builder()
                 .id(2L)
@@ -32,7 +32,7 @@ public class NotificationController {
                 .message("Alkalinity dropped below 7 dKH in Nano Reef.")
                 .type(NotificationType.WARNING)
                 .read(false)
-                .createdAt(OffsetDateTime.now().minusHours(2))
+                .createdAt(LocalDateTime.now().minusHours(2))
                 .build(),
             NotificationResponse.builder()
                 .id(3L)
@@ -40,7 +40,7 @@ public class NotificationController {
                 .message("Amphiprion ocellaris added to your livestock list.")
                 .type(NotificationType.INFO)
                 .read(true)
-                .createdAt(OffsetDateTime.now().minusHours(5))
+                .createdAt(LocalDateTime.now().minusHours(5))
                 .build(),
             NotificationResponse.builder()
                 .id(4L)
@@ -48,7 +48,7 @@ public class NotificationController {
                 .message("Skimmer cleaning scheduled for tomorrow.")
                 .type(NotificationType.INFO)
                 .read(true)
-                .createdAt(OffsetDateTime.now().minusDays(1))
+                .createdAt(LocalDateTime.now().minusDays(1))
                 .build(),
             NotificationResponse.builder()
                 .id(5L)
@@ -56,7 +56,7 @@ public class NotificationController {
                 .message("Species catalog refreshed with 12 new entries.")
                 .type(NotificationType.SUCCESS)
                 .read(true)
-                .createdAt(OffsetDateTime.now().minusDays(2))
+                .createdAt(LocalDateTime.now().minusDays(2))
                 .build());
     return ResponseEntity.ok(notifications);
   }

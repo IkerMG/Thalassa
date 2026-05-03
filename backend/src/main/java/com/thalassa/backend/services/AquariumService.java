@@ -34,6 +34,7 @@ public class AquariumService {
     return aquariumRepository.findByUserId(user.getId()).stream().map(this::mapToSummary).toList();
   }
 
+  @Transactional
   public AquariumDetailResponse getAquariumDetail(Long aquariumId) {
     User user = getAuthenticatedUser();
     Aquarium aquarium =

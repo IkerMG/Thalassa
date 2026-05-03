@@ -1,17 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Wrench, ShoppingBag, Bot, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../../store/uiStore';
 
-const tabs = [
-  { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'DASHBOARD' },
-  { to: '/dashboard/calculator/dosing', icon: <Wrench size={22} />, label: 'TOOLS' },
-  { to: '/dashboard/market', icon: <ShoppingBag size={22} />, label: 'MARKET' },
-  { to: '/dashboard/profile', icon: <User size={22} />, label: 'PROFILE' },
-];
-
 export default function BottomTabBar() {
+  const { t } = useTranslation('nav');
   const isChatOpen = useUIStore((s) => s.isChatOpen);
   const openChat = useUIStore((s) => s.openChat);
+
+  const tabs = [
+    { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: t('dashboard') },
+    { to: '/dashboard/calculator/dosing', icon: <Wrench size={22} />, label: t('tools') },
+    { to: '/dashboard/market', icon: <ShoppingBag size={22} />, label: t('market') },
+    { to: '/dashboard/profile', icon: <User size={22} />, label: t('profile') },
+  ];
 
   return (
     <nav
@@ -34,7 +36,7 @@ export default function BottomTabBar() {
           }
         >
           {tab.icon}
-          <span className="text-[9px] font-mono tracking-wider">{tab.label}</span>
+          <span className="text-[9px] font-mono tracking-wider uppercase">{tab.label}</span>
         </NavLink>
       ))}
 

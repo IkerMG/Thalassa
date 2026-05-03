@@ -7,8 +7,7 @@ import { useAuthStore } from '../../../store/authStore';
 const baseUser = {
   id: 1,
   email: 'test@thalassa.com',
-  name: 'Test',
-  createdAt: '2024-01-01T00:00:00.000Z',
+  username: 'Test',
 };
 
 beforeEach(() => {

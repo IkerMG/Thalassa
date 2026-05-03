@@ -14,6 +14,90 @@
     "logMeasurement": "Log Measurement",
     "addAnimal": "Add Animal",
     "addEquipment": "Add Equipment",
-    "exportCsv": "Export CSV"
+    "exportCsv": "Export CSV",
+    "log": "Log",
+    "exporting": "Exporting…"
+  },
+  "backToDashboard": "Dashboard",
+  "error": "Could not load aquarium data.",
+  "retry": "Retry",
+  "overview": {
+    "currentParams": "Current Parameters",
+    "quickStats": "Quick Stats",
+    "noMeasurements": "No measurements yet.",
+    "logFirst": "Log your first measurement →",
+    "lastLogged": "Last logged: {{date}}",
+    "fish": "Fish",
+    "corals": "Corals",
+    "invertebrates": "Invertebrates",
+    "equipment": "Equipment",
+    "optimal": "Optimal: {{min}}–{{max}}"
+  },
+  "parameters": {
+    "history": "Measurement History",
+    "date": "Date",
+    "timeRanges": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "3m": "3 months",
+      "all": "All time"
+    },
+    "logModal": {
+      "title": "Log New Measurement",
+      "hint": "All fields are optional — log only what you've measured.",
+      "saving": "Saving…",
+      "submit": "Save Measurement"
+    }
+  },
+  "livestock": {
+    "count_one": "{{count}} animal",
+    "count_other": "{{count}} animals",
+    "reefSafeWarning": "This species is not reef safe. It may harm corals or invertebrates in your reef aquarium.",
+    "empty": {
+      "title": "No animals yet",
+      "description": "Add the fish, corals, and invertebrates living in this aquarium."
+    },
+    "addModal": {
+      "title": "Add Animal",
+      "name": "Name",
+      "namePlaceholder": "e.g. Clownfish",
+      "category": "Category",
+      "categories": {
+        "FISH": "Fish",
+        "CORAL": "Coral",
+        "INVERTEBRATE": "Invertebrate"
+      },
+      "quantity": "Quantity",
+      "reefSafe": "Reef Safe",
+      "adding": "Adding…"
+    }
+  },
+  "equipment": {
+    "count_one": "{{count}} device",
+    "count_other": "{{count}} devices",
+    "totalPower": "Total Power",
+    "estMonthly": "Est. Monthly",
+    "empty": {
+      "title": "No equipment yet",
+      "description": "Add lights, pumps, skimmers, and heaters to track energy consumption."
+    },
+    "addModal": {
+      "title": "Add Equipment",
+      "name": "Name",
+      "namePlaceholder": "e.g. LED Light",
+      "category": "Category",
+      "categories": {
+        "LIGHT": "Light",
+        "PUMP": "Pump",
+        "SKIMMER": "Skimmer",
+        "HEATER": "Heater",
+        "OTHER": "Other"
+      },
+      "power": "Power (W)",
+      "powerPlaceholder": "e.g. 100",
+      "hours": "Hours / day",
+      "hoursPlaceholder": "e.g. 10",
+      "adding": "Adding…"
+    }
   }
 }

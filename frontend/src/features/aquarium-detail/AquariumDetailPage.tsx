@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as Tabs from '@radix-ui/react-tabs';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Plus,
@@ -52,12 +53,6 @@ import AquariumSettingsModal from './AquariumSettingsModal';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const TYPE_LABELS: Record<AquariumType, string> = {
-  REEF: 'Reef',
-  FISH_ONLY: 'Fish Only',
-  MIXED: 'Mixed',
-};
-
 const CATEGORY_COLORS: Record<LivestockCategory, string> = {
   FISH: 'text-[#59D3FF] bg-[rgba(89,211,255,0.10)] border-[rgba(89,211,255,0.25)]',
   CORAL: 'text-[#FBBF24] bg-[rgba(251,191,36,0.10)] border-[rgba(251,191,36,0.25)]',
@@ -98,6 +93,8 @@ interface LogModalProps {
 }
 
 function LogMeasurementModal({ open, onClose, aquariumId }: LogModalProps) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
   const {
     register,
     handleSubmit,
@@ -119,9 +116,9 @@ function LogMeasurementModal({ open, onClose, aquariumId }: LogModalProps) {
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="Log New Measurement" maxWidth="max-w-xl">
+    <Modal open={open} onClose={handleClose} title={t('parameters.logModal.title')} maxWidth="max-w-xl">
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <p className="text-xs text-[#666] mb-4">All fields are optional — log only what you've measured.</p>
+        <p className="text-xs text-[#666] mb-4">{t('parameters.logModal.hint')}</p>
         <div className="grid grid-cols-2 gap-3">
           {PARAMETER_KEYS.map((key) => {
             const r = PARAMETER_RANGES[key];
@@ -139,9 +136,9 @@ function LogMeasurementModal({ open, onClose, aquariumId }: LogModalProps) {
           })}
         </div>
         <div className="flex gap-3 justify-end mt-5">
-          <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
+          <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
-            {isPending ? 'Saving…' : 'Save Measurement'}
+            {isPending ? t('parameters.logModal.saving') : t('parameters.logModal.submit')}
           </Button>
         </div>
       </form>
@@ -159,6 +156,8 @@ interface AddLivestockModalProps {
 }
 
 function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLivestockModalProps) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
   const {
     register,
     handleSubmit,
@@ -187,27 +186,29 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLives
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="Add Animal">
+    <Modal open={open} onClose={handleClose} title={t('livestock.addModal.title')}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <Input
-          label="Name"
-          placeholder="e.g. Clownfish"
+          label={t('livestock.addModal.name')}
+          placeholder={t('livestock.addModal.namePlaceholder')}
           {...register('name')}
           error={errors.name?.message}
         />
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">Category</label>
+          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+            {t('livestock.addModal.category')}
+          </label>
           <select
             {...register('category')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
-            <option value="FISH">Fish</option>
-            <option value="CORAL">Coral</option>
-            <option value="INVERTEBRATE">Invertebrate</option>
+            <option value="FISH">{t('livestock.addModal.categories.FISH')}</option>
+            <option value="CORAL">{t('livestock.addModal.categories.CORAL')}</option>
+            <option value="INVERTEBRATE">{t('livestock.addModal.categories.INVERTEBRATE')}</option>
           </select>
         </div>
         <Input
-          label="Quantity"
+          label={t('livestock.addModal.quantity')}
           type="number"
           min={1}
           {...register('quantity')}
@@ -219,20 +220,18 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLives
             {...register('reefSafe')}
             className="w-4 h-4 accent-[#59D3FF]"
           />
-          <span className="text-sm text-[#A0A0A0]">Reef Safe</span>
+          <span className="text-sm text-[#A0A0A0]">{t('livestock.addModal.reefSafe')}</span>
         </label>
         {aquariumType === 'REEF' && !reefSafe && (
           <div className="flex items-start gap-2 bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.20)] rounded-lg p-3">
             <TriangleAlert size={14} className="text-[#F87171] mt-0.5 shrink-0" />
-            <p className="text-xs text-[#F87171]">
-              This species is not reef safe. It may harm corals or invertebrates in your reef aquarium.
-            </p>
+            <p className="text-xs text-[#F87171]">{t('livestock.reefSafeWarning')}</p>
           </div>
         )}
         <div className="flex gap-3 justify-end">
-          <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
+          <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
-            {isPending ? 'Adding…' : 'Add Animal'}
+            {isPending ? t('livestock.addModal.adding') : t('actions.addAnimal')}
           </Button>
         </div>
       </form>
@@ -249,6 +248,8 @@ interface AddEquipmentModalProps {
 }
 
 function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
   const {
     register,
     handleSubmit,
@@ -270,51 +271,53 @@ function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="Add Equipment">
+    <Modal open={open} onClose={handleClose} title={t('equipment.addModal.title')}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <Input
-          label="Name"
-          placeholder="e.g. LED Light"
+          label={t('equipment.addModal.name')}
+          placeholder={t('equipment.addModal.namePlaceholder')}
           {...register('name')}
           error={errors.name?.message}
         />
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">Category</label>
+          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+            {t('equipment.addModal.category')}
+          </label>
           <select
             {...register('category')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
-            <option value="LIGHT">Light</option>
-            <option value="PUMP">Pump</option>
-            <option value="SKIMMER">Skimmer</option>
-            <option value="HEATER">Heater</option>
-            <option value="OTHER">Other</option>
+            <option value="LIGHT">{t('equipment.addModal.categories.LIGHT')}</option>
+            <option value="PUMP">{t('equipment.addModal.categories.PUMP')}</option>
+            <option value="SKIMMER">{t('equipment.addModal.categories.SKIMMER')}</option>
+            <option value="HEATER">{t('equipment.addModal.categories.HEATER')}</option>
+            <option value="OTHER">{t('equipment.addModal.categories.OTHER')}</option>
           </select>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Power (W)"
+            label={t('equipment.addModal.power')}
             type="number"
             min={1}
-            placeholder="e.g. 100"
+            placeholder={t('equipment.addModal.powerPlaceholder')}
             {...register('powerWatts')}
             error={errors.powerWatts?.message}
           />
           <Input
-            label="Hours / day"
+            label={t('equipment.addModal.hours')}
             type="number"
             min={0.1}
             max={24}
             step={0.5}
-            placeholder="e.g. 10"
+            placeholder={t('equipment.addModal.hoursPlaceholder')}
             {...register('hoursPerDay')}
             error={errors.hoursPerDay?.message}
           />
         </div>
         <div className="flex gap-3 justify-end">
-          <Button type="button" variant="ghost" size="md" onClick={handleClose}>Cancel</Button>
+          <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
-            {isPending ? 'Adding…' : 'Add Equipment'}
+            {isPending ? t('equipment.addModal.adding') : t('actions.addEquipment')}
           </Button>
         </div>
       </form>
@@ -332,11 +335,11 @@ interface OverviewTabProps {
 }
 
 function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTabProps) {
+  const { t } = useTranslation('aquarium');
   const fishCount = aquarium.livestock.filter((l) => l.category === 'FISH').reduce((a, l) => a + l.quantity, 0);
   const coralCount = aquarium.livestock.filter((l) => l.category === 'CORAL').reduce((a, l) => a + l.quantity, 0);
   const invertCount = aquarium.livestock.filter((l) => l.category === 'INVERTEBRATE').reduce((a, l) => a + l.quantity, 0);
 
-  // Last 7 non-null values per parameter, chronological order (oldest → newest)
   const sparkData: Record<ParameterKey, number[]> = {} as Record<ParameterKey, number[]>;
   for (const key of PARAMETER_KEYS) {
     sparkData[key] = parameters
@@ -351,17 +354,17 @@ function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTa
       {/* Parameters snapshot */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-white">Current Parameters</h3>
+          <h3 className="text-sm font-semibold text-white">{t('overview.currentParams')}</h3>
           <Button variant="secondary" size="sm" onClick={onLogClick}>
             <Plus size={14} className="mr-1" />
-            Log Measurement
+            {t('actions.logMeasurement')}
           </Button>
         </div>
         {!lastParam ? (
           <div className="border border-dashed border-[rgba(255,255,255,0.08)] rounded-xl py-10 text-center">
-            <p className="text-[#666] text-sm">No measurements yet.</p>
+            <p className="text-[#666] text-sm">{t('overview.noMeasurements')}</p>
             <button onClick={onLogClick} className="text-[#59D3FF] text-sm mt-1 hover:underline cursor-pointer">
-              Log your first measurement →
+              {t('overview.logFirst')}
             </button>
           </div>
         ) : (
@@ -387,7 +390,7 @@ function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTa
                     )}
                   </p>
                   <p className="text-[10px] text-text-tertiary mt-1">
-                    {r.min}–{r.max} {r.unit}
+                    {t('overview.optimal', { min: r.min, max: r.max })} {r.unit}
                   </p>
                   <Sparkline data={sparkData[key]} color={STATUS_COLORS[status]} />
                 </div>
@@ -397,20 +400,20 @@ function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTa
         )}
         {lastParam && (
           <p className="text-[11px] text-text-tertiary mt-2">
-            Last logged: {formatDate(lastParam.measuredAt)}
+            {t('overview.lastLogged', { date: formatDate(lastParam.measuredAt) })}
           </p>
         )}
       </div>
 
       {/* Quick stats */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Quick Stats</h3>
+        <h3 className="text-sm font-semibold text-white mb-3">{t('overview.quickStats')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Fish', value: fishCount, color: 'text-[#59D3FF]' },
-            { label: 'Corals', value: coralCount, color: 'text-[#FBBF24]' },
-            { label: 'Invertebrates', value: invertCount, color: 'text-[#34D399]' },
-            { label: 'Equipment', value: aquarium.equipment.length, color: 'text-[#A0A0A0]' },
+            { label: t('overview.fish'), value: fishCount, color: 'text-[#59D3FF]' },
+            { label: t('overview.corals'), value: coralCount, color: 'text-[#FBBF24]' },
+            { label: t('overview.invertebrates'), value: invertCount, color: 'text-[#34D399]' },
+            { label: t('overview.equipment'), value: aquarium.equipment.length, color: 'text-[#A0A0A0]' },
           ].map(({ label, value, color }) => (
             <div key={label} className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 text-center">
               <p className={`font-mono text-2xl font-medium ${color}`}>{value}</p>
@@ -430,14 +433,8 @@ interface ParametersTabProps {
   parameters: WaterParameter[];
 }
 
-const TIME_RANGE_LABELS: Record<TimeRange, string> = {
-  '7d': '7 days',
-  '30d': '30 days',
-  '3m': '3 months',
-  'all': 'All time',
-};
-
 function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
+  const { t } = useTranslation('aquarium');
   const [activeParam, setActiveParam] = useState<ParameterKey>('temperature');
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [logOpen, setLogOpen] = useState(false);
@@ -454,6 +451,8 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
       setExporting(false);
     }
   };
+
+  const timeRangeKeys: TimeRange[] = ['7d', '30d', '3m', 'all'];
 
   return (
     <div className="p-6 space-y-6">
@@ -480,21 +479,21 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
             size="sm"
             onClick={handleExport}
             disabled={exporting || parameters.length === 0}
-            title={parameters.length === 0 ? 'No data to export' : 'Export CSV'}
+            title={parameters.length === 0 ? t('actions.exportCsv') : t('actions.exportCsv')}
           >
             <Download size={14} className="mr-1" />
-            {exporting ? 'Exporting…' : 'Export CSV'}
+            {exporting ? t('actions.exporting') : t('actions.exportCsv')}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => setLogOpen(true)}>
             <Plus size={14} className="mr-1" />
-            Log
+            {t('actions.log')}
           </Button>
         </div>
       </div>
 
       {/* Time filter */}
       <div className="flex items-center gap-2">
-        {(Object.keys(TIME_RANGE_LABELS) as TimeRange[]).map((tr) => (
+        {timeRangeKeys.map((tr) => (
           <button
             key={tr}
             onClick={() => setTimeRange(tr)}
@@ -505,7 +504,7 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
                 : 'text-[#666] hover:text-[#A0A0A0]',
             ].join(' ')}
           >
-            {TIME_RANGE_LABELS[tr]}
+            {t(`parameters.timeRanges.${tr}`)}
           </button>
         ))}
       </div>
@@ -516,7 +515,7 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
           <span className="text-sm font-medium text-white">{r.label}</span>
           {r.unit && <span className="text-xs text-[#666]">({r.unit})</span>}
           <span className="text-[10px] text-text-tertiary ml-auto">
-            Optimal: {r.min}–{r.max}
+            {t('overview.optimal', { min: r.min, max: r.max })}
           </span>
         </div>
         <ParameterLineChart parameters={filtered} paramKey={activeParam} />
@@ -525,12 +524,12 @@ function ParametersTab({ aquariumId, parameters }: ParametersTabProps) {
       {/* History table */}
       {parameters.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-white mb-3">Measurement History</h3>
+          <h3 className="text-sm font-semibold text-white mb-3">{t('parameters.history')}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-[rgba(255,255,255,0.06)]">
-                  <th className="text-left py-2 pr-4 text-[#666] font-medium">Date</th>
+                  <th className="text-left py-2 pr-4 text-[#666] font-medium">{t('parameters.date')}</th>
                   {PARAMETER_KEYS.map((k) => (
                     <th key={k} className="text-right py-2 px-2 text-[#666] font-medium whitespace-nowrap">
                       {PARAMETER_RANGES[k].label}
@@ -584,6 +583,7 @@ interface LivestockTabProps {
 }
 
 function LivestockTab({ aquarium }: LivestockTabProps) {
+  const { t } = useTranslation('aquarium');
   const [addOpen, setAddOpen] = useState(false);
   const { mutate: deleteLivestock } = useDeleteLivestock();
 
@@ -591,23 +591,23 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">
-          {aquarium.livestock.length} animal{aquarium.livestock.length !== 1 ? 's' : ''}
+          {t('livestock.count', { count: aquarium.livestock.length })}
         </h3>
         <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
           <Plus size={14} className="mr-1" />
-          Add Animal
+          {t('actions.addAnimal')}
         </Button>
       </div>
 
       {aquarium.livestock.length === 0 ? (
         <EmptyState
           icon={Fish}
-          title="No animals yet"
-          description="Add the fish, corals, and invertebrates living in this aquarium."
+          title={t('livestock.empty.title')}
+          description={t('livestock.empty.description')}
           action={
             <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
               <Plus size={14} className="mr-1" />
-              Add Animal
+              {t('actions.addAnimal')}
             </Button>
           }
         />
@@ -633,7 +633,7 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
-                  {item.category}
+                  {t(`livestock.addModal.categories.${item.category}`)}
                 </span>
                 <ReefSafeBadge reefSafe={item.reefSafe} />
               </div>
@@ -659,6 +659,7 @@ interface EquipmentTabProps {
 }
 
 function EquipmentTab({ aquarium }: EquipmentTabProps) {
+  const { t } = useTranslation('aquarium');
   const [addOpen, setAddOpen] = useState(false);
   const { mutate: deleteEquipment } = useDeleteEquipment();
 
@@ -672,11 +673,11 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">
-          {aquarium.equipment.length} device{aquarium.equipment.length !== 1 ? 's' : ''}
+          {t('equipment.count', { count: aquarium.equipment.length })}
         </h3>
         <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
           <Plus size={14} className="mr-1" />
-          Add Equipment
+          {t('actions.addEquipment')}
         </Button>
       </div>
 
@@ -685,11 +686,11 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
         <PlanGate feature="calculator_energy">
           <div className="grid grid-cols-2 gap-3 bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <div>
-              <p className="text-[#666] text-xs mb-1">Total Power</p>
+              <p className="text-[#666] text-xs mb-1">{t('equipment.totalPower')}</p>
               <p className="font-mono text-xl text-white">{totalWatts}<span className="text-xs text-[#666] ml-1">W</span></p>
             </div>
             <div>
-              <p className="text-[#666] text-xs mb-1">Est. Monthly</p>
+              <p className="text-[#666] text-xs mb-1">{t('equipment.estMonthly')}</p>
               <p className="font-mono text-xl text-white">{totalKwhMonth.toFixed(1)}<span className="text-xs text-[#666] ml-1">kWh</span></p>
             </div>
           </div>
@@ -699,12 +700,12 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
       {aquarium.equipment.length === 0 ? (
         <EmptyState
           icon={Wrench}
-          title="No equipment yet"
-          description="Add lights, pumps, skimmers, and heaters to track energy consumption."
+          title={t('equipment.empty.title')}
+          description={t('equipment.empty.description')}
           action={
             <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
               <Plus size={14} className="mr-1" />
-              Add Equipment
+              {t('actions.addEquipment')}
             </Button>
           }
         />
@@ -722,7 +723,7 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                     <p className="text-sm font-medium text-white truncate">{item.name}</p>
                     {item.category && (
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${EQUIP_CATEGORY_COLORS[item.category]}`}>
-                        {item.category}
+                        {t(`equipment.addModal.categories.${item.category}`)}
                       </span>
                     )}
                   </div>
@@ -755,6 +756,7 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
 // ── Main AquariumDetailPage ───────────────────────────────────────────────────
 
 export default function AquariumDetailPage() {
+  const { t } = useTranslation('aquarium');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const aquariumId = Number(id);
@@ -773,7 +775,6 @@ export default function AquariumDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-full flex flex-col">
-        {/* Header skeleton */}
         <div className="border-b border-[rgba(255,255,255,0.08)] px-6 py-4 animate-pulse">
           <div className="h-3 w-20 bg-[rgba(255,255,255,0.05)] rounded mb-3" />
           <div className="flex items-center gap-3">
@@ -782,13 +783,11 @@ export default function AquariumDetailPage() {
             <div className="h-3 w-8 bg-[rgba(255,255,255,0.04)] rounded" />
           </div>
         </div>
-        {/* Tab bar skeleton */}
         <div className="flex border-b border-[rgba(255,255,255,0.08)] px-6 gap-1 animate-pulse">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-10 w-24 bg-[rgba(255,255,255,0.04)] rounded my-1" />
           ))}
         </div>
-        {/* Content skeleton */}
         <div className="flex-1">
           <ParameterChartSkeleton />
         </div>
@@ -799,12 +798,12 @@ export default function AquariumDetailPage() {
   if (error && !is404) {
     return (
       <div className="min-h-full flex flex-col items-center justify-center gap-4">
-        <p className="text-[#A0A0A0] text-sm">No se pudieron cargar los datos del acuario.</p>
+        <p className="text-[#A0A0A0] text-sm">{t('error')}</p>
         <button
           onClick={() => refetch()}
           className="px-4 py-2 rounded bg-[#59D3FF] text-[#0A0F1E] text-sm font-medium hover:bg-[#7DDEFF] transition-colors cursor-pointer"
         >
-          Reintentar
+          {t('retry')}
         </button>
       </div>
     );
@@ -823,13 +822,13 @@ export default function AquariumDetailPage() {
           className="flex items-center gap-1.5 text-[#A0A0A0] hover:text-white text-sm mb-3 transition-colors cursor-pointer"
         >
           <ArrowLeft size={14} />
-          Dashboard
+          {t('backToDashboard')}
         </button>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-white">{aquarium.name}</h1>
             <span className="text-[10px] font-medium text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-2 py-0.5">
-              {TYPE_LABELS[aquarium.type]}
+              {t(`types.${aquarium.type as AquariumType}`)}
             </span>
             <span className="text-xs text-[#666]">{aquarium.liters} L</span>
           </div>
@@ -847,11 +846,11 @@ export default function AquariumDetailPage() {
       <Tabs.Root defaultValue="overview" className="flex flex-col flex-1">
         <Tabs.List className="flex border-b border-[rgba(255,255,255,0.08)] px-6 overflow-x-auto shrink-0">
           {[
-            { value: 'overview', label: 'Overview', icon: <Layers size={14} /> },
-            { value: 'parameters', label: 'Parameters', icon: <Waves size={14} /> },
-            { value: 'livestock', label: 'Livestock', icon: <Fish size={14} /> },
-            { value: 'equipment', label: 'Equipment', icon: <Wrench size={14} /> },
-          ].map(({ value, label, icon }) => (
+            { value: 'overview', labelKey: 'tabs.overview', icon: <Layers size={14} /> },
+            { value: 'parameters', labelKey: 'tabs.parameters', icon: <Waves size={14} /> },
+            { value: 'livestock', labelKey: 'tabs.livestock', icon: <Fish size={14} /> },
+            { value: 'equipment', labelKey: 'tabs.equipment', icon: <Wrench size={14} /> },
+          ].map(({ value, labelKey, icon }) => (
             <Tabs.Trigger
               key={value}
               value={value}
@@ -862,7 +861,7 @@ export default function AquariumDetailPage() {
                 hover:text-white transition-all cursor-pointer outline-none
               "
             >
-              {icon}{label}
+              {icon}{t(labelKey)}
             </Tabs.Trigger>
           ))}
         </Tabs.List>

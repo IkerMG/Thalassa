@@ -4,9 +4,8 @@ import { useAuthStore } from '../authStore';
 const mockUser = {
   id: 1,
   email: 'test@thalassa.com',
-  name: 'Test User',
+  username: 'Test User',
   plan: 'FREE' as const,
-  createdAt: '2024-01-01T00:00:00.000Z',
 };
 
 beforeEach(() => {
@@ -66,16 +65,16 @@ describe('setAccessToken (refresh in-place)', () => {
 describe('updateUser', () => {
   it('applies partial updates to the user', () => {
     useAuthStore.getState().setAuth('tok-abc', null, mockUser);
-    useAuthStore.getState().updateUser({ name: 'Updated Name', plan: 'REEFMASTER' });
+    useAuthStore.getState().updateUser({ username: 'Updated Name', plan: 'REEFMASTER' });
 
     const s = useAuthStore.getState();
-    expect(s.user?.name).toBe('Updated Name');
+    expect(s.user?.username).toBe('Updated Name');
     expect(s.user?.plan).toBe('REEFMASTER');
     expect(s.user?.email).toBe('test@thalassa.com');
   });
 
   it('is a no-op when user is null', () => {
-    useAuthStore.getState().updateUser({ name: 'Ghost' });
+    useAuthStore.getState().updateUser({ username: 'Ghost' });
     expect(useAuthStore.getState().user).toBeNull();
   });
 });

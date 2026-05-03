@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Fish, Wrench, Layers, ChevronRight, Bot } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import type { AquariumSummary, AquariumType } from '../../types/aquarium';
 import Button from '../../components/ui/Button';
@@ -16,15 +17,11 @@ import { useAquariums } from '../../hooks/queries/useAquariums';
 import { useDashboardSummary } from '../../hooks/queries/useDashboardSummary';
 import { useCreateAquarium } from '../../hooks/mutations/useCreateAquarium';
 
-const TYPE_LABELS: Record<AquariumType, string> = {
-  REEF: 'Reef',
-  FISH_ONLY: 'Fish Only',
-  MIXED: 'Mixed',
-};
-
 // ── Aquarium card ─────────────────────────────────────────────────────────────
 
 function AquariumCard({ aq }: { aq: AquariumSummary }) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
   const navigate = useNavigate();
   return (
     <button
@@ -42,11 +39,11 @@ function AquariumCard({ aq }: { aq: AquariumSummary }) {
           <p className="text-[#666] text-xs mt-0.5">{aq.liters} L</p>
         </div>
         <span className="text-[10px] font-medium text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-2 py-0.5">
-          {TYPE_LABELS[aq.type]}
+          {t(`types.${aq.type as AquariumType}`)}
         </span>
       </div>
       <div className="flex items-center justify-between mt-4">
-        <span className="text-[#A0A0A0] text-xs">View details</span>
+        <span className="text-[#A0A0A0] text-xs">{tc('viewDetails')}</span>
         <ChevronRight size={14} className="text-[#666] group-hover:text-[#59D3FF] transition-colors" />
       </div>
     </button>
@@ -61,6 +58,8 @@ interface CreateModalProps {
 }
 
 function CreateAquariumModal({ open, onClose }: CreateModalProps) {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
   const {
     register,
     handleSubmit,
@@ -80,41 +79,41 @@ function CreateAquariumModal({ open, onClose }: CreateModalProps) {
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="New Aquarium">
+    <Modal open={open} onClose={handleClose} title={t('createModal.title')}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <Input
-          label="Name"
-          placeholder="e.g. My Reef Tank"
+          label={t('createModal.name')}
+          placeholder={t('createModal.namePlaceholder')}
           {...register('name')}
           error={errors.name?.message}
         />
         <Input
-          label="Volume (liters)"
+          label={t('createModal.volume')}
           type="number"
-          placeholder="e.g. 200"
+          placeholder={t('createModal.volumePlaceholder')}
           min={1}
           {...register('liters')}
           error={errors.liters?.message}
         />
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
-            Ecosystem Type
+            {t('createModal.type')}
           </label>
           <select
             {...register('type')}
             className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
           >
-            <option value="REEF">Reef</option>
-            <option value="FISH_ONLY">Fish Only</option>
-            <option value="MIXED">Mixed</option>
+            <option value="REEF">{t('createModal.types.REEF')}</option>
+            <option value="FISH_ONLY">{t('createModal.types.FISH_ONLY')}</option>
+            <option value="MIXED">{t('createModal.types.MIXED')}</option>
           </select>
         </div>
         <div className="flex gap-3 justify-end pt-1">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
-            {isPending ? 'Creating…' : 'Create Aquarium'}
+            {isPending ? t('createModal.submitting') : t('createModal.submit')}
           </Button>
         </div>
       </form>
@@ -125,6 +124,7 @@ function CreateAquariumModal({ open, onClose }: CreateModalProps) {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function DashboardView() {
+  const { t } = useTranslation('dashboard');
   const user = useAuthStore((s) => s.user);
   const openChat = useUIStore((s) => s.openChat);
   const [createOpen, setCreateOpen] = useState(false);
@@ -138,7 +138,6 @@ export default function DashboardView() {
   if (isLoading) {
     return (
       <div className="min-h-full p-6 max-w-5xl mx-auto">
-        {/* Header skeleton */}
         <div className="mb-8 flex items-start justify-between animate-pulse">
           <div className="flex flex-col gap-2">
             <div className="h-7 w-32 bg-[rgba(255,255,255,0.07)] rounded" />
@@ -146,7 +145,6 @@ export default function DashboardView() {
           </div>
           <div className="h-9 w-28 bg-[rgba(255,255,255,0.06)] rounded-lg" />
         </div>
-        {/* Stat cards skeleton */}
         <div className="grid grid-cols-3 gap-4 mb-8 animate-pulse">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex items-center gap-3">
@@ -158,7 +156,6 @@ export default function DashboardView() {
             </div>
           ))}
         </div>
-        {/* Aquarium cards skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <DashboardCardSkeleton key={i} />
@@ -173,20 +170,20 @@ export default function DashboardView() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
           <p className="text-sm text-[#A0A0A0] mt-1">
-            Welcome back, <span className="text-white">{user?.username}</span>
+            {t('welcome', { username: user?.username })}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="secondary" size="md" onClick={openChat}>
             <Bot size={15} />
-            Thalassa AI
+            {t('actions.aiAssistant')}
           </Button>
           {canCreate && (
             <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
               <Plus size={16} />
-              New Aquarium
+              {t('actions.newAquarium')}
             </Button>
           )}
         </div>
@@ -196,9 +193,9 @@ export default function DashboardView() {
       {summary && aquariums.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
-            { icon: Layers, label: 'Aquariums', value: summary.aquariumCount },
-            { icon: Fish, label: 'Total Livestock', value: summary.totalLivestock },
-            { icon: Wrench, label: 'Total Equipment', value: summary.totalEquipment },
+            { icon: Layers, label: t('stats.aquariums'), value: summary.aquariumCount },
+            { icon: Fish, label: t('stats.livestock'), value: summary.totalLivestock },
+            { icon: Wrench, label: t('stats.equipment'), value: summary.totalEquipment },
           ].map(({ icon: Icon, label, value }) => (
             <div
               key={label}
@@ -220,12 +217,12 @@ export default function DashboardView() {
       {aquariums.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="No aquariums yet"
-          description="Create your first aquarium to start tracking parameters, livestock, and equipment."
+          title={t('empty.title')}
+          description={t('empty.description')}
           action={
             <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
               <Plus size={16} className="mr-1" />
-              New Aquarium
+              {t('actions.newAquarium')}
             </Button>
           }
         />
@@ -245,7 +242,7 @@ export default function DashboardView() {
               "
             >
               <Plus size={20} />
-              <span className="text-sm font-medium">New Aquarium</span>
+              <span className="text-sm font-medium">{t('actions.newAquarium')}</span>
             </button>
           )}
         </div>

@@ -9,31 +9,26 @@ import {
   User,
   LogOut,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import NotificationBell from '../shared/NotificationBell';
 
-interface NavItem {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  isPro?: boolean;
-}
-
 export default function Sidebar() {
+  const { t } = useTranslation('nav');
   const navigate = useNavigate();
   const { logout } = useAuth();
   const plan = useAuthStore((s) => s.user?.plan ?? 'FREE');
   const isChatOpen = useUIStore((s) => s.isChatOpen);
   const openChat = useUIStore((s) => s.openChat);
 
-  const navItems: NavItem[] = [
-    { to: '/dashboard', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
-    { to: '/dashboard/calculator/dosing', icon: <FlaskConical size={18} />, label: 'Dosing Calc', isPro: plan === 'FREE' },
-    { to: '/dashboard/calculator/energy', icon: <Zap size={18} />, label: 'Energy Calc', isPro: plan === 'FREE' },
-    { to: '/dashboard/market', icon: <ShoppingBag size={18} />, label: 'Market' },
-    { to: '/dashboard/wishlist', icon: <Heart size={18} />, label: 'Wishlist' },
+  const navItems = [
+    { to: '/dashboard', icon: <LayoutDashboard size={18} />, label: t('dashboard') },
+    { to: '/dashboard/calculator/dosing', icon: <FlaskConical size={18} />, label: t('dosingCalc'), isPro: plan === 'FREE' },
+    { to: '/dashboard/calculator/energy', icon: <Zap size={18} />, label: t('energyCalc'), isPro: plan === 'FREE' },
+    { to: '/dashboard/market', icon: <ShoppingBag size={18} />, label: t('market') },
+    { to: '/dashboard/wishlist', icon: <Heart size={18} />, label: t('wishlist') },
   ];
 
   const handleLogout = async () => {
@@ -92,7 +87,7 @@ export default function Sidebar() {
           ].join(' ')}
         >
           <Bot size={18} />
-          <span className="flex-1">AI Assistant</span>
+          <span className="flex-1">{t('aiAssistant')}</span>
         </button>
 
         <div className="my-3 border-t border-[rgba(255,255,255,0.06)]" />
@@ -109,7 +104,7 @@ export default function Sidebar() {
           }
         >
           <User size={18} />
-          <span>Profile</span>
+          <span>{t('profile')}</span>
         </NavLink>
       </nav>
 
@@ -124,7 +119,7 @@ export default function Sidebar() {
           "
         >
           <LogOut size={18} />
-          <span>Log out</span>
+          <span>{t('logout')}</span>
         </button>
       </div>
     </aside>
