@@ -1,7 +1,7 @@
 # Thalassa
 
 <p align="center">
-  <strong>Professional aquarium management platform for marine aquarists</strong>
+  <strong>Plataforma profesional de gestión de acuarios marinos</strong>
 </p>
 
 <p align="center">
@@ -11,41 +11,41 @@
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose" />
-  <img src="https://img.shields.io/badge/License-Academic-lightgrey" alt="License" />
+  <img src="https://img.shields.io/badge/Licencia-Académica-lightgrey" alt="Licencia" />
 </p>
 
 ---
 
-**Thalassa** is a full-stack, freemium SaaS for managing marine aquariums. It combines water parameter tracking, livestock and equipment inventory, energy and dosing calculators, an AI assistant powered by Groq/Llama, a live-scraped species marketplace, and PWA support — all under a clean OLED-dark interface with support for English, German, and Spanish.
+**Thalassa** es un SaaS freemium de pila completa para la gestión integral de acuarios marinos. Combina el seguimiento de parámetros del agua, el inventario de fauna y equipamiento, calculadoras de energía y dosificación, un asistente de inteligencia artificial especializado con Groq/Llama, un marketplace de especies con datos en tiempo real y soporte PWA — todo bajo una interfaz elegante de temática OLED oscura con soporte para inglés, alemán y español.
 
 ---
 
-## Features
+## Funcionalidades
 
-| Module | Description |
+| Módulo | Descripción |
 |--------|-------------|
-| **Auth** | JWT access tokens + rotating refresh tokens, forgot/reset password via email, role-based freemium gates |
-| **Dashboard** | Multi-aquarium overview with global stats (livestock count, equipment count), per-aquarium cards |
-| **Water Parameters** | Log and visualize pH, temperature, salinity, alkalinity, calcium, magnesium, nitrate, phosphate over time |
-| **Livestock** | Inventory of fish, corals, and invertebrates with reef-safe validation and species catalog links |
-| **Equipment** | Track devices (lights, pumps, skimmers, heaters) with wattage and daily usage |
-| **Energy Calculator** | Estimate monthly kWh consumption from equipment data *(ReefMaster plan)* |
-| **Dosing Calculator** | Calculate additive doses based on tank volume *(ReefMaster plan)* |
-| **AI Assistant** | Conversational assistant specialized in marine aquarium keeping, powered by Groq (Llama 3.3 70B) |
-| **Species Marketplace** | Live-scraped product listings from partner retailers via FastAPI scraper |
-| **Wishlist** | Save species and products of interest with priority and notes |
-| **Notifications** | In-app notification bell with categorized alerts |
-| **CSV Export** | Export water parameter history to CSV *(ReefMaster plan)* |
-| **i18n** | Full UI in English, German, and Spanish with per-user locale preference |
-| **PWA** | Installable on desktop and mobile, with offline support via Service Worker |
+| **Autenticación** | Tokens de acceso JWT + refresh tokens rotativos, recuperación/restablecimiento de contraseña por email, control de acceso freemium por rol |
+| **Dashboard** | Vista general de múltiples acuarios con estadísticas globales (fauna, equipos) y tarjetas individuales por acuario |
+| **Parámetros del agua** | Registro y visualización histórica de pH, temperatura, salinidad, alcalinidad, calcio, magnesio, nitrato y fosfato |
+| **Fauna** | Inventario de peces, corales e invertebrados con validación de compatibilidad con arrecife y enlace al catálogo de especies |
+| **Equipamiento** | Seguimiento de dispositivos (luces, bombas, skimmers, calentadores) con potencia en vatios y uso diario |
+| **Calculadora de energía** | Estimación del consumo mensual en kWh a partir de los datos del equipamiento *(plan ReefMaster)* |
+| **Calculadora de dosificación** | Cálculo de dosis de aditivos en función del volumen del acuario *(plan ReefMaster)* |
+| **Asistente IA** | Asistente conversacional especializado en acuariofilia marina, impulsado por Groq (Llama 3.3 70B) |
+| **Marketplace de especies** | Listados de productos obtenidos mediante scraping en tiempo real de distribuidores asociados vía FastAPI |
+| **Lista de deseos** | Guardado de especies y productos de interés con prioridad y notas |
+| **Notificaciones** | Campana de notificaciones con alertas categorizadas dentro de la aplicación |
+| **Exportación CSV** | Exportación del historial de parámetros del agua a CSV *(plan ReefMaster)* |
+| **i18n** | Interfaz completa en inglés, alemán y español con preferencia de idioma por usuario |
+| **PWA** | Instalable en escritorio y móvil, con soporte offline mediante Service Worker |
 
 ---
 
-## Architecture
+## Arquitectura
 
 ```
                     ┌─────────────────────────────────────┐
-                    │          Traefik (Reverse Proxy)     │
+                    │       Traefik (Proxy inverso)        │
                     │        HTTP :80 → HTTPS :443         │
                     └─────────┬──────────────┬─────────────┘
                               │              │
@@ -60,157 +60,157 @@
                     ┌─────────▼───┐  ┌──────▼────┐  ┌────▼──────┐
                     │  PostgreSQL │  │  Scraper  │  │  Backup   │
                     │  :5432      │  │  FastAPI  │  │  cron pg  │
-                    │  (internal) │  │  :8001    │  │  dump     │
+                    │  (interno)  │  │  :8001    │  │  dump     │
                     └─────────────┘  └───────────┘  └───────────┘
 ```
 
-All services communicate over an internal Docker network (`thalassa-net`). The database port is **not** exposed to the host.
+Todos los servicios se comunican a través de la red interna Docker (`thalassa-net`). El puerto de la base de datos **no** está expuesto al host.
 
 ---
 
-## Tech Stack
+## Stack Tecnológico
 
 ### Backend
-| Technology | Version | Role |
-|------------|---------|------|
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
 | Java | 21 | Runtime |
-| Spring Boot | 3.2.5 | REST API, business logic, security |
-| Spring Security | 6.x | JWT authentication, authorization |
-| Spring Data JPA | 3.x | ORM layer (Hibernate 6.4) |
-| PostgreSQL | 16 | Primary database |
-| Flyway | 10.x | Database schema migrations |
-| OpenAPI Generator | 7.x | DTO generation from `openapi.yaml` |
-| Spring Actuator | 3.x | Health checks, Prometheus metrics |
-| Sentry SDK | 7.x | Error tracking in production |
-| Testcontainers | 1.19 | Integration tests with real PostgreSQL |
-| JUnit 5 + Mockito | — | Unit and integration testing |
-| Spotless | — | Code formatting (Google Java Style) |
+| Spring Boot | 3.2.5 | API REST, lógica de negocio, seguridad |
+| Spring Security | 6.x | Autenticación JWT, autorización |
+| Spring Data JPA | 3.x | Capa ORM (Hibernate 6.4) |
+| PostgreSQL | 16 | Base de datos principal |
+| Flyway | 10.x | Migraciones del esquema de base de datos |
+| OpenAPI Generator | 7.x | Generación de DTOs a partir de `openapi.yaml` |
+| Spring Actuator | 3.x | Health checks, métricas Prometheus |
+| Sentry SDK | 7.x | Seguimiento de errores en producción |
+| Testcontainers | 1.19 | Tests de integración con PostgreSQL real |
+| JUnit 5 + Mockito | — | Tests unitarios y de integración |
+| Spotless | — | Formato de código (Google Java Style) |
 
 ### Frontend
-| Technology | Version | Role |
-|------------|---------|------|
-| React | 18 | UI library |
-| TypeScript | 5 | Static typing |
-| Vite | 5 | Build tool and dev server |
-| Tailwind CSS | 3 | Utility-first styling |
-| Zustand | 4 | Global state (auth, UI) |
-| TanStack Query | 5 | Server state, caching, mutations |
-| React Router DOM | 6 | SPA routing and guards |
-| react-i18next | 14 | Internationalization (EN/DE/ES) |
-| Framer Motion | 11 | Page transitions, animations |
-| Recharts | 2 | Water parameter charts |
-| Radix UI | — | Accessible headless components |
-| React Hook Form + Zod | — | Form validation |
-| Axios | 1 | HTTP client with interceptors |
-| MSW | 2 | API mocking in tests |
-| Vitest + Testing Library | — | Unit and component testing |
-| Sentry SDK | 8 | Frontend error tracking |
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
+| React | 18 | Librería de interfaz de usuario |
+| TypeScript | 5 | Tipado estático |
+| Vite | 5 | Herramienta de compilación y servidor de desarrollo |
+| Tailwind CSS | 3 | Estilos basados en utilidades |
+| Zustand | 4 | Estado global (autenticación, UI) |
+| TanStack Query | 5 | Estado del servidor, caché, mutaciones |
+| React Router DOM | 6 | Enrutamiento SPA y guardas de ruta |
+| react-i18next | 14 | Internacionalización (EN/DE/ES) |
+| Framer Motion | 11 | Transiciones de página y animaciones |
+| Recharts | 2 | Gráficas de parámetros del agua |
+| Radix UI | — | Componentes headless accesibles |
+| React Hook Form + Zod | — | Validación de formularios |
+| Axios | 1 | Cliente HTTP con interceptores |
+| MSW | 2 | Simulación de API en tests |
+| Vitest + Testing Library | — | Tests unitarios y de componentes |
+| Sentry SDK | 8 | Seguimiento de errores en el frontend |
 | vite-plugin-pwa | — | Service Worker, Web App Manifest |
 
 ### Scraper
-| Technology | Version | Role |
-|------------|---------|------|
+| Tecnología | Versión | Rol |
+|------------|---------|-----|
 | Python | 3.12 | Runtime |
-| FastAPI | 0.111 | REST microservice |
-| HTTPX + BeautifulSoup | — | HTTP scraping and HTML parsing |
-| Groq SDK | — | Llama 3.3 70B AI bridge |
+| FastAPI | 0.111 | Microservicio REST |
+| HTTPX + BeautifulSoup | — | Scraping HTTP y análisis de HTML |
+| Groq SDK | — | Puente con Llama 3.3 70B para el asistente IA |
 
-### Infrastructure
-| Technology | Role |
-|------------|------|
-| Docker + Docker Compose | Container orchestration |
-| Traefik | Reverse proxy, automatic HTTPS (Let's Encrypt) |
-| nginx | Static file serving for the SPA |
+### Infraestructura
+| Tecnología | Rol |
+|------------|-----|
+| Docker + Docker Compose | Orquestación de contenedores |
+| Traefik | Proxy inverso con HTTPS automático (Let's Encrypt) |
+| nginx | Servidor de archivos estáticos para la SPA |
 | GitHub Actions | CI: lint → typecheck → test → build |
-| pg_dump cron | Automated PostgreSQL backups (daily/weekly/monthly) |
+| pg_dump cron | Copias de seguridad automáticas de PostgreSQL (diarias/semanales/mensuales) |
 
 ---
 
-## Prerequisites
+## Requisitos Previos
 
-- **Docker** 24+ and **Docker Compose** v2 (`docker compose` CLI)
+- **Docker** 24+ y **Docker Compose** v2 (comando `docker compose`)
 - Git
 
-That's it. The entire stack runs inside containers.
+Con esto es suficiente. Todo el stack se ejecuta dentro de contenedores.
 
-> For local development without Docker you additionally need: Java 21+, Maven 3.9+, Node.js 20+, and a running PostgreSQL 16 instance.
+> Para el desarrollo local sin Docker también necesitas: Java 21+, Maven 3.9+, Node.js 20+ y una instancia de PostgreSQL 16 en ejecución.
 
 ---
 
-## Quick Start (Docker Compose)
+## Inicio Rápido (Docker Compose)
 
-### 1. Clone and configure environment
+### 1. Clonar y configurar el entorno
 
 ```bash
 git clone <repo-url>
 cd thalassa
 
-# Copy the environment template
+# Copiar la plantilla de variables de entorno
 cp .env.example .env
 ```
 
-Open `.env` and fill in **all required values**:
+Abre `.env` y rellena **todos los valores obligatorios**:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JWT_SECRET` | ✅ | HS512 signing secret for access tokens. Generate with: `openssl rand -hex 64` |
-| `JWT_REFRESH_SECRET` | ✅ | Signing secret for refresh tokens. Generate separately from JWT_SECRET. |
-| `POSTGRES_USER` | ✅ | PostgreSQL username (e.g. `thalassa`) |
-| `POSTGRES_PASSWORD` | ✅ | PostgreSQL password. Use a strong random value. |
-| `GROQ_API_KEY` | ✅ | API key from [console.groq.com](https://console.groq.com/keys). Free tier available. |
-| `CORS_ALLOWED_ORIGINS` | ✅ | Comma-separated allowed origins (e.g. `https://thalassa.app`). Use `https://localhost` locally. |
-| `SPRING_PROFILES_ACTIVE` | ✅ | Spring profile: `dev` for local, `prod` for production |
-| `VITE_SENTRY_DSN` | ⬜ | Sentry DSN for frontend error tracking (leave empty to disable) |
-| `SENTRY_DSN` | ⬜ | Sentry DSN for backend error tracking (leave empty to disable) |
-| `DOMAIN` | ⬜ | Public domain for Traefik HTTPS (default: `localhost`) |
-| `ACME_EMAIL` | ⬜ | Email for Let's Encrypt certificate notifications |
+| Variable | Obligatoria | Descripción |
+|----------|-------------|-------------|
+| `JWT_SECRET` | ✅ | Secreto de firma HS512 para los tokens de acceso. Genera uno con: `openssl rand -hex 64` |
+| `JWT_REFRESH_SECRET` | ✅ | Secreto de firma para los refresh tokens. Genera uno distinto al anterior. |
+| `POSTGRES_USER` | ✅ | Nombre de usuario de PostgreSQL (ej: `thalassa`) |
+| `POSTGRES_PASSWORD` | ✅ | Contraseña de PostgreSQL. Usa un valor aleatorio robusto. |
+| `GROQ_API_KEY` | ✅ | Clave de API de [console.groq.com](https://console.groq.com/keys). Disponible en nivel gratuito. |
+| `CORS_ALLOWED_ORIGINS` | ✅ | Orígenes permitidos separados por comas (ej: `https://thalassa.app`). En local usa `https://localhost`. |
+| `SPRING_PROFILES_ACTIVE` | ✅ | Perfil Spring: `dev` en local, `prod` en producción |
+| `VITE_SENTRY_DSN` | ⬜ | DSN de Sentry para el frontend (dejar vacío para desactivar) |
+| `SENTRY_DSN` | ⬜ | DSN de Sentry para el backend (dejar vacío para desactivar) |
+| `DOMAIN` | ⬜ | Dominio público para HTTPS con Traefik (por defecto: `localhost`) |
+| `ACME_EMAIL` | ⬜ | Email para notificaciones de renovación de certificados Let's Encrypt |
 
-### 2. Build and start all services
+### 2. Compilar e iniciar todos los servicios
 
 ```bash
 docker compose up --build
 ```
 
-On the first run, Docker will:
-1. Build multi-stage images for `backend` (Maven → JRE) and `frontend` (Node → nginx)
-2. Apply Flyway database migrations automatically
-3. Start all 5 services with health checks
+En el primer arranque, Docker realizará automáticamente:
+1. Compilación de imágenes multi-etapa para `backend` (Maven → JRE) y `frontend` (Node → nginx)
+2. Aplicación de las migraciones de base de datos con Flyway
+3. Arranque de los 5 servicios con comprobaciones de salud
 
-### 3. Open the app
+### 3. Abrir la aplicación
 
 ```
 https://localhost
 ```
 
-> The browser will show a certificate warning — this is expected with the self-signed certificate used for `localhost`. Accept it to proceed.
+> El navegador mostrará una advertencia de certificado — es lo esperado con el certificado autofirmado usado en `localhost`. Acéptala para continuar.
 
-**Default ports (internal mapping):**
+**Puertos por defecto (mapeo interno):**
 
-| Service | Internal | Exposed via Traefik |
-|---------|----------|---------------------|
+| Servicio | Puerto interno | Expuesto vía Traefik |
+|----------|----------------|----------------------|
 | Frontend (nginx) | 80 | `https://localhost` |
 | Backend API | 8080 | `https://localhost/api/` |
-| Traefik Dashboard | 8080 | `http://localhost:8090` |
-| Scraper (FastAPI) | 8001 | Internal only |
-| PostgreSQL | 5432 | Internal only |
+| Panel de Traefik | 8080 | `http://localhost:8090` |
+| Scraper (FastAPI) | 8001 | Solo red interna |
+| PostgreSQL | 5432 | Solo red interna |
 
-### 4. Stop and clean up
+### 4. Detener y limpiar
 
 ```bash
-# Stop containers (preserve data)
+# Detener los contenedores (conserva los datos)
 docker compose down
 
-# Stop and delete volumes (wipes database)
+# Detener y eliminar los volúmenes (borra la base de datos)
 docker compose down -v
 ```
 
 ---
 
-## Development Setup (Hot Reload)
+## Entorno de Desarrollo (Hot Reload)
 
-For active development with live reloading, run each service independently.
+Para el desarrollo activo con recarga en vivo, ejecuta cada servicio de forma independiente.
 
-### Database only (required as dependency)
+### Solo la base de datos (necesaria como dependencia)
 
 ```bash
 docker compose up db
@@ -223,7 +223,7 @@ cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-The API will be available at `http://localhost:8080/api`.
+La API estará disponible en `http://localhost:8080/api`.
 
 ### Frontend (Vite)
 
@@ -233,7 +233,7 @@ npm install
 npm run dev
 ```
 
-The SPA will be available at `http://localhost:5173`.
+La SPA estará disponible en `http://localhost:5173`.
 
 ### Scraper (FastAPI)
 
@@ -245,14 +245,14 @@ uvicorn app.main:app --reload --port 8001
 
 ---
 
-## Running Tests
+## Ejecución de Tests
 
 ### Frontend
 
 ```bash
 cd frontend
-npm run test           # Run Vitest suite
-npm run typecheck      # TypeScript type check (tsc --noEmit)
+npm run test           # Ejecuta la suite Vitest
+npm run typecheck      # Comprobación de tipos TypeScript (tsc --noEmit)
 npm run lint           # ESLint
 ```
 
@@ -260,159 +260,159 @@ npm run lint           # ESLint
 
 ```bash
 cd backend
-./mvnw test            # JUnit 5 + Testcontainers (requires Docker)
-./mvnw verify          # Full build: compile → test → Spotless check → JaCoCo coverage
+./mvnw test            # JUnit 5 + Testcontainers (requiere Docker)
+./mvnw verify          # Build completo: compilar → tests → Spotless → cobertura JaCoCo
 ```
 
-Coverage threshold: **60% line coverage** enforced by JaCoCo.
+Umbral de cobertura mínimo: **60% de líneas** aplicado por JaCoCo.
 
 ---
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 thalassa/
-├── backend/                         Spring Boot API
+├── backend/                         API Spring Boot
 │   ├── src/main/java/com/thalassa/
-│   │   ├── config/                  Security, CORS, OpenAPI
-│   │   ├── controllers/             REST endpoints
-│   │   ├── dto/                     Request/Response DTOs (OpenAPI-generated)
-│   │   ├── exceptions/              Custom exceptions + GlobalExceptionHandler
-│   │   ├── models/                  JPA entities
-│   │   ├── repositories/            Spring Data JPA repositories
-│   │   ├── security/                JWT filter, token service
-│   │   └── services/                Business logic
+│   │   ├── config/                  Seguridad, CORS, OpenAPI
+│   │   ├── controllers/             Endpoints REST
+│   │   ├── dto/                     DTOs de petición/respuesta (generados por OpenAPI)
+│   │   ├── exceptions/              Excepciones personalizadas + GlobalExceptionHandler
+│   │   ├── models/                  Entidades JPA
+│   │   ├── repositories/            Repositorios Spring Data JPA
+│   │   ├── security/                Filtro JWT, servicio de tokens
+│   │   └── services/                Lógica de negocio
 │   ├── src/main/resources/
-│   │   ├── db/migration/            Flyway SQL migrations (V1, V2, …)
-│   │   ├── application.yml          Base config (no secrets)
-│   │   ├── application-dev.yml      Local development overrides
-│   │   └── openapi.yaml             API contract (source of truth for DTOs)
+│   │   ├── db/migration/            Migraciones SQL de Flyway (V1, V2, …)
+│   │   ├── application.yml          Configuración base (sin secretos)
+│   │   ├── application-dev.yml      Sobreescrituras para desarrollo local
+│   │   └── openapi.yaml             Contrato de la API (fuente de verdad para los DTOs)
 │   └── pom.xml
 │
-├── frontend/                        React + Vite SPA
+├── frontend/                        SPA React + Vite
 │   └── src/
-│       ├── api/                     Axios clients per domain
+│       ├── api/                     Clientes Axios por dominio
 │       ├── components/
 │       │   ├── layout/              Sidebar, BottomTabBar, GestorLayout
 │       │   ├── shared/              PlanGate, EmptyState, NotificationBell, …
 │       │   └── ui/                  Button, Input, Modal, Badge, Spinner
-│       ├── features/                Page-level components by feature
-│       │   ├── auth/                Login, Register, Forgot/Reset Password
-│       │   ├── aquarium-detail/     Parameters, Livestock, Equipment tabs
-│       │   ├── calculators/         Energy and Dosing calculators
-│       │   ├── chat/                AI Assistant drawer
-│       │   ├── dashboard/           Aquarium grid + create modal
-│       │   ├── landing/             Public marketing page
-│       │   ├── market/              Species marketplace
-│       │   ├── profile/             User settings, locale selector
-│       │   └── wishlist/            Saved items
-│       ├── hooks/                   Custom hooks (queries, mutations, auth)
-│       ├── i18n/                    i18next config + locales (en/de/es)
-│       ├── lib/                     Zod schemas, toast helper
+│       ├── features/                Componentes de página organizados por funcionalidad
+│       │   ├── auth/                Login, Registro, Recuperación/Restablecimiento de contraseña
+│       │   ├── aquarium-detail/     Pestañas de Parámetros, Fauna y Equipamiento
+│       │   ├── calculators/         Calculadoras de energía y dosificación
+│       │   ├── chat/                Drawer del asistente IA
+│       │   ├── dashboard/           Cuadrícula de acuarios y modal de creación
+│       │   ├── landing/             Página pública de marketing
+│       │   ├── market/              Marketplace de especies
+│       │   ├── profile/             Ajustes de usuario y selector de idioma
+│       │   └── wishlist/            Elementos guardados
+│       ├── hooks/                   Hooks personalizados (queries, mutaciones, auth)
+│       ├── i18n/                    Configuración i18next + traducciones (en/de/es)
+│       ├── lib/                     Esquemas Zod, helper de toasts
 │       ├── routes/                  AppRouter, ProtectedRoute, PublicRoute
-│       ├── store/                   Zustand stores (auth, UI)
-│       ├── types/                   TypeScript interfaces
-│       └── utils/                   Formatters, parameter ranges
+│       ├── store/                   Stores Zustand (auth, UI)
+│       ├── types/                   Interfaces TypeScript
+│       └── utils/                   Formateadores, rangos de parámetros
 │
-├── scraper/                         FastAPI microservice
+├── scraper/                         Microservicio FastAPI
 │   └── app/
-│       ├── routers/                 chat, species, wishlist endpoints
-│       └── services/                Groq client, HTML parsers
+│       ├── routers/                 Endpoints de chat, especies y lista de deseos
+│       └── services/                Cliente Groq, analizadores HTML
 │
-├── docs/                            Project documentation (Obsidian vault)
-│   ├── architecture-decisions/      ADR records
-│   └── *.md                         Specs, wireframes, backlog, Gantt
+├── docs/                            Documentación del proyecto (vault Obsidian)
+│   ├── architecture-decisions/      Registros ADR
+│   └── *.md                         Especificaciones, wireframes, backlog, Gantt
 │
-├── .github/workflows/ci.yml         GitHub Actions CI pipeline
-├── docker-compose.yml               Full stack orchestration
-├── .env.example                     Environment variable template
-├── CONTRIBUTING.md                  Commit conventions and branch naming
-└── CHANGELOG.md                     Version history
+├── .github/workflows/ci.yml         Pipeline de CI con GitHub Actions
+├── docker-compose.yml               Orquestación del stack completo
+├── .env.example                     Plantilla de variables de entorno
+├── CONTRIBUTING.md                  Convenciones de commits y nomenclatura de ramas
+└── CHANGELOG.md                     Historial de versiones
 ```
 
 ---
 
 ## API
 
-The backend is designed **API-First**. The source of truth is:
+El backend sigue el diseño **API-First**. La fuente de verdad es:
 
 ```
 backend/src/main/resources/openapi.yaml
 ```
 
-All request/response DTOs are generated from this spec via `openapi-generator-maven-plugin` during the Maven build phase. The interactive Swagger UI is available at:
+Todos los DTOs de petición y respuesta se generan a partir de esta especificación mediante `openapi-generator-maven-plugin` durante la fase de compilación de Maven. La interfaz interactiva de Swagger UI está disponible en:
 
 ```
 https://localhost/api/swagger-ui/index.html
 ```
 
-Core endpoint groups:
+Grupos de endpoints principales:
 
-| Prefix | Description |
-|--------|-------------|
-| `POST /api/auth/register` | Create account |
-| `POST /api/auth/login` | Authenticate, receive access + refresh tokens |
-| `POST /api/auth/refresh` | Rotate refresh token, get new access token |
-| `POST /api/auth/logout` | Revoke refresh token |
-| `POST /api/auth/forgot-password` | Request password reset email |
-| `POST /api/auth/reset-password` | Confirm reset with token |
-| `GET/PUT /api/users/me` | User profile and preferences |
-| `GET/POST /api/aquariums` | List and create aquariums |
-| `GET/PUT/DELETE /api/aquariums/{id}` | Aquarium CRUD |
-| `GET/POST /api/aquariums/{id}/parameters` | Water parameter log |
-| `GET /api/aquariums/{id}/parameters/export` | CSV export |
-| `GET/POST/DELETE /api/aquariums/{id}/livestock` | Livestock management |
-| `GET/POST/DELETE /api/aquariums/{id}/equipment` | Equipment management |
-| `POST /api/chat/message` | AI assistant message |
-| `GET /api/wishlist` | Saved species/products |
-| `GET /api/notifications` | In-app notifications |
-| `GET /api/dashboard/summary` | Aggregate stats |
-| `GET /actuator/health` | Service health (unauthenticated) |
-| `GET /actuator/prometheus` | Prometheus metrics scrape endpoint |
+| Endpoint | Descripción |
+|----------|-------------|
+| `POST /api/auth/register` | Crear cuenta |
+| `POST /api/auth/login` | Autenticarse y recibir tokens de acceso y refresh |
+| `POST /api/auth/refresh` | Rotar el refresh token y obtener un nuevo token de acceso |
+| `POST /api/auth/logout` | Revocar el refresh token |
+| `POST /api/auth/forgot-password` | Solicitar email de restablecimiento de contraseña |
+| `POST /api/auth/reset-password` | Confirmar el restablecimiento con el token recibido |
+| `GET/PUT /api/users/me` | Perfil y preferencias del usuario |
+| `GET/POST /api/aquariums` | Listar y crear acuarios |
+| `GET/PUT/DELETE /api/aquariums/{id}` | CRUD de acuario |
+| `GET/POST /api/aquariums/{id}/parameters` | Registro de parámetros del agua |
+| `GET /api/aquariums/{id}/parameters/export` | Exportación a CSV |
+| `GET/POST/DELETE /api/aquariums/{id}/livestock` | Gestión de fauna |
+| `GET/POST/DELETE /api/aquariums/{id}/equipment` | Gestión de equipamiento |
+| `POST /api/chat/message` | Mensaje al asistente IA |
+| `GET /api/wishlist` | Especies y productos guardados |
+| `GET /api/notifications` | Notificaciones dentro de la aplicación |
+| `GET /api/dashboard/summary` | Estadísticas agregadas |
+| `GET /actuator/health` | Estado del servicio (sin autenticación) |
+| `GET /actuator/prometheus` | Endpoint de métricas para Prometheus |
 
 ---
 
 ## CI/CD
 
-GitHub Actions runs on every push and pull request to `main`:
+GitHub Actions se ejecuta en cada push y pull request a `main`:
 
 ```
 ┌─────────────┐    ┌──────────────────────┐    ┌─────────────────┐
 │  frontend   │    │       backend        │    │     docker      │
 │  npm ci     │    │  mvn verify          │    │  compose build  │
-│  lint       │    │  (test + coverage)   │    │  --no-start     │
+│  lint       │    │  (test + cobertura)  │    │  --no-start     │
 │  typecheck  │    │  Spotless check      │    └─────────────────┘
 │  build      │    └──────────────────────┘
 └─────────────┘
 ```
 
-All three jobs run in parallel. A PR cannot be merged unless all checks pass.
+Los tres jobs se ejecutan en paralelo. No es posible hacer merge de un PR si alguna comprobación falla.
 
 ---
 
-## Observability
+## Observabilidad
 
-| Tool | Endpoint / Location |
-|------|---------------------|
+| Herramienta | Endpoint / Ubicación |
+|-------------|----------------------|
 | Spring Actuator health | `GET /actuator/health` |
-| Prometheus metrics | `GET /actuator/prometheus` |
-| Structured JSON logs | `docker logs thalassa-backend` |
-| Sentry (frontend) | Configured via `VITE_SENTRY_DSN` |
-| Sentry (backend) | Configured via `SENTRY_DSN` |
+| Métricas Prometheus | `GET /actuator/prometheus` |
+| Logs estructurados JSON | `docker logs thalassa-backend` |
+| Sentry (frontend) | Configurado mediante `VITE_SENTRY_DSN` |
+| Sentry (backend) | Configurado mediante `SENTRY_DSN` |
 
 ---
 
-## Database Backups
+## Copias de Seguridad de la Base de Datos
 
-An automated backup service runs `pg_dump` on a cron schedule and stores compressed dumps in `./backups/`:
+Un servicio de backup automatizado ejecuta `pg_dump` según una planificación cron y almacena los volcados comprimidos en `./backups/`:
 
-| Schedule | Retention |
-|----------|-----------|
-| Daily (02:00 UTC) | 7 days |
-| Weekly (Sunday 03:00 UTC) | 4 weeks |
-| Monthly (1st 04:00 UTC) | 12 months |
+| Planificación | Retención |
+|---------------|-----------|
+| Diaria (02:00 UTC) | 7 días |
+| Semanal (domingos 03:00 UTC) | 4 semanas |
+| Mensual (día 1, 04:00 UTC) | 12 meses |
 
-To restore a backup:
+Para restaurar una copia de seguridad:
 
 ```bash
 gunzip < backups/daily/thalassa_YYYY-MM-DD.sql.gz | \
@@ -421,6 +421,6 @@ gunzip < backups/daily/thalassa_YYYY-MM-DD.sql.gz | \
 
 ---
 
-## License
+## Licencia
 
-Academic project — DAW 2025/2026.
+Proyecto académico — DAW 2025/2026.
