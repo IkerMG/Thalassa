@@ -1,0 +1,32 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome back, {{username}}",
+  "stats": {
+    "aquariums": "Aquariums",
+    "livestock": "Total Livestock",
+    "equipment": "Total Equipment"
+  },
+  "actions": {
+    "aiAssistant": "Thalassa AI",
+    "newAquarium": "New Aquarium"
+  },
+  "empty": {
+    "title": "No aquariums yet",
+    "description": "Create your first aquarium to start tracking parameters, livestock, and equipment."
+  },
+  "createModal": {
+    "title": "New Aquarium",
+    "name": "Name",
+    "namePlaceholder": "e.g. My Reef Tank",
+    "volume": "Volume (liters)",
+    "volumePlaceholder": "e.g. 200",
+    "type": "Ecosystem Type",
+    "types": {
+      "REEF": "Reef",
+      "FISH_ONLY": "Fish Only",
+      "MIXED": "Mixed"
+    },
+    "submit": "Create Aquarium",
+    "submitting": "Creating…"
+  }
+}

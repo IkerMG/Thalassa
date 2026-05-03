@@ -16,30 +16,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/equipment")
 public class EquipmentController {
 
-    private final EquipmentService equipmentService;
+  private final EquipmentService equipmentService;
 
-    public EquipmentController(EquipmentService equipmentService) {
-        this.equipmentService = equipmentService;
-    }
+  public EquipmentController(EquipmentService equipmentService) {
+    this.equipmentService = equipmentService;
+  }
 
-    /**
-     * PUT /api/equipment/{id}
-     * Actualiza nombre, potencia y horas de uso de un equipo.
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<EquipmentResponse> updateEquipment(
-            @PathVariable Long id,
-            @Valid @RequestBody EquipmentRequest request) {
-        return ResponseEntity.ok(equipmentService.updateEquipment(id, request));
-    }
+  /** PUT /api/equipment/{id} Actualiza nombre, potencia y horas de uso de un equipo. */
+  @PutMapping("/{id}")
+  public ResponseEntity<EquipmentResponse> updateEquipment(
+      @PathVariable Long id, @Valid @RequestBody EquipmentRequest request) {
+    return ResponseEntity.ok(equipmentService.updateEquipment(id, request));
+  }
 
-    /**
-     * DELETE /api/equipment/{id}
-     * Elimina un equipo del acuario.
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEquipment(@PathVariable Long id) {
-        equipmentService.deleteEquipment(id);
-        return ResponseEntity.noContent().build();
-    }
+  /** DELETE /api/equipment/{id} Elimina un equipo del acuario. */
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteEquipment(@PathVariable Long id) {
+    equipmentService.deleteEquipment(id);
+    return ResponseEntity.noContent().build();
+  }
 }

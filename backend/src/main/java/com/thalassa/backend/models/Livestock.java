@@ -14,42 +14,40 @@ import lombok.*;
 @Builder
 public class Livestock {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    /**
-     * Nombre del espécimen (puede ser personalizado si no viene del catálogo).
-     */
-    @Column(nullable = false, length = 100)
-    private String name;
+  /** Nombre del espécimen (puede ser personalizado si no viene del catálogo). */
+  @Column(nullable = false, length = 100)
+  private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LivestockCategory category;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private LivestockCategory category;
 
-    /**
-     * Se denormaliza aquí para permitir especies personalizadas fuera del catálogo
-     * y para una consulta de compatibilidad directa sin JOIN.
-     */
-    @Column(name = "reef_safe", nullable = false)
-    private Boolean reefSafe;
+  /**
+   * Se denormaliza aquí para permitir especies personalizadas fuera del catálogo y para una
+   * consulta de compatibilidad directa sin JOIN.
+   */
+  @Column(name = "reef_safe", nullable = false)
+  private Boolean reefSafe;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer quantity = 1;
+  @Column(nullable = false)
+  @Builder.Default
+  private Integer quantity = 1;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "aquarium_id", nullable = false)
-    @JsonBackReference("aquarium-livestock")
-    private Aquarium aquarium;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "aquarium_id", nullable = false)
+  @JsonBackReference("aquarium-livestock")
+  private Aquarium aquarium;
 
-    /**
-     * Referencia opcional al catálogo de especies. Null cuando el usuario
-     * añade un espécimen personalizado que no existe en el catálogo.
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "species_catalog_id")
-    @JsonIgnoreProperties({"livestock", "hibernateLazyInitializer", "handler"})
-    private SpeciesCatalog speciesCatalog;
+  /**
+   * Referencia opcional al catálogo de especies. Null cuando el usuario añade un espécimen
+   * personalizado que no existe en el catálogo.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "species_catalog_id")
+  @JsonIgnoreProperties({"livestock", "hibernateLazyInitializer", "handler"})
+  private SpeciesCatalog speciesCatalog;
 }

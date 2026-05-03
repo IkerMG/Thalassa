@@ -3,28 +3,33 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/thalassa
-    username: thalassa
-    password: changeme
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/thalassa}
+    username: ${SPRING_DATASOURCE_USERNAME:thalassa}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    # Garantiza que data.sql se ejecuta DESPUÉS de que Hibernate genere las tablas
-    defer-datasource-initialization: true
   sql:
     init:
-      # 'always' ejecuta data.sql en cada arranque (idempotente con ON CONFLICT DO NOTHING)
-      mode: always
+      mode: never
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
 jwt:
-  secret: thalassa-super-secret-key-change-this-in-production-0123456789abcdef
-  expiration: 86400000
+  secret: ${JWT_SECRET}
+
+app:
+  jwt:
+    access-expiration-ms: 900000        # 15 min
+    refresh-expiration-ms: 2592000000   # 30 days
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
 
 python:
   service:
@@ -32,3 +37,19 @@ python:
 
 chat:
   free-daily-limit: 5
+
+sentry:
+  dsn: ${SENTRY_DSN:}      # vacío = Sentry desactivado
+  traces-sample-rate: 0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    tags:
+      application: thalassa-backend

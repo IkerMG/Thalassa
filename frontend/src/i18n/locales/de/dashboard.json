@@ -1,0 +1,32 @@
+{
+  "title": "Dashboard",
+  "welcome": "Willkommen zurück, {{username}}",
+  "stats": {
+    "aquariums": "Aquarien",
+    "livestock": "Tiere gesamt",
+    "equipment": "Geräte gesamt"
+  },
+  "actions": {
+    "aiAssistant": "Thalassa KI",
+    "newAquarium": "Neues Aquarium"
+  },
+  "empty": {
+    "title": "Noch keine Aquarien",
+    "description": "Erstelle dein erstes Aquarium, um Parameter, Tiere und Geräte zu verfolgen."
+  },
+  "createModal": {
+    "title": "Neues Aquarium",
+    "name": "Name",
+    "namePlaceholder": "z.B. Mein Riffbecken",
+    "volume": "Volumen (Liter)",
+    "volumePlaceholder": "z.B. 200",
+    "type": "Ökosystem-Typ",
+    "types": {
+      "REEF": "Riff",
+      "FISH_ONLY": "Nur Fische",
+      "MIXED": "Gemischt"
+    },
+    "submit": "Aquarium erstellen",
+    "submitting": "Erstelle…"
+  }
+}

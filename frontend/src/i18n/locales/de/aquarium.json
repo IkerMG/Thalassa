@@ -1,0 +1,103 @@
+{
+  "types": {
+    "REEF": "Riff",
+    "FISH_ONLY": "Nur Fische",
+    "MIXED": "Gemischt"
+  },
+  "tabs": {
+    "overview": "Übersicht",
+    "parameters": "Parameter",
+    "livestock": "Tiere",
+    "equipment": "Geräte"
+  },
+  "actions": {
+    "logMeasurement": "Messung eintragen",
+    "addAnimal": "Tier hinzufügen",
+    "addEquipment": "Gerät hinzufügen",
+    "exportCsv": "CSV exportieren",
+    "log": "Eintragen",
+    "exporting": "Exportiere…"
+  },
+  "backToDashboard": "Dashboard",
+  "error": "Aquariumdaten konnten nicht geladen werden.",
+  "retry": "Erneut versuchen",
+  "overview": {
+    "currentParams": "Aktuelle Parameter",
+    "quickStats": "Schnellübersicht",
+    "noMeasurements": "Noch keine Messungen.",
+    "logFirst": "Erste Messung eintragen →",
+    "lastLogged": "Zuletzt eingetragen: {{date}}",
+    "fish": "Fische",
+    "corals": "Korallen",
+    "invertebrates": "Wirbellose",
+    "equipment": "Geräte",
+    "optimal": "Optimal: {{min}}–{{max}}"
+  },
+  "parameters": {
+    "history": "Messverlauf",
+    "date": "Datum",
+    "timeRanges": {
+      "7d": "7 Tage",
+      "30d": "30 Tage",
+      "3m": "3 Monate",
+      "all": "Gesamtzeitraum"
+    },
+    "logModal": {
+      "title": "Neue Messung eintragen",
+      "hint": "Alle Felder sind optional — trage nur ein, was gemessen wurde.",
+      "saving": "Speichert…",
+      "submit": "Messung speichern"
+    }
+  },
+  "livestock": {
+    "count_one": "{{count}} Tier",
+    "count_other": "{{count}} Tiere",
+    "reefSafeWarning": "Diese Art ist nicht riffsicher. Sie kann Korallen oder Wirbellose in deinem Riffsaquarium schädigen.",
+    "empty": {
+      "title": "Noch keine Tiere",
+      "description": "Füge Fische, Korallen und Wirbellose hinzu, die in diesem Aquarium leben."
+    },
+    "addModal": {
+      "title": "Tier hinzufügen",
+      "name": "Name",
+      "namePlaceholder": "z.B. Clownfisch",
+      "category": "Kategorie",
+      "categories": {
+        "FISH": "Fisch",
+        "CORAL": "Koralle",
+        "INVERTEBRATE": "Wirbelloses"
+      },
+      "quantity": "Anzahl",
+      "reefSafe": "Riffsicher",
+      "adding": "Hinzufügen…"
+    }
+  },
+  "equipment": {
+    "count_one": "{{count}} Gerät",
+    "count_other": "{{count}} Geräte",
+    "totalPower": "Gesamtleistung",
+    "estMonthly": "Est. monatlich",
+    "empty": {
+      "title": "Noch keine Geräte",
+      "description": "Füge Lampen, Pumpen, Abschäumer und Heizer hinzu, um den Energieverbrauch zu verfolgen."
+    },
+    "addModal": {
+      "title": "Gerät hinzufügen",
+      "name": "Name",
+      "namePlaceholder": "z.B. LED-Lampe",
+      "category": "Kategorie",
+      "categories": {
+        "LIGHT": "Licht",
+        "PUMP": "Pumpe",
+        "SKIMMER": "Abschäumer",
+        "HEATER": "Heizer",
+        "OTHER": "Sonstiges"
+      },
+      "power": "Leistung (W)",
+      "powerPlaceholder": "z.B. 100",
+      "hours": "Stunden / Tag",
+      "hoursPlaceholder": "z.B. 10",
+      "adding": "Hinzufügen…"
+    }
+  }
+}

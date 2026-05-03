@@ -12,20 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/scraper")
 public class ScraperController {
 
-    private final ScraperService scraperService;
+  private final ScraperService scraperService;
 
-    public ScraperController(ScraperService scraperService) {
-        this.scraperService = scraperService;
-    }
+  public ScraperController(ScraperService scraperService) {
+    this.scraperService = scraperService;
+  }
 
-    /**
-     * GET /api/scraper/search?keyword=...
-     * Proxy al microservicio Python. Siempre devuelve 200 OK;
-     * si el scraper no responde, el campo errorCode indica el motivo.
-     */
-    @GetMapping("/search")
-    public ResponseEntity<ScraperResponse> search(
-            @RequestParam String keyword) {
-        return ResponseEntity.ok(scraperService.search(keyword));
-    }
+  /**
+   * GET /api/scraper/search?keyword=... Proxy al microservicio Python. Siempre devuelve 200 OK; si
+   * el scraper no responde, el campo errorCode indica el motivo.
+   */
+  @GetMapping("/search")
+  public ResponseEntity<ScraperResponse> search(@RequestParam String keyword) {
+    return ResponseEntity.ok(scraperService.search(keyword));
+  }
 }

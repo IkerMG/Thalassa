@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      # data.sql se carga en dev para seed de usuarios y acuarios de prueba
+      mode: always
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000

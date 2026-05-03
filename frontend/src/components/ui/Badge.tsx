@@ -1,16 +1,18 @@
 import { Fish, AlertTriangle, Star, Crown } from 'lucide-react';
 import { ReactNode } from 'react';
 
+// Variants aligned to Master Plan enums (English) + semantic states
 type BadgeVariant =
   | 'reefSafe'
   | 'reefUnsafe'
-  | 'PEZ'
+  | 'FISH'
   | 'CORAL'
-  | 'INVERTEBRADO'
+  | 'INVERTEBRATE'
+  | 'REEF'
+  | 'FISH_ONLY'
+  | 'MIXED'
   | 'REEFMASTER'
-  | 'FREE'
-  | 'MARINO_PECES'
-  | 'MARINO_ARRECIFE';
+  | 'FREE';
 
 interface BadgeProps {
   variant: BadgeVariant;
@@ -24,47 +26,62 @@ interface BadgeConfig {
   icon?: ReactNode;
 }
 
+// Master Plan §5.5 badge specs
 const BADGE_MAP: Record<BadgeVariant, BadgeConfig> = {
   reefSafe: {
     label: 'Reef Safe',
-    classes: 'bg-reef-safe/15 text-reef-safe border-reef-safe/30',
+    classes:
+      'bg-[rgba(52,211,153,0.12)] text-[#34D399] border border-[rgba(52,211,153,0.25)]',
     icon: <Fish className="w-3 h-3" />,
   },
   reefUnsafe: {
-    label: 'No Reef Safe',
-    classes: 'bg-reef-unsafe/15 text-reef-unsafe border-reef-unsafe/30',
+    label: 'Not Reef Safe',
+    classes:
+      'bg-[rgba(248,113,113,0.12)] text-[#F87171] border border-[rgba(248,113,113,0.25)]',
     icon: <AlertTriangle className="w-3 h-3" />,
   },
-  PEZ: {
-    label: 'Pez',
-    classes: 'bg-cyan/15 text-cyan border-cyan/30',
+  FISH: {
+    label: 'Fish',
+    classes:
+      'bg-[rgba(89,211,255,0.12)] text-[#59D3FF] border border-[rgba(89,211,255,0.25)]',
     icon: <Fish className="w-3 h-3" />,
   },
   CORAL: {
     label: 'Coral',
-    classes: 'bg-coral/15 text-coral border-coral/30',
+    classes:
+      'bg-[rgba(251,191,36,0.12)] text-[#FBBF24] border border-[rgba(251,191,36,0.25)]',
   },
-  INVERTEBRADO: {
-    label: 'Invertebrado',
-    classes: 'bg-reef-warning/15 text-reef-warning border-reef-warning/30',
+  INVERTEBRATE: {
+    label: 'Invertebrate',
+    classes:
+      'bg-[rgba(160,160,160,0.12)] text-[#A0A0A0] border border-[rgba(160,160,160,0.20)]',
+  },
+  REEF: {
+    label: 'Reef',
+    classes:
+      'bg-[rgba(52,211,153,0.12)] text-[#34D399] border border-[rgba(52,211,153,0.25)]',
+  },
+  FISH_ONLY: {
+    label: 'Fish Only',
+    classes:
+      'bg-[rgba(89,211,255,0.12)] text-[#59D3FF] border border-[rgba(89,211,255,0.25)]',
+  },
+  MIXED: {
+    label: 'Mixed',
+    classes:
+      'bg-[rgba(251,191,36,0.12)] text-[#FBBF24] border border-[rgba(251,191,36,0.25)]',
   },
   REEFMASTER: {
-    label: 'REEFMASTER',
-    classes: 'bg-gradient-to-r from-cyan/20 to-coral/20 text-cyan border-cyan/30',
+    label: 'ReefMaster',
+    classes:
+      'bg-[rgba(89,211,255,0.12)] text-[#59D3FF] border border-[rgba(89,211,255,0.40)]',
     icon: <Crown className="w-3 h-3" />,
   },
   FREE: {
-    label: 'FREE',
-    classes: 'bg-text-muted/20 text-text-secondary border-text-muted/30',
+    label: 'Free',
+    classes:
+      'bg-[rgba(102,102,102,0.15)] text-[#A0A0A0] border border-[rgba(102,102,102,0.25)]',
     icon: <Star className="w-3 h-3" />,
-  },
-  MARINO_PECES: {
-    label: 'Peces',
-    classes: 'bg-cyan/15 text-cyan border-cyan/30',
-  },
-  MARINO_ARRECIFE: {
-    label: 'Arrecife',
-    classes: 'bg-reef-safe/15 text-reef-safe border-reef-safe/30',
   },
 };
 
@@ -76,7 +93,7 @@ export default function Badge({ variant, label, className = '' }: BadgeProps) {
     <span
       className={[
         'inline-flex items-center gap-1 px-2 py-0.5',
-        'rounded-full border text-xs font-mono',
+        'rounded-full text-xs font-mono',
         config.classes,
         className,
       ].join(' ')}

@@ -1,0 +1,12 @@
+{
+  "title": "Profil",
+  "language": {
+    "label": "Sprache",
+    "en": "English",
+    "de": "Deutsch",
+    "es": "Español"
+  },
+  "settings": {
+    "comingSoonText": "Die Bearbeitung von Einstellungen wird bald verfügbar sein."
+  }
+}

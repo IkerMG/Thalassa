@@ -1,11 +1,43 @@
-version: "3.9"
-
 # =============================================================================
 # Thalassa — Docker Compose
-# Sprint 4: completar configuración de servicios, volúmenes y redes
+# Copia .env.example a .env y rellena los valores antes de levantar.
 # =============================================================================
 
 services:
+
+  # ---------------------------------------------------------------------------
+  # Reverse proxy — Traefik (TLS + routing)
+  # ---------------------------------------------------------------------------
+  traefik:
+    image: traefik:v3.3
+    container_name: thalassa-traefik
+    command:
+      # Docker provider: solo servicios con traefik.enable=true
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=thalassa-net"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP → HTTPS (Traefik intercepta /.well-known/acme-challenge
+      # antes del redirect, por lo que HTTP-01 sigue funcionando)
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      # Let's Encrypt HTTP-01
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "acme_data:/acme"
+    networks:
+      - thalassa-net
+    restart: unless-stopped
 
   # ---------------------------------------------------------------------------
   # Backend — Spring Boot (Java)
@@ -15,16 +47,38 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: thalassa-backend
+    # En producción se pueden eliminar estos puertos para que el backend solo
+    # sea accesible a través de Traefik y nunca directamente desde el host.
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      # - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/thalassa
-      # - SPRING_DATASOURCE_USERNAME=thalassa
-      # - SPRING_DATASOURCE_PASSWORD=changeme
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/thalassa
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      - PYTHON_SERVICE_URL=http://scraper:8001
     depends_on:
-      - db
-      - scraper
+      db:
+        condition: service_healthy
+      scraper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      # Router HTTPS para /api/** — más específico que el frontend, gana automáticamente
+      - "traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api.middlewares=hsts@docker"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -37,10 +91,25 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: thalassa-frontend
+    # Puerto directo útil en dev; en producción se puede eliminar.
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      # Router HTTPS para el resto del tráfico (SPA)
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend.middlewares=hsts@docker"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # Middleware HSTS — se define aquí, se referencia desde ambos routers
+      - "traefik.http.middlewares.hsts.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.hsts.headers.stsPreload=true"
+      - "traefik.http.middlewares.hsts.headers.forceSTSHeader=true"
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -56,9 +125,42 @@ services:
     ports:
       - "8001:8001"
     environment:
-      # Rellena con tu clave real: https://console.groq.com/keys
-      - GROQ_API_KEY=${GROQ_API_KEY:-tu_api_key_aqui}
+      - GROQ_API_KEY=${GROQ_API_KEY}
       - GROQ_MODEL=llama-3.3-70b-versatile
+    healthcheck:
+      test: ["CMD-SHELL", "[ -n \"$$GROQ_API_KEY\" ] && [ \"$$GROQ_API_KEY\" != 'tu_api_key_aqui' ] && echo OK || (echo 'GROQ_API_KEY not set or placeholder' && exit 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - thalassa-net
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Backup — pg_dump diario con retención 7/4/12
+  # ---------------------------------------------------------------------------
+  backup:
+    image: postgres:16-alpine
+    container_name: thalassa-backup
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=thalassa
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - BACKUP_DIR=/backups
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    # Instala el script como cron job a las 03:00 UTC y arranca crond
+    command: >
+      sh -c "chmod +x /backup.sh &&
+             echo '0 3 * * * /backup.sh >> /backups/backup.log 2>&1' | crontab - &&
+             crond -f -l 8"
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -69,14 +171,20 @@ services:
   db:
     image: postgres:16-alpine
     container_name: thalassa-db
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       POSTGRES_DB: thalassa
-      POSTGRES_USER: thalassa
-      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d thalassa"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     networks:
       - thalassa-net
     restart: unless-stopped
@@ -86,6 +194,11 @@ services:
 # =============================================================================
 volumes:
   db_data:
+  backup_data:
+  # Almacena el certificado Let's Encrypt entre reinicios.
+  # El archivo acme.json necesita permisos 600 en el host:
+  #   mkdir -p /opt/thalassa/acme && touch /opt/thalassa/acme/acme.json && chmod 600 /opt/thalassa/acme/acme.json
+  acme_data:
 
 # =============================================================================
 # Redes

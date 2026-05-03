@@ -1,0 +1,103 @@
+{
+  "types": {
+    "REEF": "Arrecife",
+    "FISH_ONLY": "Solo peces",
+    "MIXED": "Mixto"
+  },
+  "tabs": {
+    "overview": "Resumen",
+    "parameters": "Parámetros",
+    "livestock": "Animales",
+    "equipment": "Equipos"
+  },
+  "actions": {
+    "logMeasurement": "Registrar medición",
+    "addAnimal": "Añadir animal",
+    "addEquipment": "Añadir equipo",
+    "exportCsv": "Exportar CSV",
+    "log": "Registrar",
+    "exporting": "Exportando…"
+  },
+  "backToDashboard": "Panel",
+  "error": "No se pudieron cargar los datos del acuario.",
+  "retry": "Reintentar",
+  "overview": {
+    "currentParams": "Parámetros actuales",
+    "quickStats": "Estadísticas rápidas",
+    "noMeasurements": "Aún no hay mediciones.",
+    "logFirst": "Registra tu primera medición →",
+    "lastLogged": "Último registro: {{date}}",
+    "fish": "Peces",
+    "corals": "Corales",
+    "invertebrates": "Invertebrados",
+    "equipment": "Equipos",
+    "optimal": "Óptimo: {{min}}–{{max}}"
+  },
+  "parameters": {
+    "history": "Historial de mediciones",
+    "date": "Fecha",
+    "timeRanges": {
+      "7d": "7 días",
+      "30d": "30 días",
+      "3m": "3 meses",
+      "all": "Todo el tiempo"
+    },
+    "logModal": {
+      "title": "Registrar nueva medición",
+      "hint": "Todos los campos son opcionales — registra solo lo que has medido.",
+      "saving": "Guardando…",
+      "submit": "Guardar medición"
+    }
+  },
+  "livestock": {
+    "count_one": "{{count}} animal",
+    "count_other": "{{count}} animales",
+    "reefSafeWarning": "Esta especie no es apta para arrecife. Puede dañar corales o invertebrados en tu acuario de arrecife.",
+    "empty": {
+      "title": "Aún no hay animales",
+      "description": "Añade los peces, corales e invertebrados que viven en este acuario."
+    },
+    "addModal": {
+      "title": "Añadir animal",
+      "name": "Nombre",
+      "namePlaceholder": "ej. Pez payaso",
+      "category": "Categoría",
+      "categories": {
+        "FISH": "Pez",
+        "CORAL": "Coral",
+        "INVERTEBRATE": "Invertebrado"
+      },
+      "quantity": "Cantidad",
+      "reefSafe": "Apto para arrecife",
+      "adding": "Añadiendo…"
+    }
+  },
+  "equipment": {
+    "count_one": "{{count}} dispositivo",
+    "count_other": "{{count}} dispositivos",
+    "totalPower": "Potencia total",
+    "estMonthly": "Est. mensual",
+    "empty": {
+      "title": "Aún no hay equipos",
+      "description": "Añade luces, bombas, skimmers y calentadores para controlar el consumo energético."
+    },
+    "addModal": {
+      "title": "Añadir equipo",
+      "name": "Nombre",
+      "namePlaceholder": "ej. Luz LED",
+      "category": "Categoría",
+      "categories": {
+        "LIGHT": "Luz",
+        "PUMP": "Bomba",
+        "SKIMMER": "Skimmer",
+        "HEATER": "Calentador",
+        "OTHER": "Otro"
+      },
+      "power": "Potencia (W)",
+      "powerPlaceholder": "ej. 100",
+      "hours": "Horas / día",
+      "hoursPlaceholder": "ej. 10",
+      "adding": "Añadiendo…"
+    }
+  }
+}

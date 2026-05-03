@@ -5,7 +5,7 @@
 # =============================================================================
 
 # ── Stage 1: Builder ──────────────────────────────────────────────────────────
-FROM maven:3.9.7-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /build
 
@@ -20,7 +20,7 @@ RUN mvn package -DskipTests -q
 
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 
 # Crear usuario no-root
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

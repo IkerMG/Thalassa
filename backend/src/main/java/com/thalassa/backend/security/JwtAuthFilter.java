@@ -4,6 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,60 +15,89 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
+  private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
+  private final JwtUtil jwtUtil;
+  private final UserDetailsServiceImpl userDetailsService;
+
+  public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+    this.jwtUtil = jwtUtil;
+    this.userDetailsService = userDetailsService;
+  }
+
+  /**
+   * Rutas de autenticación pública: el filtro JWT no debe ejecutarse en ellas. Esto garantiza que
+   * /api/auth/** nunca sea bloqueado por lógica de token.
+   */
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getServletPath();
+    boolean skip = path.startsWith("/api/auth/");
+    if (skip) {
+      log.info("[JWT FILTER] Skipping auth path: {} {}", request.getMethod(), path);
+    }
+    return skip;
+  }
+
+  @Override
+  protected void doFilterInternal(
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain)
+      throws ServletException, IOException {
+
+    String path = request.getServletPath();
+    log.info("[JWT FILTER] Processing: {} {}", request.getMethod(), path);
+
+    final String authHeader = request.getHeader("Authorization");
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      log.info("[JWT FILTER] No Bearer token found for {} — passing through unauthenticated", path);
+      filterChain.doFilter(request, response);
+      return;
     }
 
-    @Override
-    protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+    final String jwt = authHeader.substring(7);
+    final String email;
 
-        final String authHeader = request.getHeader("Authorization");
-
-        // Si no hay cabecera Bearer, dejamos pasar la petición sin autenticar
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        final String jwt = authHeader.substring(7);
-        final String email;
-
-        try {
-            email = jwtUtil.extractEmail(jwt);
-        } catch (Exception e) {
-            // Token malformado o expirado → continuamos sin autenticar
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // Solo procesamos si hay email y no hay autenticación previa en el contexto
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            if (jwtUtil.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        }
-
-        filterChain.doFilter(request, response);
+    try {
+      email = jwtUtil.extractEmail(jwt);
+      log.info("[JWT FILTER] Token present, extracted email: {}", email);
+    } catch (Exception e) {
+      log.warn(
+          "[JWT FILTER] Malformed or expired token for {} — passing through unauthenticated. Reason: {}",
+          path,
+          e.getMessage());
+      filterChain.doFilter(request, response);
+      return;
     }
+
+    if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      try {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (jwtUtil.isTokenValid(jwt, userDetails)) {
+          UsernamePasswordAuthenticationToken authToken =
+              new UsernamePasswordAuthenticationToken(
+                  userDetails, null, userDetails.getAuthorities());
+
+          authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(authToken);
+          log.info("[JWT FILTER] Authentication set for user: {}", email);
+        } else {
+          log.warn("[JWT FILTER] Token is invalid for user: {}", email);
+        }
+      } catch (Exception e) {
+        log.warn(
+            "[JWT FILTER] Could not load user '{}': {} — passing through unauthenticated",
+            email,
+            e.getMessage());
+      }
+    }
+
+    filterChain.doFilter(request, response);
+  }
 }

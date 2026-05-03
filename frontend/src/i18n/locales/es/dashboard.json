@@ -1,0 +1,32 @@
+{
+  "title": "Panel",
+  "welcome": "Bienvenido de nuevo, {{username}}",
+  "stats": {
+    "aquariums": "Acuarios",
+    "livestock": "Animales totales",
+    "equipment": "Equipos totales"
+  },
+  "actions": {
+    "aiAssistant": "Thalassa IA",
+    "newAquarium": "Nuevo acuario"
+  },
+  "empty": {
+    "title": "Aún no hay acuarios",
+    "description": "Crea tu primer acuario para empezar a registrar parámetros, animales y equipos."
+  },
+  "createModal": {
+    "title": "Nuevo acuario",
+    "name": "Nombre",
+    "namePlaceholder": "ej. Mi arrecife",
+    "volume": "Volumen (litros)",
+    "volumePlaceholder": "ej. 200",
+    "type": "Tipo de ecosistema",
+    "types": {
+      "REEF": "Arrecife",
+      "FISH_ONLY": "Solo peces",
+      "MIXED": "Mixto"
+    },
+    "submit": "Crear acuario",
+    "submitting": "Creando…"
+  }
+}

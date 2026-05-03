@@ -5,15 +5,14 @@
 # =============================================================================
 
 # ── Stage 1: Builder ──────────────────────────────────────────────────────────
-FROM node:20-slim AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /build
 
 # Copiar manifiestos primero para cachear la instalación de dependencias.
 # Este layer solo se invalida si package.json o package-lock.json cambian.
-COPY package.json package-lock.json* ./
-# Elimina paquetes viejos e instala forzando la arquitectura de Linux
-RUN rm -rf node_modules package-lock.json && npm install
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 
 # Copiar el resto del código fuente y compilar
 COPY . .

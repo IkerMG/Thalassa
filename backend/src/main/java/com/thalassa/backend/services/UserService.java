@@ -11,41 +11,55 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+  public UserService(UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  // ── Helper ────────────────────────────────────────────────────────────────
+
+  private User getAuthenticatedUser() {
+    return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  }
+
+  // ── Operaciones ───────────────────────────────────────────────────────────
+
+  public UserResponse getProfile() {
+    return mapToResponse(getAuthenticatedUser());
+  }
+
+  @Transactional
+  public UserResponse updateElectricityPrice(UpdateUserRequest request) {
+    User user = getAuthenticatedUser();
+    if (request.getElectricityPriceKwh() != null) {
+      user.setElectricityPriceKwh(request.getElectricityPriceKwh());
     }
-
-    // ── Helper ────────────────────────────────────────────────────────────────
-
-    private User getAuthenticatedUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (request.getLocale() != null) {
+      user.setLocale(request.getLocale());
     }
-
-    // ── Operaciones ───────────────────────────────────────────────────────────
-
-    public UserResponse getProfile() {
-        return mapToResponse(getAuthenticatedUser());
+    if (request.getTemperatureUnit() != null) {
+      user.setTemperatureUnit(request.getTemperatureUnit());
     }
-
-    @Transactional
-    public UserResponse updateElectricityPrice(UpdateUserRequest request) {
-        User user = getAuthenticatedUser();
-        user.setElectricityPriceKwh(request.getElectricityPriceKwh());
-        User saved = userRepository.save(user);
-        return mapToResponse(saved);
+    if (request.getVolumeUnit() != null) {
+      user.setVolumeUnit(request.getVolumeUnit());
     }
+    User saved = userRepository.save(user);
+    return mapToResponse(saved);
+  }
 
-    // ── Mapeo ─────────────────────────────────────────────────────────────────
+  // ── Mapeo ─────────────────────────────────────────────────────────────────
 
-    private UserResponse mapToResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .subscriptionPlan(user.getSubscriptionPlan())
-                .electricityPriceKwh(user.getElectricityPriceKwh())
-                .build();
-    }
+  private UserResponse mapToResponse(User user) {
+    return UserResponse.builder()
+        .id(user.getId())
+        .username(user.getDisplayUsername())
+        .email(user.getEmail())
+        .subscriptionPlan(user.getSubscriptionPlan())
+        .electricityPriceKwh(user.getElectricityPriceKwh())
+        .locale(user.getLocale())
+        .temperatureUnit(user.getTemperatureUnit())
+        .volumeUnit(user.getVolumeUnit())
+        .build();
+  }
 }

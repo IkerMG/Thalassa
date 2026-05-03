@@ -1,0 +1,77 @@
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import ProtectedRoute from './ProtectedRoute';
+import PublicRoute from './PublicRoute';
+import ErrorBoundary from '../components/shared/ErrorBoundary';
+
+// Public pages — loaded immediately (landing needs fast paint)
+import LandingPage from '../features/landing/LandingPage';
+import LoginPage from '../features/auth/LoginPage';
+import RegisterPage from '../features/auth/RegisterPage';
+import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '../features/auth/ResetPasswordPage';
+
+// Protected pages — lazy loaded (reduces initial bundle)
+const DashboardView = lazy(() => import('../features/dashboard/DashboardView'));
+const AquariumDetailPage = lazy(() => import('../features/aquarium-detail/AquariumDetailPage'));
+const MarketPage = lazy(() => import('../features/market/MarketPage'));
+const WishlistPage = lazy(() => import('../features/wishlist/WishlistPage'));
+const ProfilePage = lazy(() => import('../features/profile/ProfilePage'));
+const DosingCalcPage = lazy(() => import('../features/calculators/DosingCalcPage'));
+const EnergyCalcPage = lazy(() => import('../features/calculators/EnergyCalcPage'));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-[#59D3FF] border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+function AuthExpiredGuard() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const handle = () => navigate('/login', { replace: true });
+    window.addEventListener('auth:expired', handle);
+    return () => window.removeEventListener('auth:expired', handle);
+  }, [navigate]);
+  return null;
+}
+
+export default function AppRouter() {
+  return (
+    <BrowserRouter>
+      <Toaster richColors position="top-right" closeButton />
+      <AuthExpiredGuard />
+      <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* ── Public routes (redirect to /dashboard if already logged in) ── */}
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+          </Route>
+
+          {/* ── Protected routes (redirect to /login if not authenticated) ── */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardView />} />
+            <Route path="/dashboard/aquarium/:id" element={<AquariumDetailPage />} />
+            <Route path="/dashboard/market" element={<MarketPage />} />
+            <Route path="/dashboard/wishlist" element={<WishlistPage />} />
+            <Route path="/dashboard/profile" element={<ProfilePage />} />
+            <Route path="/dashboard/calculator/dosing" element={<DosingCalcPage />} />
+            <Route path="/dashboard/calculator/energy" element={<EnergyCalcPage />} />
+          </Route>
+
+          {/* ── Fallback ── */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+      </ErrorBoundary>
+    </BrowserRouter>
+  );
+}
