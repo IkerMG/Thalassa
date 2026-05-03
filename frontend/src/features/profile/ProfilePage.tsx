@@ -1,10 +1,213 @@
-import { User, Crown, Mail, Globe, Settings } from 'lucide-react';
+import { useEffect } from 'react';
+import { User, Crown, Mail, Globe, Settings, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAuthStore } from '../../store/authStore';
 import { useUpdateProfile } from '../../hooks/mutations/useUpdateProfile';
+import { useUserProfile } from '../../hooks/queries/useUserProfile';
+import { toast } from '../../lib/toast';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+
+// ── Settings form schema ──────────────────────────────────────────────────────
+
+const settingsSchema = z.object({
+  electricityPriceKwh: z.coerce
+    .number({ invalid_type_error: 'Debe ser un número' })
+    .min(0.01, 'Mínimo €0.01/kWh')
+    .max(9.99, 'Máximo €9.99/kWh')
+    .nullable()
+    .optional(),
+  temperatureUnit: z.enum(['C', 'F']).default('C'),
+  volumeUnit: z.enum(['L', 'GAL']).default('L'),
+});
+
+type SettingsFormValues = z.infer<typeof settingsSchema>;
+
+// ── ToggleGroup ───────────────────────────────────────────────────────────────
+
+function ToggleGroup<T extends string>({
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex gap-2">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange(opt.value)}
+          className={[
+            'flex-1 py-2 rounded-lg text-sm font-medium transition-colors',
+            value === opt.value
+              ? 'bg-[rgba(89,211,255,0.12)] text-[#59D3FF] border border-[rgba(89,211,255,0.35)]'
+              : 'text-[#666] border border-[rgba(255,255,255,0.08)] hover:text-white hover:border-[rgba(255,255,255,0.20)]',
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          ].join(' ')}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Settings form ─────────────────────────────────────────────────────────────
+
+function SettingsForm() {
+  const { data: profile, isLoading } = useUserProfile();
+  const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const updateUser = useAuthStore((s) => s.updateUser);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      electricityPriceKwh: undefined,
+      temperatureUnit: 'C',
+      volumeUnit: 'L',
+    },
+  });
+
+  // Sync form with fetched profile
+  useEffect(() => {
+    if (!profile) return;
+    reset({
+      electricityPriceKwh: profile.electricityPriceKwh ?? undefined,
+      temperatureUnit: (profile.temperatureUnit as 'C' | 'F') ?? 'C',
+      volumeUnit: (profile.volumeUnit as 'L' | 'GAL') ?? 'L',
+    });
+  }, [profile, reset]);
+
+  const tempUnit = watch('temperatureUnit');
+  const volUnit = watch('volumeUnit');
+
+  const onSubmit = (values: SettingsFormValues) => {
+    updateProfile(
+      {
+        electricityPriceKwh: values.electricityPriceKwh ?? null,
+        temperatureUnit: values.temperatureUnit,
+        volumeUnit: values.volumeUnit,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Configuración guardada.');
+          updateUser({
+            kwhPrice: values.electricityPriceKwh ?? undefined,
+            temperatureUnit: values.temperatureUnit,
+            volumeUnit: values.volumeUnit,
+          });
+        },
+        onError: () => {
+          toast.error('No se pudo guardar la configuración.');
+        },
+      }
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 animate-pulse">
+        <div className="h-4 w-40 bg-[rgba(255,255,255,0.06)] rounded" />
+        <div className="h-12 bg-[rgba(255,255,255,0.04)] rounded-lg" />
+        <div className="h-4 w-32 bg-[rgba(255,255,255,0.06)] rounded" />
+        <div className="flex gap-2">
+          <div className="flex-1 h-10 bg-[rgba(255,255,255,0.04)] rounded-lg" />
+          <div className="flex-1 h-10 bg-[rgba(255,255,255,0.04)] rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2 mb-0.5">
+          <Zap size={13} className="text-[#59D3FF]" />
+          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+            Precio electricidad (€/kWh)
+          </label>
+        </div>
+        <Input
+          type="number"
+          step="0.0001"
+          min={0.01}
+          max={9.99}
+          placeholder="Ej. 0.2800"
+          {...register('electricityPriceKwh')}
+          error={errors.electricityPriceKwh?.message}
+        />
+        <p className="text-[#444] text-[11px]">
+          Se usa para calcular el coste mensual de los equipos.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+          Temperatura
+        </label>
+        <ToggleGroup
+          value={tempUnit}
+          onChange={(v) => setValue('temperatureUnit', v, { shouldDirty: true })}
+          options={[
+            { value: 'C', label: 'Celsius (°C)' },
+            { value: 'F', label: 'Fahrenheit (°F)' },
+          ]}
+          disabled={isPending}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+          Volumen
+        </label>
+        <ToggleGroup
+          value={volUnit}
+          onChange={(v) => setValue('volumeUnit', v, { shouldDirty: true })}
+          options={[
+            { value: 'L', label: 'Litros (L)' },
+            { value: 'GAL', label: 'Galones (gal)' },
+          ]}
+          disabled={isPending}
+        />
+      </div>
+
+      <div className="flex justify-end pt-1">
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          disabled={isPending || !isDirty}
+        >
+          {isPending ? 'Guardando…' : 'Guardar cambios'}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// ── Language selectors ────────────────────────────────────────────────────────
 
 const LOCALES = ['en', 'de', 'es'] as const;
 type Locale = (typeof LOCALES)[number];
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation('profile');
@@ -77,15 +280,13 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Settings — coming soon */}
-      <div className="bg-black border border-[rgba(255,255,255,0.06)] rounded-2xl p-6 flex flex-col items-center text-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
-          <Settings size={20} className="text-[#555]" />
+      {/* Settings */}
+      <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <Settings size={16} className="text-[#59D3FF]" />
+          <span className="text-sm font-medium text-white">Configuración</span>
         </div>
-        <p className="text-[#555] text-sm">{t('settings.comingSoonText')}</p>
-        <span className="text-[10px] font-mono tracking-widest text-[#59D3FF] border border-[rgba(89,211,255,0.25)] rounded-full px-3 py-1">
-          {t('comingSoon', { ns: 'common' })}
-        </span>
+        <SettingsForm />
       </div>
     </div>
   );
