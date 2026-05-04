@@ -97,15 +97,22 @@ function ProductCard({ product, onAddToWishlist, isAdding }: CardProps) {
 
         {/* Actions */}
         <div className="flex gap-2 pt-1">
-          <a
-            href={product.productUrl ?? '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] text-xs font-medium hover:text-white hover:border-[rgba(255,255,255,0.25)] transition-colors"
-          >
-            <ExternalLink size={12} />
-            Ver
-          </a>
+          {product.productUrl ? (
+            <a
+              href={product.productUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] text-xs font-medium hover:text-white hover:border-[rgba(255,255,255,0.25)] transition-colors"
+            >
+              <ExternalLink size={12} />
+              Ver
+            </a>
+          ) : (
+            <span className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.04)] text-[#383838] text-xs font-medium cursor-not-allowed select-none">
+              <ExternalLink size={12} />
+              Ver
+            </span>
+          )}
           <button
             onClick={() => onAddToWishlist(product)}
             disabled={isAdding}
@@ -170,10 +177,18 @@ export default function MarketPage() {
   // Build display list
   const liveResults   = data?.results ?? [];
   const typedFallback = fallbackData as FallbackItem[];
+  const searchText    = debouncedInput.trim().toLowerCase();
 
-  const baseFallback = activeCategory === 'all'
-    ? typedFallback
-    : typedFallback.filter((p) => p._category === activeCategory);
+  const baseFallback = (() => {
+    let items = activeCategory === 'all'
+      ? typedFallback
+      : typedFallback.filter((p) => p._category === activeCategory);
+    // Apply text search on static fallback data too
+    if (searchText.length >= 2) {
+      items = items.filter((p) => p.name?.toLowerCase().includes(searchText));
+    }
+    return items;
+  })();
 
   const displayResults: ScraperResult[] = usingFallback ? baseFallback : liveResults;
 
@@ -185,6 +200,8 @@ export default function MarketPage() {
   const handleCategoryClick = (key: CategoryKey) => {
     setActiveCategory(key);
     setInputValue('');
+    // "Todo" resets all filters so the user truly sees everything
+    if (key === 'all') setStoreFilter('all');
   };
 
   const handleInputChange = (value: string) => {
@@ -234,7 +251,7 @@ export default function MarketPage() {
         />
         {inputValue && (
           <button
-            onClick={() => { setInputValue(''); setActiveCategory('all'); }}
+            onClick={() => { setInputValue(''); setActiveCategory('all'); setStoreFilter('all'); }}
             className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#555] hover:text-white transition-colors cursor-pointer"
           >
             <X size={14} />

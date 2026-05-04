@@ -17,9 +17,9 @@
 
 ## Fase 15B — Market Bugs
 
-- [ ] **Botón 'Ver':** El botón de los productos no funciona. Añadir la funcionalidad para que use el campo `productUrl` y abra el enlace en una pestaña nueva.
+- [x] **Botón 'Ver':** El botón de los productos no funciona. Añadir la funcionalidad para que use el campo `productUrl` y abra el enlace en una pestaña nueva.
 
-- [ ] **Filtro Combinado:** Arreglar la lógica de filtrado en el cliente. Si se selecciona la pestaña 'Todos' debe mostrar todo, y si se cruza una búsqueda de texto con una tienda específica debe devolver resultados correctos sin romperse.
+- [x] **Filtro Combinado:** Arreglar la lógica de filtrado en el cliente. Si se selecciona la pestaña 'Todos' debe mostrar todo, y si se cruza una búsqueda de texto con una tienda específica debe devolver resultados correctos sin romperse.
 
 ---
 
