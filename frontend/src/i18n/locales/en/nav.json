@@ -11,5 +11,7 @@
   "sectionHome": "HOME",
   "sectionTools": "TOOLS",
   "sectionExplore": "EXPLORE",
-  "sectionAssistant": "ASSISTANT"
+  "sectionAssistant": "ASSISTANT",
+  "sectionConfig": "SETTINGS",
+  "settings": "Settings"
 }

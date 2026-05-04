@@ -1,9 +1,11 @@
 package com.thalassa.backend.controllers;
 
+import com.thalassa.backend.dto.ChangePasswordRequest;
 import com.thalassa.backend.dto.UpdateUserRequest;
 import com.thalassa.backend.dto.UserResponse;
 import com.thalassa.backend.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,13 @@ public class UserController {
   public ResponseEntity<UserResponse> updateElectricityPrice(
       @Valid @RequestBody UpdateUserRequest request) {
     return ResponseEntity.ok(userService.updateElectricityPrice(request));
+  }
+
+  /** POST /api/users/me/password Cambia la contraseña del usuario autenticado. */
+  @PostMapping("/me/password")
+  public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    userService.changePassword(request);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   /**

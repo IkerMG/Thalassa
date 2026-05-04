@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Wrench, TrendingUp, ExternalLink } from 'lucide-react';
+import { Zap, Wrench, TrendingUp, ExternalLink, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { EnergyResponse } from '../../api/equipmentApi';
 import { useAquariums } from '../../hooks/queries/useAquariums';
@@ -291,6 +291,37 @@ export default function EnergyCalcPage() {
                     <Wrench size={20} className="text-[#555]" />
                   </div>
                   <p className="text-white font-medium text-sm">
+                    Error al calcular el consumo. Inténtalo de nuevo.
+                  </p>
+                </div>
+              )}
+
+              {!loadingEnergy && !isError && energyData?.errorCode === 'KWH_PRICE_MISSING' && (
+                <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-8 text-center flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[rgba(89,211,255,0.06)] border border-[rgba(89,211,255,0.15)] flex items-center justify-center">
+                    <AlertCircle size={20} className="text-[#59D3FF]" />
+                  </div>
+                  <p className="text-white font-medium text-sm">
+                    {t('energy.missingKwhPrice')}
+                  </p>
+                  <p className="text-[#666] text-xs max-w-xs">
+                    {t('energy.missingKwhPriceDesc')}
+                  </p>
+                  <button
+                    onClick={() => navigate('/dashboard/profile/settings')}
+                    className="mt-1 text-xs font-semibold text-[#59D3FF] hover:underline cursor-pointer"
+                  >
+                    {t('energy.goToProfile')} →
+                  </button>
+                </div>
+              )}
+
+              {!loadingEnergy && !isError && energyData?.errorCode === 'NO_EQUIPMENT' && (
+                <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-8 text-center flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] flex items-center justify-center">
+                    <Wrench size={20} className="text-[#555]" />
+                  </div>
+                  <p className="text-white font-medium text-sm">
                     {t('energy.noEquipment')}
                   </p>
                   <p className="text-[#666] text-xs max-w-xs">
@@ -300,12 +331,12 @@ export default function EnergyCalcPage() {
                     href={`/dashboard/aquarium/${selectedId}`}
                     className="mt-1 text-xs font-semibold text-[#59D3FF] hover:underline"
                   >
-                    Ir al acuario →
+                    {t('energy.manageEquipment')} →
                   </a>
                 </div>
               )}
 
-              {!loadingEnergy && !isError && energyData && (
+              {!loadingEnergy && !isError && energyData && !energyData.errorCode && (
                 <EnergyResults data={energyData} aquariumId={selectedId} />
               )}
             </>

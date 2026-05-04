@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Waves, BarChart3, Bot, ShoppingBag } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import { useAuthStore } from '../../store/authStore';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -169,6 +170,13 @@ function Features() {
 
 // ── Pricing ────────────────────────────────────────────────────────────────
 function Pricing() {
+  const navigate = useNavigate();
+  const isLoggedIn = !!useAuthStore((s) => s.user);
+
+  const handleReefMaster = () => {
+    navigate(isLoggedIn ? '/dashboard/checkout' : '/register?next=/dashboard/checkout');
+  };
+
   return (
     <section id="pricing" className="bg-black py-24 px-6">
       <div className="max-w-4xl mx-auto">
@@ -227,9 +235,9 @@ function Pricing() {
                 </li>
               ))}
             </ul>
-            <Link to="/register" className="block w-full">
-              <Button variant="primary" size="md" className="w-full">Go ReefMaster</Button>
-            </Link>
+            <Button variant="primary" size="md" className="w-full" onClick={handleReefMaster}>
+              Go ReefMaster
+            </Button>
           </motion.div>
         </motion.div>
       </div>

@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Skimmer Bubble Magus Curve 5",
+    "price": 109.95,
+    "product_url": "https://www.aquashop.es/skimmer-bubble-magus-curve-5",
+    "img_url": "https://www.aquashop.es/img/productos/skimmer-bubble-magus-curve5.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Powerhead Jebao SLW-10",
+    "price": 49.95,
+    "product_url": "https://www.aquashop.es/powerhead-jebao-slw-10",
+    "img_url": "https://www.aquashop.es/img/productos/jebao-slw10.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Iluminación Aqua Medic Qube 50",
+    "price": 189.00,
+    "product_url": "https://www.aquashop.es/iluminacion-aqua-medic-qube-50",
+    "img_url": "https://www.aquashop.es/img/productos/aqua-medic-qube50.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Sal Red Sea Coral Pro 22 kg",
+    "price": 54.90,
+    "product_url": "https://www.aquashop.es/sal-red-sea-coral-pro-22kg",
+    "img_url": "https://www.aquashop.es/img/productos/red-sea-coral-pro-22kg.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Reactor de calcio Deltec PF 509",
+    "price": 219.00,
+    "product_url": "https://www.aquashop.es/reactor-calcio-deltec-pf509",
+    "img_url": "https://www.aquashop.es/img/productos/deltec-pf509.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Medidor pH Milwaukee SMS122",
+    "price": 34.90,
+    "product_url": "https://www.aquashop.es/medidor-ph-milwaukee-sms122",
+    "img_url": "https://www.aquashop.es/img/productos/milwaukee-sms122.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Filtro mecánico algodón 100 micras",
+    "price": 12.95,
+    "product_url": "https://www.aquashop.es/filtro-mecanico-algodon-100-micras",
+    "img_url": "https://www.aquashop.es/img/productos/filtro-algodon-100.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Osmosis inversa RO 200 GPD",
+    "price": 89.00,
+    "product_url": "https://www.aquashop.es/osmosis-inversa-ro-200gpd",
+    "img_url": "https://www.aquashop.es/img/productos/ro-200gpd.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Refugio Refugium Macro Algae Kit",
+    "price": 64.50,
+    "product_url": "https://www.aquashop.es/refugio-macro-algae-kit",
+    "img_url": "https://www.aquashop.es/img/productos/refugium-kit.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Nitrato de potasio 500g (dosificación NO3)",
+    "price": 8.90,
+    "product_url": "https://www.aquashop.es/nitrato-potasio-500g",
+    "img_url": "https://www.aquashop.es/img/productos/kno3-500g.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Coral Frag Montípora capricornis naranja",
+    "price": 18.00,
+    "product_url": "https://www.aquashop.es/coral-montipora-capricornis-naranja",
+    "img_url": "https://www.aquashop.es/img/corales/montipora-capricornis.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Arena aragonita CaribSea Arag-Alive 9 kg",
+    "price": 42.00,
+    "product_url": "https://www.aquashop.es/arena-caribsea-arag-alive-9kg",
+    "img_url": "https://www.aquashop.es/img/productos/caribsea-arag-alive.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Termómetro digital con sonda Tunze 5017",
+    "price": 19.95,
+    "product_url": "https://www.aquashop.es/termometro-tunze-5017",
+    "img_url": "https://www.aquashop.es/img/productos/tunze-5017.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Test KH Salifert",
+    "price": 14.90,
+    "product_url": "https://www.aquashop.es/test-kh-salifert",
+    "img_url": "https://www.aquashop.es/img/productos/salifert-kh.jpg",
+    "store_name": "AquaShop"
+  },
+  {
+    "name": "Bomba de retorno Varios Eheim CompactON 600",
+    "price": 39.90,
+    "product_url": "https://www.aquashop.es/bomba-eheim-compacton-600",
+    "img_url": "https://www.aquashop.es/img/productos/eheim-compacton-600.jpg",
+    "store_name": "AquaShop"
+  }
+]

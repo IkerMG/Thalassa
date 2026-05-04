@@ -31,22 +31,17 @@ function UnreadDot({ type }: { type: NotificationItem['type'] }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-interface NotificationBellProps {
-  /** Controls which side the dropdown opens towards.
-   *  'right' (default) aligns the dropdown's right edge with the bell — correct for top-right fixed bell on mobile.
-   *  'left'  aligns the dropdown's left  edge with the bell — correct when the bell is inside the sidebar on desktop. */
-  align?: 'left' | 'right';
-}
+const PANEL_WIDTH = 320; // w-80
 
-export default function NotificationBell({ align = 'right' }: NotificationBellProps) {
+export default function NotificationBell() {
   const [open, setOpen]           = useState(false);
+  const [openRight, setOpenRight] = useState(true);
   const [readIds, setReadIds]     = useState<Set<number>>(new Set());
   const ref                       = useRef<HTMLDivElement>(null);
 
   const { data: serverItems = [] } = useNotifications();
   const paramAlerts                = useParameterAlerts();
 
-  // Parameter alerts first (more urgent), then server notifications
   const all: NotificationItem[] = [...paramAlerts, ...serverItems];
 
   const isRead = useCallback(
@@ -60,6 +55,14 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
   const markAllRead = () => {
     setReadIds(new Set(all.map((n) => n.id ?? 0)));
   };
+
+  // Detect which direction has room when the panel opens
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const spaceRight = window.innerWidth - rect.left;
+    setOpenRight(spaceRight >= PANEL_WIDTH);
+  }, [open]);
 
   // Close on outside click
   useEffect(() => {
@@ -108,7 +111,7 @@ export default function NotificationBell({ align = 'right' }: NotificationBellPr
           aria-label="Notificaciones"
           className={[
             'absolute top-10 w-80 bg-[#111] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 overflow-hidden',
-            align === 'left' ? 'left-0' : 'right-0',
+            openRight ? 'left-0 origin-top-left' : 'right-0 origin-top-right',
           ].join(' ')}
         >
           {/* Header */}

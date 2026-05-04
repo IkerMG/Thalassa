@@ -18,6 +18,9 @@
     "noEquipment": "This aquarium has no equipment",
     "noEquipmentDesc": "Add equipment in the aquarium profile to calculate energy consumption.",
     "manageEquipment": "Manage equipment",
-    "changeInProfile": "Change in profile"
+    "changeInProfile": "Change in profile",
+    "missingKwhPrice": "Electricity price not configured",
+    "missingKwhPriceDesc": "Set your kWh price in your profile to calculate the monthly cost of your equipment.",
+    "goToProfile": "Go to profile"
   }
 }

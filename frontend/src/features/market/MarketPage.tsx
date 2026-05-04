@@ -6,6 +6,7 @@ import { marketApi, type ScraperResult } from '../../api/marketApi';
 import { useAddWishlistItem } from '../../hooks/mutations/useAddWishlistItem';
 import EmptyState from '../../components/shared/EmptyState';
 import fallbackData from '../../data/market-fallback.json';
+import { normalizeExternalUrl } from '../../lib/url';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -55,11 +56,14 @@ interface CardProps {
   product: ScraperResult;
   onAddToWishlist: (product: ScraperResult) => void;
   isAdding: boolean;
+  fromCache?: boolean;
 }
 
-function ProductCard({ product, onAddToWishlist, isAdding }: CardProps) {
+function ProductCard({ product, onAddToWishlist, isAdding, fromCache }: CardProps) {
+  const { t } = useTranslation('market');
   const store = product.storeName ?? '';
   const storeBadge = STORE_COLORS[store] ?? 'text-[#A0A0A0] border-[rgba(255,255,255,0.12)]';
+  const productHref = normalizeExternalUrl(product.productUrl);
 
   return (
     <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl flex flex-col overflow-hidden hover:border-[rgba(255,255,255,0.14)] transition-colors group">
@@ -85,33 +89,40 @@ function ProductCard({ product, onAddToWishlist, isAdding }: CardProps) {
           {product.name ?? '—'}
         </p>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-1 flex-wrap">
           <span className="text-white font-mono font-semibold">
             {product.price != null ? `€${product.price.toFixed(2)}` : '—'}
           </span>
-          {store && (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border capitalize ${storeBadge}`}>
-              {store}
-            </span>
-          )}
+          <div className="flex items-center gap-1">
+            {fromCache && (
+              <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded border text-[#59D3FF] border-[rgba(89,211,255,0.25)] bg-[rgba(89,211,255,0.05)]">
+                {t('cachedBadge')}
+              </span>
+            )}
+            {store && (
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border capitalize ${storeBadge}`}>
+                {store}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-2 pt-1">
-          {product.productUrl ? (
+          {productHref ? (
             <a
-              href={product.productUrl}
+              href={productHref}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] text-xs font-medium hover:text-white hover:border-[rgba(255,255,255,0.25)] transition-colors"
             >
               <ExternalLink size={12} />
-              Ver
+              {t('viewProduct')}
             </a>
           ) : (
             <span className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.04)] text-[#383838] text-xs font-medium cursor-not-allowed select-none">
               <ExternalLink size={12} />
-              Ver
+              {t('viewProduct')}
             </span>
           )}
           <button
@@ -174,6 +185,7 @@ export default function MarketPage() {
   const { mutate: addToWishlist, isPending: isAdding } = useAddWishlistItem();
 
   const isScraperDown = !!data?.errorCode;
+  const fromCache = data?.fromCache === true;
   const usingFallback = isScraperDown;
 
   // Build display list
@@ -336,6 +348,7 @@ export default function MarketPage() {
               product={product}
               onAddToWishlist={handleAddToWishlist}
               isAdding={isAdding}
+              fromCache={fromCache}
             />
           ))}
         </div>

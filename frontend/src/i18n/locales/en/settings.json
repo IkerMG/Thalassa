@@ -1,0 +1,32 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your profile and preferences",
+  "profile": {
+    "sectionTitle": "Profile",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Your community name",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saveSuccess": "Profile updated successfully",
+    "saveError": "Failed to update profile"
+  },
+  "preferences": {
+    "sectionTitle": "Preferences",
+    "temperatureUnit": "Temperature unit",
+    "volumeUnit": "Volume unit",
+    "electricityPrice": "Electricity price (€/kWh)",
+    "electricityPricePlaceholder": "e.g. 0.15",
+    "language": "Language"
+  },
+  "security": {
+    "sectionTitle": "Security",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Minimum 8 characters",
+    "changePassword": "Change password",
+    "changing": "Changing...",
+    "changeSuccess": "Password changed successfully",
+    "changeError": "Current password is incorrect",
+    "changeErrorGeneric": "Failed to change password"
+  }
+}

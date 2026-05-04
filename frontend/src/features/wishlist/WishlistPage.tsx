@@ -17,6 +17,7 @@ import {
   type WishlistEditFormValues,
 } from '../../lib/schemas/wishlist.schemas';
 import Button from '../../components/ui/Button';
+import { normalizeExternalUrl } from '../../lib/url';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import EmptyState from '../../components/shared/EmptyState';
@@ -78,6 +79,7 @@ interface CardProps {
 }
 
 function WishlistItemCard({ item, onEdit, onDelete }: CardProps) {
+  const productHref = normalizeExternalUrl(item.productUrl);
   return (
     <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex flex-col gap-3 hover:border-[rgba(255,255,255,0.14)] transition-colors">
       {/* Header */}
@@ -86,9 +88,9 @@ function WishlistItemCard({ item, onEdit, onDelete }: CardProps) {
           {item.productName}
         </p>
         <div className="flex items-center gap-1 shrink-0 mt-0.5">
-          {item.productUrl && (
+          {productHref && (
             <a
-              href={item.productUrl}
+              href={productHref}
               target="_blank"
               rel="noopener noreferrer"
               className="p-1 rounded-md text-[#555] hover:text-[#59D3FF] hover:bg-[rgba(89,211,255,0.06)] transition-colors"

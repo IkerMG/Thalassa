@@ -18,6 +18,8 @@ const AquariumDetailPage = lazy(() => import('../features/aquarium-detail/Aquari
 const MarketPage = lazy(() => import('../features/market/MarketPage'));
 const WishlistPage = lazy(() => import('../features/wishlist/WishlistPage'));
 const ProfilePage = lazy(() => import('../features/profile/ProfilePage'));
+const SettingsPage = lazy(() => import('../features/settings/SettingsPage'));
+const CheckoutPage = lazy(() => import('../features/checkout/CheckoutPage'));
 const DosingCalcPage = lazy(() => import('../features/calculators/DosingCalcPage'));
 const EnergyCalcPage = lazy(() => import('../features/calculators/EnergyCalcPage'));
 
@@ -63,6 +65,8 @@ export default function AppRouter() {
             <Route path="/dashboard/market" element={<MarketPage />} />
             <Route path="/dashboard/wishlist" element={<WishlistPage />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
+            <Route path="/dashboard/profile/settings" element={<SettingsPage />} />
+            <Route path="/dashboard/checkout" element={<CheckoutPage />} />
             <Route path="/dashboard/calculator/dosing" element={<DosingCalcPage />} />
             <Route path="/dashboard/calculator/energy" element={<EnergyCalcPage />} />
           </Route>

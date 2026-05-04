@@ -18,6 +18,9 @@
     "noEquipment": "Este acuario no tiene equipos",
     "noEquipmentDesc": "Añade equipos en la ficha del acuario para calcular el consumo energético.",
     "manageEquipment": "Gestionar equipos",
-    "changeInProfile": "Cambiar en perfil"
+    "changeInProfile": "Cambiar en perfil",
+    "missingKwhPrice": "Precio de la electricidad no configurado",
+    "missingKwhPriceDesc": "Configura tu precio por kWh en el perfil para calcular el coste mensual de tus equipos.",
+    "goToProfile": "Ir al perfil"
   }
 }

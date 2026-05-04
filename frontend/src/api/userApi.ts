@@ -3,6 +3,7 @@ import type { components } from './generated/schema';
 
 export type UserProfile = components['schemas']['UserResponse'];
 export type UpdateUserRequest = components['schemas']['UpdateUserRequest'];
+export type ChangePasswordRequest = components['schemas']['ChangePasswordRequest'];
 
 export const userApi = {
   getProfile: () =>
@@ -13,4 +14,7 @@ export const userApi = {
 
   simulateUpgrade: () =>
     api.post<UserProfile>('/users/me/simulate-upgrade').then((r) => r.data),
+
+  changePassword: (data: ChangePasswordRequest) =>
+    api.post<void>('/users/me/password', data).then((r) => r.data),
 };

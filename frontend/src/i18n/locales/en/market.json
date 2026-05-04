@@ -5,5 +5,8 @@
   "noResults": "No results",
   "noResultsDesc": "No products found for \"{{query}}\".",
   "clearFilters": "Clear filters",
-  "fallbackNotice": "The scraper is currently unavailable. Showing sample catalogue."
+  "fallbackNotice": "The scraper is currently unavailable. Showing sample catalogue.",
+  "cachedBadge": "Demo data",
+  "viewProduct": "View product",
+  "addToWishlist": "Add to wishlist"
 }

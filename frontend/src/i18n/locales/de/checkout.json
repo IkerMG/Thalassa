@@ -1,0 +1,35 @@
+{
+  "title": "Reef Master aktivieren",
+  "subtitle": "Schließe die Zahlung ab, um alle Premium-Funktionen freizuschalten.",
+  "plan": {
+    "name": "Reef Master",
+    "price": "9,99 € / Monat",
+    "features": [
+      "Unbegrenzte Aquarien",
+      "Erweiterter KI-Assistent",
+      "Echtzeit-Parameteralarme",
+      "Prioritätszugang zu neuen Funktionen"
+    ]
+  },
+  "form": {
+    "cardNumber": "Kartennummer",
+    "cardNumberPlaceholder": "1234 5678 9012 3456",
+    "cardHolder": "Karteninhaber",
+    "cardHolderPlaceholder": "Wie auf der Karte angegeben",
+    "expiry": "Ablaufdatum",
+    "expiryPlaceholder": "MM/JJ",
+    "cvv": "CVV",
+    "cvvPlaceholder": "123",
+    "submit": "Jetzt aktivieren",
+    "submitting": "Wird verarbeitet...",
+    "cardInvalid": "Ungültige Kartennummer",
+    "expiryInvalid": "Ungültiges Ablaufdatum",
+    "cvvInvalid": "Ungültiger CVV"
+  },
+  "success": {
+    "title": "Willkommen bei Reef Master!",
+    "message": "Dein Konto wurde aktualisiert. Genieße alle Premium-Funktionen.",
+    "cta": "Zum Dashboard"
+  },
+  "demo": "Simulierte Zahlung — es wird kein echter Betrag belastet."
+}

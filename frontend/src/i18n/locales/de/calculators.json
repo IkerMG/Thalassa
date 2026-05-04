@@ -18,6 +18,9 @@
     "noEquipment": "Dieses Aquarium hat keine Geräte",
     "noEquipmentDesc": "Füge Geräte im Aquariumprofil hinzu, um den Energieverbrauch zu berechnen.",
     "manageEquipment": "Geräte verwalten",
-    "changeInProfile": "Im Profil ändern"
+    "changeInProfile": "Im Profil ändern",
+    "missingKwhPrice": "Strompreis nicht konfiguriert",
+    "missingKwhPriceDesc": "Lege deinen kWh-Preis im Profil fest, um die monatlichen Kosten deiner Geräte zu berechnen.",
+    "goToProfile": "Zum Profil"
   }
 }

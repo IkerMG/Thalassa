@@ -8,6 +8,7 @@ import {
   Bot,
   User,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -66,8 +67,7 @@ export default function Sidebar() {
       {/* Logo + NotificationBell */}
       <div className="px-6 py-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between">
         <span className="text-lg font-bold tracking-widest text-white">THALASSA</span>
-        {/* align="left" so the dropdown opens rightward into the main content area, not off-screen */}
-        <NotificationBell align="left" />
+        <NotificationBell />
       </div>
 
       {/* Nav items */}
@@ -111,6 +111,18 @@ export default function Sidebar() {
               </span>
             )}
           </NavLink>
+          <button
+            onClick={openChat}
+            className={[
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
+              isChatOpen
+                ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
+                : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
+            ].join(' ')}
+          >
+            <Bot size={18} />
+            <span className="flex-1">{t('aiAssistant')}</span>
+          </button>
         </div>
 
         {/* ── EXPLORAR ── */}
@@ -132,34 +144,25 @@ export default function Sidebar() {
           </NavLink>
         </div>
 
-        {/* ── ASISTENTE ── */}
+        {/* ── CONFIGURACIÓN ── */}
         <div className="mt-3">
-          <NavSection label={t('sectionAssistant')} />
-          <button
-            onClick={openChat}
-            className={[
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
-              isChatOpen
-                ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
-            ].join(' ')}
+          <NavSection label={t('sectionConfig')} />
+          <NavLink
+            to="/dashboard/profile"
+            end
+            className={({ isActive }) => navLinkClass(isActive)}
           >
-            <Bot size={18} />
-            <span className="flex-1">{t('aiAssistant')}</span>
-          </button>
+            <User size={18} />
+            <span className="flex-1">{t('profile')}</span>
+          </NavLink>
+          <NavLink
+            to="/dashboard/profile/settings"
+            className={({ isActive }) => navLinkClass(isActive)}
+          >
+            <Settings size={18} />
+            <span className="flex-1">{t('settings')}</span>
+          </NavLink>
         </div>
-
-        {/* Separator */}
-        <div className="my-4 border-t border-[rgba(255,255,255,0.06)]" />
-
-        {/* Profile */}
-        <NavLink
-          to="/dashboard/profile"
-          className={({ isActive }) => navLinkClass(isActive, false)}
-        >
-          <User size={18} />
-          <span>{t('profile')}</span>
-        </NavLink>
       </nav>
 
       {/* Logout at bottom */}

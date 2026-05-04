@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,8 @@ const inputClass = `
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = searchParams.get('next') ?? '/dashboard';
   const { register: registerUser } = useAuth();
   const [apiError, setApiError] = useState('');
 
@@ -31,7 +33,7 @@ export default function RegisterPage() {
     setApiError('');
     try {
       await registerUser(data);
-      navigate('/dashboard', { replace: true });
+      navigate(nextPath, { replace: true });
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message;

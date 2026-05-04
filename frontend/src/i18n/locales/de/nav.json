@@ -11,5 +11,7 @@
   "sectionHome": "START",
   "sectionTools": "WERKZEUGE",
   "sectionExplore": "ENTDECKEN",
-  "sectionAssistant": "ASSISTENT"
+  "sectionAssistant": "ASSISTENT",
+  "sectionConfig": "EINSTELLUNGEN",
+  "settings": "Einstellungen"
 }
