@@ -2,6 +2,7 @@ package com.thalassa.backend.services;
 
 import com.thalassa.backend.dto.UpdateUserRequest;
 import com.thalassa.backend.dto.UserResponse;
+import com.thalassa.backend.models.SubscriptionPlan;
 import com.thalassa.backend.models.User;
 import com.thalassa.backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -44,6 +45,14 @@ public class UserService {
     if (request.getVolumeUnit() != null) {
       user.setVolumeUnit(request.getVolumeUnit());
     }
+    User saved = userRepository.save(user);
+    return mapToResponse(saved);
+  }
+
+  @Transactional
+  public UserResponse simulateUpgrade() {
+    User user = getAuthenticatedUser();
+    user.setSubscriptionPlan(SubscriptionPlan.REEFMASTER);
     User saved = userRepository.save(user);
     return mapToResponse(saved);
   }

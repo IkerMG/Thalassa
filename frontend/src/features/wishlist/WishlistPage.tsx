@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Plus, ExternalLink, Pencil, Trash2, ShoppingBag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { WishlistItem } from '../../api/wishlistApi';
@@ -151,6 +152,7 @@ interface AddModalProps {
 }
 
 function AddWishlistModal({ open, onClose }: AddModalProps) {
+  const { t } = useTranslation('wishlist');
   const { mutate, isPending } = useAddWishlistItem();
   const {
     register,
@@ -181,7 +183,7 @@ function AddWishlistModal({ open, onClose }: AddModalProps) {
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="Añadir a wishlist">
+    <Modal open={open} onClose={handleClose} title={t('addModalTitle')}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <Input
           label="Nombre del producto *"
@@ -283,6 +285,7 @@ interface EditModalProps {
 }
 
 function EditWishlistModal({ item, onClose }: EditModalProps) {
+  const { t } = useTranslation('wishlist');
   const { mutate, isPending } = useUpdateWishlistItem();
   const {
     register,
@@ -305,7 +308,7 @@ function EditWishlistModal({ item, onClose }: EditModalProps) {
   };
 
   return (
-    <Modal open={!!item} onClose={onClose} title="Editar item">
+    <Modal open={!!item} onClose={onClose} title={t('editModalTitle')}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
@@ -376,6 +379,7 @@ function WishlistSkeleton() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function WishlistPage() {
+  const { t } = useTranslation('wishlist');
   const navigate = useNavigate();
   const { data: items = [], isLoading } = useWishlist();
   const { mutateAsync: removeItem } = useRemoveWishlistItem();
@@ -407,17 +411,17 @@ export default function WishlistPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Heart size={22} className="text-[#59D3FF]" />
-            Wishlist
+            {t('title')}
           </h1>
           <p className="text-sm text-[#A0A0A0] mt-1">
             {items.length === 0
-              ? 'Guarda lo que quieres conseguir'
+              ? t('saveDesc')
               : `${items.length} ${items.length === 1 ? 'item guardado' : 'items guardados'}`}
           </p>
         </div>
         <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
           <Plus size={16} />
-          Añadir
+          {t('add')}
         </Button>
       </div>
 
@@ -445,17 +449,17 @@ export default function WishlistPage() {
       {items.length === 0 ? (
         <EmptyState
           icon={Heart}
-          title="Tu wishlist está vacía"
-          description="Guarda las especies y equipos que quieres añadir en el futuro."
+          title={t('emptyTitle')}
+          description={t('emptyDesc')}
           action={
             <div className="flex gap-3">
               <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
                 <Plus size={16} />
-                Añadir item
+                {t('addItem')}
               </Button>
               <Button variant="secondary" size="md" onClick={() => navigate('/dashboard/market')}>
                 <ShoppingBag size={15} />
-                Ir al Market
+                {t('goToMarket')}
               </Button>
             </div>
           }
@@ -467,7 +471,7 @@ export default function WishlistPage() {
           description={`No tienes items en la categoría "${FILTERS.find((f) => f.value === activeFilter)?.label}".`}
           action={
             <Button variant="ghost" size="md" onClick={() => setActiveFilter('all')}>
-              Ver todos
+              {t('viewAll')}
             </Button>
           }
         />

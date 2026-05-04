@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FlaskConical, CheckCircle2, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -65,10 +66,11 @@ const PARAM_INPUT_CLASS =
   'w-20 bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-2 text-sm text-white text-center outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors font-mono';
 
 function OkRow({ label }: { label: string }) {
+  const { t } = useTranslation('calculators');
   return (
     <div className="flex items-center gap-2 py-2.5 px-4 text-sm text-[#555]">
       <CheckCircle2 size={14} className="text-emerald-500/60 shrink-0" />
-      <span>{label} — sin ajuste necesario</span>
+      <span>{label} — {t('dosing.noAdjustment')}</span>
     </div>
   );
 }
@@ -98,6 +100,7 @@ function DoseRow({ dot, label, value, unit, note }: DoseRowProps) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function DosingCalcPage() {
+  const { t } = useTranslation('calculators');
   const { data: aquariums = [] } = useAquariums();
   const [results, setResults] = useState<Results | null>(null);
 
@@ -137,11 +140,9 @@ export default function DosingCalcPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <FlaskConical size={22} className="text-[#59D3FF]" />
-          Calculadora de Dosis
+          {t('dosing.title')}
         </h1>
-        <p className="text-sm text-[#A0A0A0] mt-1">
-          Calcula las dosis exactas de aditivos para alcanzar tus parámetros objetivo.
-        </p>
+        <p className="text-sm text-[#A0A0A0] mt-1">{t('dosing.description')}</p>
       </div>
 
       <PlanGate feature="calculator_dosage">
@@ -244,7 +245,7 @@ export default function DosingCalcPage() {
 
           <Button type="submit" variant="primary" size="md" className="self-end">
             <FlaskConical size={15} />
-            Calcular
+            {t('dosing.calculate')}
           </Button>
         </form>
 
@@ -253,7 +254,7 @@ export default function DosingCalcPage() {
           <div className="mt-6 bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]">
               <p className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide">
-                Dosis recomendadas
+                {t('dosing.recommendedDoses')}
               </p>
             </div>
 
@@ -335,8 +336,7 @@ export default function DosingCalcPage() {
             {/* Disclaimer */}
             <div className="px-4 py-3 border-t border-[rgba(255,255,255,0.04)] bg-[rgba(255,200,0,0.03)]">
               <p className="text-[11px] text-[#444] leading-relaxed">
-                ⚠️ Valores orientativos. Las concentraciones reales varían según el producto comercial.
-                Añade los aditivos gradualmente y verifica con un test antes de dosificar de nuevo.
+                ⚠️ {t('dosing.disclaimer')}
               </p>
             </div>
           </div>

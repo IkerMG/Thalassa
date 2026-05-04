@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Wrench, TrendingUp, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { EnergyResponse } from '../../api/equipmentApi';
 import { useAquariums } from '../../hooks/queries/useAquariums';
 import { useEnergyCalc } from '../../hooks/queries/useEnergyCalc';
@@ -79,6 +80,7 @@ interface ResultsProps {
 }
 
 function EnergyResults({ data, aquariumId }: ResultsProps) {
+  const { t } = useTranslation('calculators');
   const navigate = useNavigate();
   const breakdown = data.equipmentBreakdown ?? [];
   const totalKwh = breakdown.reduce(
@@ -91,14 +93,14 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <SummaryCard
-          label="Consumo mensual"
+          label={t('energy.monthlyConsumption')}
           value={fmt(totalKwh, 1)}
           unit="kWh/mes"
           icon={Zap}
           accent
         />
         <SummaryCard
-          label="Coste estimado"
+          label={t('energy.estimatedCost')}
           value={fmt(data.totalMonthlyCost)}
           unit={`${data.currencySymbol ?? '€'}/mes`}
           icon={TrendingUp}
@@ -119,7 +121,7 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
           onClick={() => navigate('/dashboard/profile')}
           className="text-[#59D3FF] hover:underline cursor-pointer"
         >
-          Cambiar en perfil →
+          {t('energy.changeInProfile')} →
         </button>
       </p>
 
@@ -127,13 +129,13 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
       <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
           <p className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide">
-            Desglose por equipo
+            {t('energy.breakdown')}
           </p>
         </div>
 
         {breakdown.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-sm text-[#555]">Sin equipos para desglosar.</p>
+            <p className="text-sm text-[#555]">{t('energy.noBreakdown')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -213,7 +215,7 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
           onClick={() => navigate(`/dashboard/aquarium/${aquariumId}`)}
         >
           <ExternalLink size={13} />
-          Gestionar equipos
+          {t('energy.manageEquipment')}
         </Button>
       </div>
     </div>
@@ -223,6 +225,7 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function EnergyCalcPage() {
+  const { t } = useTranslation('calculators');
   const { data: aquariums = [], isLoading: loadingAquariums } = useAquariums();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -238,11 +241,9 @@ export default function EnergyCalcPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <Zap size={22} className="text-[#59D3FF]" />
-          Calculadora de Energía
+          {t('energy.title')}
         </h1>
-        <p className="text-sm text-[#A0A0A0] mt-1">
-          Estima el consumo mensual de todos los equipos de tu acuario.
-        </p>
+        <p className="text-sm text-[#A0A0A0] mt-1">{t('energy.description')}</p>
       </div>
 
       <PlanGate feature="calculator_energy">
@@ -250,7 +251,7 @@ export default function EnergyCalcPage() {
           {/* Aquarium selector */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
-              Selecciona un acuario
+              {t('energy.selectAquarium')}
             </label>
             {loadingAquariums ? (
               <div className="h-12 bg-[rgba(255,255,255,0.04)] rounded-lg animate-pulse" />
@@ -290,10 +291,10 @@ export default function EnergyCalcPage() {
                     <Wrench size={20} className="text-[#555]" />
                   </div>
                   <p className="text-white font-medium text-sm">
-                    Este acuario no tiene equipos
+                    {t('energy.noEquipment')}
                   </p>
                   <p className="text-[#666] text-xs max-w-xs">
-                    Añade equipos en la ficha del acuario para calcular el consumo energético.
+                    {t('energy.noEquipmentDesc')}
                   </p>
                   <a
                     href={`/dashboard/aquarium/${selectedId}`}

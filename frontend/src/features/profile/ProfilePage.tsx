@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '../../store/authStore';
 import { useUpdateProfile } from '../../hooks/mutations/useUpdateProfile';
+import { useSimulateUpgrade } from '../../hooks/mutations/useSimulateUpgrade';
 import { useUserProfile } from '../../hooks/queries/useUserProfile';
 import { toast } from '../../lib/toast';
 import Input from '../../components/ui/Input';
@@ -213,6 +214,7 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation('profile');
   const user = useAuthStore((s) => s.user);
   const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: simulateUpgrade, isPending: isUpgrading } = useSimulateUpgrade();
 
   if (!user) return null;
 
@@ -252,6 +254,35 @@ export default function ProfilePage() {
             {user.plan}
           </span>
         </div>
+
+        {/* Reef Master upgrade CTA — only shown on FREE plan */}
+        {!isReefMaster && (
+          <div className="mt-5 pt-5 border-t border-[rgba(255,255,255,0.06)]">
+            <button
+              disabled={isUpgrading}
+              onClick={() =>
+                simulateUpgrade(undefined, {
+                  onSuccess: () => toast.success(t('plan.upgradeSuccess')),
+                  onError:   () => toast.error('Error al actualizar el plan. Inténtalo de nuevo.'),
+                })
+              }
+              className="
+                w-full flex items-center justify-center gap-2
+                px-5 py-3 rounded-xl
+                bg-gradient-to-r from-amber-400 to-orange-500
+                text-white font-bold text-sm tracking-wide
+                shadow-lg shadow-orange-500/30
+                hover:brightness-110 hover:shadow-orange-500/50
+                active:scale-[0.98]
+                disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
+                transition-all duration-150 cursor-pointer
+              "
+            >
+              <Crown size={16} />
+              {isUpgrading ? 'Actualizando…' : t('plan.upgradeButton')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Language selector */}
@@ -284,7 +315,7 @@ export default function ProfilePage() {
       <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-5">
           <Settings size={16} className="text-[#59D3FF]" />
-          <span className="text-sm font-medium text-white">Configuración</span>
+          <span className="text-sm font-medium text-white">{t('settings.title')}</span>
         </div>
         <SettingsForm />
       </div>

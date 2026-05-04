@@ -10,4 +10,7 @@ export const userApi = {
 
   updateProfile: (data: UpdateUserRequest) =>
     api.put<UserProfile>('/users/me', data).then((r) => r.data),
+
+  simulateUpgrade: () =>
+    api.post<UserProfile>('/users/me/simulate-upgrade').then((r) => r.data),
 };

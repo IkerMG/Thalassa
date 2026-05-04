@@ -25,6 +25,6 @@
 
 ## Fase 15C — Profile, i18n & Premium Flow
 
-- [ ] **Traducciones (i18n):** Revisar las nuevas vistas (Market, Calculadoras, Wishlist) y añadir los textos faltantes a los archivos de internacionalización.
+- [x] **Traducciones (i18n):** Revisar las nuevas vistas (Market, Calculadoras, Wishlist) y añadir los textos faltantes a los archivos de internacionalización.
 
-- [ ] **Flujo Reef Master & Perfil:** Consolidar la configuración del usuario en el Profile. Añadir un botón *Simular Upgrade a Reef Master* con aspecto premium (gradiente ámbar-naranja, icono de corona, sombra). Al pulsarlo, actualiza el estado del usuario para desbloquear las calculadoras.
+- [x] **Flujo Reef Master & Perfil:** Consolidar la configuración del usuario en el Profile. Añadir un botón *Simular Upgrade a Reef Master* con aspecto premium (gradiente ámbar-naranja, icono de corona, sombra). Al pulsarlo, actualiza el estado del usuario para desbloquear las calculadoras.

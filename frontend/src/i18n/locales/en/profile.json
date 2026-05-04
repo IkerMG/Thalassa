@@ -7,6 +7,11 @@
     "es": "Español"
   },
   "settings": {
-    "comingSoonText": "Preference editing will be available soon."
+    "comingSoonText": "Preference editing will be available soon.",
+    "title": "Settings"
+  },
+  "plan": {
+    "upgradeButton": "Simulate Upgrade to Reef Master",
+    "upgradeSuccess": "Reef Master plan activated! Calculators are now unlocked."
   }
 }

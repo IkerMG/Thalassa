@@ -6,6 +6,7 @@ import com.thalassa.backend.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +36,15 @@ public class UserController {
   public ResponseEntity<UserResponse> updateElectricityPrice(
       @Valid @RequestBody UpdateUserRequest request) {
     return ResponseEntity.ok(userService.updateElectricityPrice(request));
+  }
+
+  /**
+   * POST /api/users/me/simulate-upgrade Promueve al usuario autenticado al plan REEFMASTER en base
+   * de datos. Endpoint de simulación para QA/dev — en producción se sustituiría por un flujo de
+   * pago real.
+   */
+  @PostMapping("/me/simulate-upgrade")
+  public ResponseEntity<UserResponse> simulateUpgrade() {
+    return ResponseEntity.ok(userService.simulateUpgrade());
   }
 }

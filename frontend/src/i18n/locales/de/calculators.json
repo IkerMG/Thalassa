@@ -1,0 +1,23 @@
+{
+  "dosing": {
+    "title": "Dosierrechner",
+    "description": "Berechne genaue Additivdosen um deine Zielparameter zu erreichen.",
+    "calculate": "Berechnen",
+    "recommendedDoses": "Empfohlene Dosen",
+    "noAdjustment": "keine Anpassung nötig",
+    "disclaimer": "Orientierungswerte. Die tatsächlichen Konzentrationen variieren je nach Produkt. Additive schrittweise zugeben und vor erneuter Dosierung testen."
+  },
+  "energy": {
+    "title": "Energierechner",
+    "description": "Schätze den monatlichen Verbrauch aller Geräte deines Aquariums.",
+    "selectAquarium": "Aquarium auswählen",
+    "monthlyConsumption": "Monatsverbrauch",
+    "estimatedCost": "Geschätzte Kosten",
+    "breakdown": "Geräteaufschlüsselung",
+    "noBreakdown": "Keine Geräte zum Aufschlüsseln.",
+    "noEquipment": "Dieses Aquarium hat keine Geräte",
+    "noEquipmentDesc": "Füge Geräte im Aquariumprofil hinzu, um den Energieverbrauch zu berechnen.",
+    "manageEquipment": "Geräte verwalten",
+    "changeInProfile": "Im Profil ändern"
+  }
+}

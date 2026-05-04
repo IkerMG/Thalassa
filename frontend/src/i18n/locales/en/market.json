@@ -1,0 +1,9 @@
+{
+  "title": "Market",
+  "description": "Find equipment and products at the best reef aquarium stores.",
+  "searchPlaceholder": "Search products...",
+  "noResults": "No results",
+  "noResultsDesc": "No products found for \"{{query}}\".",
+  "clearFilters": "Clear filters",
+  "fallbackNotice": "The scraper is currently unavailable. Showing sample catalogue."
+}

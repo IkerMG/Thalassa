@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Heart, ExternalLink, AlertTriangle, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { marketApi, type ScraperResult } from '../../api/marketApi';
 import { useAddWishlistItem } from '../../hooks/mutations/useAddWishlistItem';
@@ -149,6 +150,7 @@ function GridSkeleton() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function MarketPage() {
+  const { t } = useTranslation('market');
   const [inputValue, setInputValue]       = useState('');
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
   const [storeFilter, setStoreFilter]     = useState<StoreFilter>('all');
@@ -232,11 +234,9 @@ export default function MarketPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <ShoppingBag size={22} className="text-[#59D3FF]" />
-          Market
+          {t('title')}
         </h1>
-        <p className="text-sm text-[#A0A0A0] mt-1">
-          Encuentra equipamiento y productos en las mejores tiendas de acuariofilia.
-        </p>
+        <p className="text-sm text-[#A0A0A0] mt-1">{t('description')}</p>
       </div>
 
       {/* Search bar */}
@@ -246,7 +246,7 @@ export default function MarketPage() {
           type="text"
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Buscar productos..."
+          placeholder={t('searchPlaceholder')}
           className="w-full bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg pl-9 pr-9 py-3 text-sm text-white placeholder-[#444] outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors"
         />
         {inputValue && (
@@ -307,9 +307,7 @@ export default function MarketPage() {
       {usingFallback && (
         <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[rgba(251,191,36,0.06)] border border-[rgba(251,191,36,0.18)]">
           <AlertTriangle size={13} className="text-yellow-400 shrink-0" />
-          <p className="text-xs text-yellow-400/80">
-            El buscador no está disponible ahora mismo. Mostrando catálogo de muestra.
-          </p>
+          <p className="text-xs text-yellow-400/80">{t('fallbackNotice')}</p>
         </div>
       )}
 
@@ -319,14 +317,14 @@ export default function MarketPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={ShoppingBag}
-          title="Sin resultados"
-          description={`No encontramos productos para "${debouncedInput || activeCategoryDef.label}".`}
+          title={t('noResults')}
+          description={t('noResultsDesc', { query: debouncedInput || activeCategoryDef.label })}
           action={
             <button
               onClick={() => { setInputValue(''); setActiveCategory('all'); setStoreFilter('all'); }}
               className="text-sm text-[#59D3FF] hover:underline cursor-pointer"
             >
-              Limpiar filtros
+              {t('clearFilters')}
             </button>
           }
         />
