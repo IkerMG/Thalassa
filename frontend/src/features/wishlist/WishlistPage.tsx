@@ -176,7 +176,7 @@ function AddWishlistModal({ open, onClose }: AddModalProps) {
         productUrl: values.productUrl ?? '',
         storeName: values.storeName ?? '',
         imgUrl: null,
-        category: values.category ?? null,
+        category: values.category ?? undefined,
         priority: values.priority ?? null,
         notes: values.notes ?? null,
       },

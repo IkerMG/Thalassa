@@ -13,6 +13,7 @@ import com.thalassa.backend.models.SubscriptionPlan;
 import com.thalassa.backend.models.User;
 import com.thalassa.backend.repositories.AquariumRepository;
 import com.thalassa.backend.repositories.UserRepository;
+import com.thalassa.backend.repositories.WaterParameterRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ class ChatServiceTest {
   @Mock RestClient scraperRestClient;
   @Mock UserRepository userRepository;
   @Mock AquariumRepository aquariumRepository;
+  @Mock WaterParameterRepository waterParameterRepository;
 
   // Spy created manually in setUp() — allows stubbing package-private callPythonChat
   ChatService chatService;
@@ -45,7 +47,7 @@ class ChatServiceTest {
 
   @BeforeEach
   void setUp() {
-    chatService = spy(new ChatService(scraperRestClient, userRepository, aquariumRepository));
+    chatService = spy(new ChatService(scraperRestClient, userRepository, aquariumRepository, waterParameterRepository));
     ReflectionTestUtils.setField(chatService, "freeDailyLimit", FREE_DAILY_LIMIT);
   }
 

@@ -185,7 +185,7 @@ export default function MarketPage() {
   const { mutate: addToWishlist, isPending: isAdding } = useAddWishlistItem();
 
   const isScraperDown = !!data?.errorCode;
-  const fromCache = data?.fromCache === true;
+  const fromCache = (data as any)?.fromCache === true;
   const usingFallback = isScraperDown;
 
   // Build display list
@@ -232,7 +232,7 @@ export default function MarketPage() {
       productUrl:   product.productUrl ?? '',
       storeName:    product.storeName  ?? '',
       imgUrl:       product.imgUrl ?? null,
-      category:     null,
+      category:     undefined,
       priority:     'MEDIUM',
       notes:        null,
     });

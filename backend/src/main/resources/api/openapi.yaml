@@ -1279,7 +1279,6 @@ components:
             'KWH_PRICE_MISSING' si el usuario no ha configurado su precio de la luz.
             'NO_EQUIPMENT' si el acuario no tiene ningún equipo registrado.
             null si el cálculo es correcto.
-          enum: [KWH_PRICE_MISSING, NO_EQUIPMENT]
 
     # ── Fauna ─────────────────────────────────────────────────────────────────
 

@@ -3,7 +3,6 @@ import { User, Crown, Mail, Globe, Settings, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { useUpdateProfile } from '../../hooks/mutations/useUpdateProfile';
-import Button from '../../components/ui/Button';
 
 // ── Language selectors ────────────────────────────────────────────────────────
 

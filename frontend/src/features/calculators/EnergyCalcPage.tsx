@@ -226,6 +226,7 @@ function EnergyResults({ data, aquariumId }: ResultsProps) {
 
 export default function EnergyCalcPage() {
   const { t } = useTranslation('calculators');
+  const navigate = useNavigate();
   const { data: aquariums = [], isLoading: loadingAquariums } = useAquariums();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
