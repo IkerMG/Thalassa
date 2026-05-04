@@ -7,5 +7,9 @@
   "wishlist": "Wunschliste",
   "aiAssistant": "KI-Assistent",
   "profile": "Profil",
-  "logout": "Abmelden"
+  "logout": "Abmelden",
+  "sectionHome": "START",
+  "sectionTools": "WERKZEUGE",
+  "sectionExplore": "ENTDECKEN",
+  "sectionAssistant": "ASSISTENT"
 }

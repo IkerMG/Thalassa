@@ -15,6 +15,32 @@ import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import NotificationBell from '../shared/NotificationBell';
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function NavSection({ label }: { label: string }) {
+  return (
+    <p className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-widest text-[#383838] uppercase select-none">
+      {label}
+    </p>
+  );
+}
+
+function navLinkClass(isActive: boolean, withIndicator = true) {
+  return [
+    'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative',
+    isActive
+      ? [
+          'text-[#59D3FF] bg-[rgba(89,211,255,0.08)]',
+          withIndicator
+            ? 'before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
+            : '',
+        ].join(' ')
+      : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
+  ].join(' ');
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function Sidebar() {
   const { t } = useTranslation('nav');
   const navigate = useNavigate();
@@ -22,14 +48,7 @@ export default function Sidebar() {
   const plan = useAuthStore((s) => s.user?.plan ?? 'FREE');
   const isChatOpen = useUIStore((s) => s.isChatOpen);
   const openChat = useUIStore((s) => s.openChat);
-
-  const navItems = [
-    { to: '/dashboard', icon: <LayoutDashboard size={18} />, label: t('dashboard') },
-    { to: '/dashboard/calculator/dosing', icon: <FlaskConical size={18} />, label: t('dosingCalc'), isPro: plan === 'FREE' },
-    { to: '/dashboard/calculator/energy', icon: <Zap size={18} />, label: t('energyCalc'), isPro: plan === 'FREE' },
-    { to: '/dashboard/market', icon: <ShoppingBag size={18} />, label: t('market') },
-    { to: '/dashboard/wishlist', icon: <Heart size={18} />, label: t('wishlist') },
-  ];
+  const isPro = plan !== 'FREE';
 
   const handleLogout = async () => {
     await logout();
@@ -47,61 +66,96 @@ export default function Sidebar() {
       {/* Logo + NotificationBell */}
       <div className="px-6 py-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between">
         <span className="text-lg font-bold tracking-widest text-white">THALASSA</span>
-        <NotificationBell />
+        {/* align="left" so the dropdown opens rightward into the main content area, not off-screen */}
+        <NotificationBell align="left" />
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-        {navItems.map((item) => (
+      <nav className="flex-1 overflow-y-auto py-3 px-3">
+
+        {/* ── INICIO ── */}
+        <NavSection label={t('sectionHome')} />
+        <NavLink
+          to="/dashboard"
+          end
+          className={({ isActive }) => navLinkClass(isActive)}
+        >
+          <LayoutDashboard size={18} />
+          <span className="flex-1">{t('dashboard')}</span>
+        </NavLink>
+
+        {/* ── HERRAMIENTAS ── */}
+        <div className="mt-3">
+          <NavSection label={t('sectionTools')} />
           <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/dashboard'}
-            className={({ isActive }) =>
-              [
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative',
-                isActive
-                  ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
-                  : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
-              ].join(' ')
-            }
+            to="/dashboard/calculator/dosing"
+            className={({ isActive }) => navLinkClass(isActive)}
           >
-            {item.icon}
-            <span className="flex-1">{item.label}</span>
-            {item.isPro && (
+            <FlaskConical size={18} />
+            <span className="flex-1">{t('dosingCalc')}</span>
+            {!isPro && (
               <span className="text-[10px] font-mono text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-1">
                 PRO
               </span>
             )}
           </NavLink>
-        ))}
+          <NavLink
+            to="/dashboard/calculator/energy"
+            className={({ isActive }) => navLinkClass(isActive)}
+          >
+            <Zap size={18} />
+            <span className="flex-1">{t('energyCalc')}</span>
+            {!isPro && (
+              <span className="text-[10px] font-mono text-[#59D3FF] border border-[rgba(89,211,255,0.30)] rounded px-1">
+                PRO
+              </span>
+            )}
+          </NavLink>
+        </div>
 
-        {/* AI Assistant — opens drawer, not a route */}
-        <button
-          onClick={openChat}
-          className={[
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
-            isChatOpen
-              ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
-              : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
-          ].join(' ')}
-        >
-          <Bot size={18} />
-          <span className="flex-1">{t('aiAssistant')}</span>
-        </button>
+        {/* ── EXPLORAR ── */}
+        <div className="mt-3">
+          <NavSection label={t('sectionExplore')} />
+          <NavLink
+            to="/dashboard/market"
+            className={({ isActive }) => navLinkClass(isActive)}
+          >
+            <ShoppingBag size={18} />
+            <span className="flex-1">{t('market')}</span>
+          </NavLink>
+          <NavLink
+            to="/dashboard/wishlist"
+            className={({ isActive }) => navLinkClass(isActive)}
+          >
+            <Heart size={18} />
+            <span className="flex-1">{t('wishlist')}</span>
+          </NavLink>
+        </div>
 
-        <div className="my-3 border-t border-[rgba(255,255,255,0.06)]" />
+        {/* ── ASISTENTE ── */}
+        <div className="mt-3">
+          <NavSection label={t('sectionAssistant')} />
+          <button
+            onClick={openChat}
+            className={[
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
+              isChatOpen
+                ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
+                : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
+            ].join(' ')}
+          >
+            <Bot size={18} />
+            <span className="flex-1">{t('aiAssistant')}</span>
+          </button>
+        </div>
 
+        {/* Separator */}
+        <div className="my-4 border-t border-[rgba(255,255,255,0.06)]" />
+
+        {/* Profile */}
         <NavLink
           to="/dashboard/profile"
-          className={({ isActive }) =>
-            [
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm',
-              isActive
-                ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)]'
-                : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
-            ].join(' ')
-          }
+          className={({ isActive }) => navLinkClass(isActive, false)}
         >
           <User size={18} />
           <span>{t('profile')}</span>

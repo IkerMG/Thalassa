@@ -7,5 +7,9 @@
   "wishlist": "Wishlist",
   "aiAssistant": "AI Assistant",
   "profile": "Profile",
-  "logout": "Log out"
+  "logout": "Log out",
+  "sectionHome": "HOME",
+  "sectionTools": "TOOLS",
+  "sectionExplore": "EXPLORE",
+  "sectionAssistant": "ASSISTANT"
 }

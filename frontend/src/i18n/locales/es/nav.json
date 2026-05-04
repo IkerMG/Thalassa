@@ -7,5 +7,9 @@
   "wishlist": "Lista de deseos",
   "aiAssistant": "Asistente IA",
   "profile": "Perfil",
-  "logout": "Cerrar sesión"
+  "logout": "Cerrar sesión",
+  "sectionHome": "INICIO",
+  "sectionTools": "HERRAMIENTAS",
+  "sectionExplore": "EXPLORAR",
+  "sectionAssistant": "ASISTENTE"
 }

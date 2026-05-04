@@ -31,7 +31,14 @@ function UnreadDot({ type }: { type: NotificationItem['type'] }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  /** Controls which side the dropdown opens towards.
+   *  'right' (default) aligns the dropdown's right edge with the bell — correct for top-right fixed bell on mobile.
+   *  'left'  aligns the dropdown's left  edge with the bell — correct when the bell is inside the sidebar on desktop. */
+  align?: 'left' | 'right';
+}
+
+export default function NotificationBell({ align = 'right' }: NotificationBellProps) {
   const [open, setOpen]           = useState(false);
   const [readIds, setReadIds]     = useState<Set<number>>(new Set());
   const ref                       = useRef<HTMLDivElement>(null);
@@ -99,7 +106,10 @@ export default function NotificationBell() {
         <div
           role="dialog"
           aria-label="Notificaciones"
-          className="absolute right-0 top-10 w-80 bg-[#111] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 overflow-hidden"
+          className={[
+            'absolute top-10 w-80 bg-[#111] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 overflow-hidden',
+            align === 'left' ? 'left-0' : 'right-0',
+          ].join(' ')}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
