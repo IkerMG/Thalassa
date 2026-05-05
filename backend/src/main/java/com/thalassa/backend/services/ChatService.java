@@ -170,7 +170,7 @@ public class ChatService {
                       .toList();
               ctx.put("equipment", equipment);
 
-              ctx.put("latestParameters", buildLatestParameters(aquariumId));
+              ctx.put("waterParameters", buildLatestParameters(aquariumId));
 
               return ctx;
             })
@@ -187,11 +187,11 @@ public class ChatService {
     params.put("temperature", p.getTemperature());
     params.put("salinity", p.getSalinity());
     params.put("ph", p.getPh());
-    params.put("alkalinityDKH", p.getAlkalinityDKH());
-    params.put("calciumPPM", p.getCalciumPPM());
-    params.put("magnesiumPPM", p.getMagnesiumPPM());
-    params.put("nitratesPPM", p.getNitratesPPM());
-    params.put("phosphatesPPM", p.getPhosphatesPPM());
+    params.put("alkalinity", p.getAlkalinityDKH());
+    params.put("calcium", p.getCalciumPPM());
+    params.put("magnesium", p.getMagnesiumPPM());
+    params.put("nitrates", p.getNitratesPPM());
+    params.put("phosphates", p.getPhosphatesPPM());
     return params;
   }
 

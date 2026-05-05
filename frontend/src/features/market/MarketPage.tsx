@@ -11,7 +11,7 @@ import { normalizeExternalUrl } from '../../lib/url';
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type FallbackItem = ScraperResult & { _category: string };
-type StoreFilter = 'all' | 'tiendanimal' | 'kiwoko';
+type StoreFilter = 'all' | 'Urban Natura' | 'Cetamar';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -30,13 +30,13 @@ type CategoryKey = (typeof CATEGORIES)[number]['key'];
 
 const STORE_LABELS: Record<StoreFilter, string> = {
   all: 'Todas',
-  tiendanimal: 'Tiendanimal',
-  kiwoko: 'Kiwoko',
+  'Urban Natura': 'Urban Natura',
+  'Cetamar':      'Cetamar',
 };
 
 const STORE_COLORS: Record<string, string> = {
-  tiendanimal: 'text-orange-400 border-orange-400/25 bg-orange-400/08',
-  kiwoko:      'text-green-400  border-green-400/25  bg-green-400/08',
+  'Urban Natura': 'text-emerald-400 border-emerald-400/25 bg-emerald-400/08',
+  'Cetamar':      'text-sky-400     border-sky-400/25     bg-sky-400/08',
 };
 
 // ── Debounce hook ─────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ export default function MarketPage() {
   const { mutate: addToWishlist, isPending: isAdding } = useAddWishlistItem();
 
   const isScraperDown = !!data?.errorCode;
-  const fromCache = (data as any)?.fromCache === true;
+  const fromCache = data?.fromCache === true;
   const usingFallback = isScraperDown;
 
   // Build display list
@@ -292,7 +292,7 @@ export default function MarketPage() {
       {/* Store filter + result count row */}
       <div className="flex items-center justify-between mb-5 gap-4">
         <div className="flex gap-1.5">
-          {(['all', 'tiendanimal', 'kiwoko'] as StoreFilter[]).map((s) => (
+          {(['all', 'Urban Natura', 'Cetamar'] as StoreFilter[]).map((s) => (
             <button
               key={s}
               onClick={() => setStoreFilter(s)}

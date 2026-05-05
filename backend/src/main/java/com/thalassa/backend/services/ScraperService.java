@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thalassa.backend.dto.ScraperProductResult;
 import com.thalassa.backend.dto.ScraperResponse;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -114,40 +115,46 @@ public class ScraperService {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private ScraperResponse loadFromSeedCache(String keyword) {
-    String[] seedFiles = {"aquashop", "icaacuarios"};
+    String[] seedFiles = {"urbannatura", "cetamar"};
+    List<ScraperProductResult> matched = new ArrayList<>();
+    List<ScraperProductResult> all = new ArrayList<>();
+
     for (String store : seedFiles) {
       try {
         ClassPathResource resource = new ClassPathResource("market-seed/" + store + ".json");
         if (!resource.exists()) continue;
         try (InputStream is = resource.getInputStream()) {
-          List<ScraperProductResult> all = objectMapper.readValue(is, new TypeReference<>() {});
-          List<ScraperProductResult> filtered = all.stream()
-              .filter(p -> p.getName() != null
-                  && p.getName().toLowerCase().contains(keyword.toLowerCase()))
-              .map(p -> ScraperProductResult.builder()
-                  .name(p.getName())
-                  .price(p.getPrice())
-                  .productUrl(normalizeUrl(p.getProductUrl()))
-                  .imgUrl(normalizeUrl(p.getImgUrl()))
-                  .storeName(p.getStoreName())
-                  .build())
-              .collect(Collectors.toList());
-          if (!filtered.isEmpty()) {
-            return ScraperResponse.builder()
-                .keyword(keyword)
-                .store(store)
-                .total(filtered.size())
-                .results(filtered)
-                .errorCode(null)
-                .fromCache(true)
+          List<ScraperProductResult> items = objectMapper.readValue(is, new TypeReference<>() {});
+          for (ScraperProductResult p : items) {
+            ScraperProductResult normalized = ScraperProductResult.builder()
+                .name(p.getName())
+                .price(p.getPrice())
+                .productUrl(normalizeUrl(p.getProductUrl()))
+                .imgUrl(normalizeUrl(p.getImgUrl()))
+                .storeName(p.getStoreName())
                 .build();
+            all.add(normalized);
+            if (p.getName() != null && p.getName().toLowerCase().contains(keyword.toLowerCase())) {
+              matched.add(normalized);
+            }
           }
         }
       } catch (Exception e) {
         log.warn("No se pudo cargar el seed del mercado [{}]: {}", store, e.getMessage());
       }
     }
-    return null;
+
+    List<ScraperProductResult> results = matched.isEmpty() ? all : matched;
+    if (results.isEmpty()) return null;
+
+    return ScraperResponse.builder()
+        .keyword(keyword)
+        .store("cache")
+        .total(results.size())
+        .results(results)
+        .errorCode(null)
+        .fromCache(true)
+        .build();
   }
 
   private String normalizeUrl(String url) {

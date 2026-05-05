@@ -522,6 +522,8 @@ export interface components {
       results?: components["schemas"]["ScraperProductResult"][];
       /** @description TIMEOUT_ERROR | SERVICE_UNAVAILABLE. Null si todo fue bien. */
       errorCode?: string | null;
+      /** @description true si los resultados provienen del seed-cache local (el scraper Python estaba caído). */
+      fromCache?: boolean;
     };
     WishlistItemRequest: {
       /** @description Nombre del producto */
