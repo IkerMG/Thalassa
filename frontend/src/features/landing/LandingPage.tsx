@@ -44,17 +44,21 @@ function Navbar() {
 // ── Hero ───────────────────────────────────────────────────────────────────
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <video
+        src="/assets/hero-bg.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -2 }}
+      />
+      {/* Dark overlay */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', zIndex: -1 }} />
       {/* Subtle radial glow from center */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_60%,rgba(89,211,255,0.06),transparent)]" />
 
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center pt-16">
-        <motion.div {...fadeUp(0)}>
-          <span className="inline-flex items-center gap-2 text-xs text-[#59D3FF] border border-[rgba(89,211,255,0.25)] rounded-full px-4 py-1.5 mb-8">
-            <Waves size={12} />
-            Marine Aquarium Management
-          </span>
-        </motion.div>
 
         <motion.h1
           {...fadeUp(0.1)}
