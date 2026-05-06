@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   FlaskConical,
@@ -6,15 +6,12 @@ import {
   ShoppingBag,
   Heart,
   Bot,
-  User,
-  LogOut,
-  Settings,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import NotificationBell from '../shared/NotificationBell';
+import UserDropup from './UserDropup';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -44,17 +41,10 @@ function navLinkClass(isActive: boolean, withIndicator = true) {
 
 export default function Sidebar() {
   const { t } = useTranslation('nav');
-  const navigate = useNavigate();
-  const { logout } = useAuth();
   const plan = useAuthStore((s) => s.user?.plan ?? 'FREE');
   const isChatOpen = useUIStore((s) => s.isChatOpen);
   const openChat = useUIStore((s) => s.openChat);
   const isPro = plan !== 'FREE';
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/', { replace: true });
-  };
 
   return (
     <aside
@@ -144,41 +134,9 @@ export default function Sidebar() {
           </NavLink>
         </div>
 
-        {/* ── CONFIGURACIÓN ── */}
-        <div className="mt-3">
-          <NavSection label={t('sectionConfig')} />
-          <NavLink
-            to="/dashboard/profile"
-            end
-            className={({ isActive }) => navLinkClass(isActive)}
-          >
-            <User size={18} />
-            <span className="flex-1">{t('profile')}</span>
-          </NavLink>
-          <NavLink
-            to="/dashboard/profile/settings"
-            className={({ isActive }) => navLinkClass(isActive)}
-          >
-            <Settings size={18} />
-            <span className="flex-1">{t('settings')}</span>
-          </NavLink>
-        </div>
       </nav>
 
-      {/* Logout at bottom */}
-      <div className="px-3 py-4 border-t border-[rgba(255,255,255,0.08)]">
-        <button
-          onClick={handleLogout}
-          className="
-            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-            text-[#666] hover:text-[#F87171] hover:bg-[rgba(248,113,113,0.06)]
-            transition-all duration-150 text-sm cursor-pointer
-          "
-        >
-          <LogOut size={18} />
-          <span>{t('logout')}</span>
-        </button>
-      </div>
+      <UserDropup />
     </aside>
   );
 }
