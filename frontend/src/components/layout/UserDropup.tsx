@@ -96,11 +96,15 @@ export default function UserDropup() {
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
                    hover:bg-[rgba(255,255,255,0.04)] transition-all duration-150 cursor-pointer"
       >
-        {/* Initials avatar */}
-        <div className="w-8 h-8 rounded-full bg-[rgba(89,211,255,0.10)]
+        {/* Avatar */}
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-[rgba(89,211,255,0.10)]
                         border border-[rgba(89,211,255,0.25)]
                         flex items-center justify-center shrink-0">
-          <span className="text-[#59D3FF] text-xs font-bold">{initial}</span>
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.username ?? ''} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[#59D3FF] text-xs font-bold">{initial}</span>
+          )}
         </div>
 
         {/* Username + email */}

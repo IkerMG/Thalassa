@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Zap, Globe, Lock, User as UserIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { useUserProfile } from '../../hooks/queries/useUserProfile';
 import { toast } from '../../lib/toast';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import ImageUploader from '../../components/shared/ImageUploader';
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -99,7 +100,9 @@ function ProfileSection() {
   const { t } = useTranslation('settings');
   const { data: profile } = useUserProfile();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: updateAvatar, isPending: isAvatarPending } = useUpdateProfile();
   const updateUser = useAuthStore((s) => s.updateUser);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors, isDirty } } =
     useForm<ProfileFormValues>({
@@ -108,7 +111,22 @@ function ProfileSection() {
 
   useEffect(() => {
     if (profile?.displayName) reset({ displayName: profile.displayName });
+    setAvatarUrl(profile?.avatarUrl ?? null);
   }, [profile, reset]);
+
+  const handleAvatarChange = useCallback((url: string | null) => {
+    setAvatarUrl(url);
+    updateAvatar(
+      { avatarUrl: url ?? '' },
+      {
+        onSuccess: (updated) => {
+          toast.success('Avatar actualizado');
+          updateUser({ avatarUrl: updated.avatarUrl ?? null });
+        },
+        onError: () => toast.error('No se pudo actualizar el avatar'),
+      }
+    );
+  }, [updateAvatar, updateUser]);
 
   const onSubmit = (values: ProfileFormValues) => {
     updateProfile(
@@ -125,6 +143,15 @@ function ProfileSection() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      <ImageUploader
+        value={avatarUrl}
+        onChange={handleAvatarChange}
+        folder="avatars"
+        label="Foto de perfil"
+      />
+      {isAvatarPending && (
+        <p className="text-xs text-white/40">Guardando avatar…</p>
+      )}
       <Input
         label={t('profile.displayName')}
         placeholder={t('profile.displayNamePlaceholder')}

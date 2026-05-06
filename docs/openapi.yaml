@@ -1100,6 +1100,9 @@ components:
           type: string
           description: "L or GAL"
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
 
     UpdateUserRequest:
       type: object
@@ -1124,6 +1127,10 @@ components:
         volumeUnit:
           type: string
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+          description: URL del avatar. Cadena vacía = eliminar avatar.
 
     ChangePasswordRequest:
       type: object
@@ -1213,6 +1220,10 @@ components:
           maximum: 24.0
         category:
           $ref: '#/components/schemas/EquipmentCategory'
+        imageUrl:
+          type: string
+          nullable: true
+          maxLength: 500
 
     EquipmentResponse:
       type: object
@@ -1231,6 +1242,10 @@ components:
         category:
           $ref: '#/components/schemas/EquipmentCategory'
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          maxLength: 500
 
     EquipmentEnergyCost:
       type: object
@@ -1307,6 +1322,10 @@ components:
           format: int64
           nullable: true
           description: ID de la especie en el catálogo. Null para especímenes personalizados.
+        imageUrl:
+          type: string
+          nullable: true
+          maxLength: 500
 
     LivestockResponse:
       type: object
@@ -1327,6 +1346,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          maxLength: 500
 
     AddLivestockResponse:
       # @JsonInclude(NON_NULL) a nivel de clase: el campo 'warning' solo

@@ -11,6 +11,7 @@ export const equipmentSchema = z.object({
     .min(0.1, 'Minimum 0.1 hours')
     .max(24, 'Maximum 24 hours'),
   category: z.enum(['LIGHT', 'PUMP', 'SKIMMER', 'HEATER', 'OTHER']).optional(),
+  imageUrl: z.string().nullable().optional(),
 });
 
 export type EquipmentFormValues = z.infer<typeof equipmentSchema>;

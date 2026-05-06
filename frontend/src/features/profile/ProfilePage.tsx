@@ -33,8 +33,12 @@ export default function ProfilePage() {
       {/* User card */}
       <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 mb-5">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[rgba(89,211,255,0.08)] border border-[rgba(89,211,255,0.20)] flex items-center justify-center flex-shrink-0">
-            <User size={24} className="text-[#59D3FF]" />
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-[rgba(89,211,255,0.08)] border border-[rgba(89,211,255,0.20)] flex items-center justify-center flex-shrink-0">
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+            ) : (
+              <User size={24} className="text-[#59D3FF]" />
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-semibold text-lg leading-tight">{user.username}</p>

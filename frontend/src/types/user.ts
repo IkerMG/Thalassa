@@ -9,4 +9,5 @@ export interface User {
   locale?: 'en' | 'de' | 'es';
   temperatureUnit?: 'C' | 'F';
   volumeUnit?: 'L' | 'GAL';
+  avatarUrl?: string | null;
 }

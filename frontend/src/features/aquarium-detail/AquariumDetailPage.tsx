@@ -36,8 +36,10 @@ import ReefSafeBadge from '../../components/shared/ReefSafeBadge';
 import PlanGate from '../../components/shared/PlanGate';
 import ParameterLineChart from '../../components/charts/ParameterLineChart';
 import Sparkline from '../../components/shared/Sparkline';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import ImageUploader from '../../components/shared/ImageUploader';
+import ImagePlaceholder from '../../components/shared/ImagePlaceholder';
 import { measurementLogSchema, type MeasurementLogFormValues } from '../../lib/schemas/parameter.schemas';
 import { livestockSchema, type LivestockFormValues } from '../../lib/schemas/livestock.schemas';
 import { equipmentSchema, type EquipmentFormValues } from '../../lib/schemas/equipment.schemas';
@@ -163,6 +165,7 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLives
     handleSubmit,
     watch,
     reset,
+    control,
     formState: { errors },
   } = useForm<LivestockFormValues>({
     resolver: zodResolver(livestockSchema),
@@ -228,6 +231,18 @@ function AddLivestockModal({ open, onClose, aquariumId, aquariumType }: AddLives
             <p className="text-xs text-[#F87171]">{t('livestock.reefSafeWarning')}</p>
           </div>
         )}
+        <Controller
+          name="imageUrl"
+          control={control}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value ?? null}
+              onChange={field.onChange}
+              folder="livestock"
+              label="Imagen (opcional)"
+            />
+          )}
+        />
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
@@ -254,6 +269,7 @@ function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
@@ -314,6 +330,18 @@ function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps
             error={errors.hoursPerDay?.message}
           />
         </div>
+        <Controller
+          name="imageUrl"
+          control={control}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value ?? null}
+              onChange={field.onChange}
+              folder="equipment"
+              label="Imagen (opcional)"
+            />
+          )}
+        />
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
           <Button type="submit" variant="primary" size="md" disabled={isPending}>
@@ -616,26 +644,35 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
           {aquarium.livestock.map((item) => (
             <div
               key={item.id}
-              className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex flex-col gap-3"
+              className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden flex flex-col"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">{item.name}</p>
-                  <p className="text-xs text-[#666] mt-0.5">×{item.quantity}</p>
-                </div>
-                <button
-                  onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
-                  aria-label={`Delete ${item.name}`}
-                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1"
-                >
-                  <Trash2 size={14} />
-                </button>
+              <div className="aspect-[4/3] w-full">
+                {item.imageUrl ? (
+                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <ImagePlaceholder entityType="livestock" className="w-full h-full" />
+                )}
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
-                  {t(`livestock.addModal.categories.${item.category}`)}
-                </span>
-                <ReefSafeBadge reefSafe={item.reefSafe} />
+              <div className="p-4 flex flex-col gap-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">{item.name}</p>
+                    <p className="text-xs text-[#666] mt-0.5">×{item.quantity}</p>
+                  </div>
+                  <button
+                    onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
+                    aria-label={`Delete ${item.name}`}
+                    className="text-text-tertiary hover:text-[#F87171] transition-colors p-1"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
+                    {t(`livestock.addModal.categories.${item.category}`)}
+                  </span>
+                  <ReefSafeBadge reefSafe={item.reefSafe} />
+                </div>
               </div>
             </div>
           ))}
@@ -716,8 +753,15 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
             return (
               <div
                 key={item.id}
-                className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 flex items-center gap-4"
+                className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 flex items-center gap-3"
               >
+                <div className="w-10 h-10 rounded-md overflow-hidden shrink-0">
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <ImagePlaceholder entityType="equipment" className="w-full h-full" />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-white truncate">{item.name}</p>
