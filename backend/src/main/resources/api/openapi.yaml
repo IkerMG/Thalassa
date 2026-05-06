@@ -1150,6 +1150,10 @@ components:
           type: string
           description: "L or GAL"
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+          description: URL del avatar del usuario en Cloudinary.
 
     UpdateUserRequest:
       type: object
@@ -1174,6 +1178,11 @@ components:
         volumeUnit:
           type: string
           nullable: true
+        avatarUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL del avatar en Cloudinary. Enviar cadena vacía para eliminar el avatar.
 
     ChangePasswordRequest:
       type: object
@@ -1263,6 +1272,11 @@ components:
           maximum: 24.0
         category:
           $ref: '#/components/schemas/EquipmentCategory'
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL de imagen en Cloudinary. Null si no se ha subido imagen.
 
     EquipmentResponse:
       type: object
@@ -1281,6 +1295,10 @@ components:
         category:
           $ref: '#/components/schemas/EquipmentCategory'
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL de imagen en Cloudinary.
 
     EquipmentEnergyCost:
       type: object
@@ -1356,6 +1374,11 @@ components:
           format: int64
           nullable: true
           description: ID de la especie en el catálogo. Null para especímenes personalizados.
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL de imagen en Cloudinary. Null si no se ha subido imagen.
 
     LivestockResponse:
       type: object
@@ -1376,6 +1399,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL de imagen en Cloudinary.
 
     AddLivestockResponse:
       # @JsonInclude(NON_NULL) a nivel de clase: el campo 'warning' solo

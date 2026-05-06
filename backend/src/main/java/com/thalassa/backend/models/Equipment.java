@@ -35,6 +35,9 @@ public class Equipment {
   @Column
   private EquipmentCategory category;
 
+  @Column(name = "image_url", length = 500)
+  private String imageUrl;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "aquarium_id", nullable = false)
   @JsonBackReference("aquarium-equipment")
