@@ -1,0 +1,202 @@
+[
+  {
+    "name": "Kessil A360X Tuna Blue LED",
+    "price": 389.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "lighting"
+  },
+  {
+    "name": "AI Prime 16HD Reef Coral LED",
+    "price": 249.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "lighting"
+  },
+  {
+    "name": "Ecotech Radion XR15 Pro G6",
+    "price": 569.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "lighting"
+  },
+  {
+    "name": "Maxspect Ethereal 130W Reef LED",
+    "price": 299.00,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "lighting"
+  },
+  {
+    "name": "Ecotech Marine Vectra M2 Pump",
+    "price": 289.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "pumps"
+  },
+  {
+    "name": "Tunze Turbelle Stream 6055",
+    "price": 189.00,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "pumps"
+  },
+  {
+    "name": "Maxspect Gyre XF350 Circulation",
+    "price": 219.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "pumps"
+  },
+  {
+    "name": "Bubble Magus Curve A5 Skimmer",
+    "price": 149.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "filtration"
+  },
+  {
+    "name": "Reef Octopus Classic 110 Skimmer",
+    "price": 199.00,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "filtration"
+  },
+  {
+    "name": "Skimz Monzter SM161 Skimmer",
+    "price": 179.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "filtration"
+  },
+  {
+    "name": "Deltec SC 1456 Protein Skimmer",
+    "price": 329.00,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "filtration"
+  },
+  {
+    "name": "Aquaforest Artemia Premium 500ml",
+    "price": 14.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "feeding"
+  },
+  {
+    "name": "Fauna Marin Ultra LPS Pellets",
+    "price": 29.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "feeding"
+  },
+  {
+    "name": "Ocean Nutrition Formula One Marine",
+    "price": 12.50,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "feeding"
+  },
+  {
+    "name": "Hikari Marine S 500g",
+    "price": 16.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "feeding"
+  },
+  {
+    "name": "Eheim Jager TruTemp 300W",
+    "price": 34.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "heating"
+  },
+  {
+    "name": "Hydor Inline External Heater 300W",
+    "price": 49.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "heating"
+  },
+  {
+    "name": "Teco TK 500 Marine Chiller",
+    "price": 599.00,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "heating"
+  },
+  {
+    "name": "Red Sea Reef Foundation Pro Test Kit",
+    "price": 79.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "testing"
+  },
+  {
+    "name": "Salifert KH Alkalinity Test Kit",
+    "price": 19.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "testing"
+  },
+  {
+    "name": "Salifert Calcium Test Kit",
+    "price": 17.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "testing"
+  },
+  {
+    "name": "Nyos Quantum 160 Refractometer",
+    "price": 79.00,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "testing"
+  },
+  {
+    "name": "Aqua Medic Reef Rock 5kg",
+    "price": 29.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "decoration"
+  },
+  {
+    "name": "Real Reef Rock Base Rock 5kg",
+    "price": 39.99,
+    "imgUrl": null,
+    "productUrl": "https://www.kiwoko.com",
+    "storeName": "kiwoko",
+    "_category": "decoration"
+  },
+  {
+    "name": "CaribSea Arag-Alive Live Sand 9kg",
+    "price": 44.99,
+    "imgUrl": null,
+    "productUrl": "https://www.tiendanimal.es",
+    "storeName": "tiendanimal",
+    "_category": "decoration"
+  }
+]

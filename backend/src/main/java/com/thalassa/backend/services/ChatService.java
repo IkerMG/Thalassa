@@ -5,12 +5,16 @@ import com.thalassa.backend.dto.ChatResponse;
 import com.thalassa.backend.exceptions.RateLimitExceededException;
 import com.thalassa.backend.models.SubscriptionPlan;
 import com.thalassa.backend.models.User;
+import com.thalassa.backend.models.WaterParameter;
 import com.thalassa.backend.repositories.AquariumRepository;
 import com.thalassa.backend.repositories.UserRepository;
+import com.thalassa.backend.repositories.WaterParameterRepository;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,7 @@ public class ChatService {
   private final RestClient scraperRestClient;
   private final UserRepository userRepository;
   private final AquariumRepository aquariumRepository;
+  private final WaterParameterRepository waterParameterRepository;
 
   @Value("${chat.free-daily-limit}")
   private int freeDailyLimit;
@@ -32,10 +37,12 @@ public class ChatService {
   public ChatService(
       RestClient scraperRestClient,
       UserRepository userRepository,
-      AquariumRepository aquariumRepository) {
+      AquariumRepository aquariumRepository,
+      WaterParameterRepository waterParameterRepository) {
     this.scraperRestClient = scraperRestClient;
     this.userRepository = userRepository;
     this.aquariumRepository = aquariumRepository;
+    this.waterParameterRepository = waterParameterRepository;
   }
 
   // ── Helper ────────────────────────────────────────────────────────────────
@@ -135,17 +142,57 @@ public class ChatService {
               ctx.put("liters", aquarium.getLiters());
               ctx.put("type", aquarium.getType().name());
 
-              List<Map<String, String>> livestock =
-                  aquarium.getLivestock().stream().map(ls -> Map.of("name", ls.getName())).toList();
+              List<Map<String, Object>> livestock =
+                  aquarium.getLivestock().stream()
+                      .map(
+                          ls -> {
+                            Map<String, Object> m = new LinkedHashMap<>();
+                            m.put("name", ls.getName());
+                            m.put("category", ls.getCategory() != null ? ls.getCategory().name() : null);
+                            m.put("quantity", ls.getQuantity());
+                            m.put("reefSafe", ls.getReefSafe());
+                            return m;
+                          })
+                      .toList();
               ctx.put("livestock", livestock);
 
-              List<Map<String, String>> equipment =
-                  aquarium.getEquipment().stream().map(eq -> Map.of("name", eq.getName())).toList();
+              List<Map<String, Object>> equipment =
+                  aquarium.getEquipment().stream()
+                      .map(
+                          eq -> {
+                            Map<String, Object> m = new LinkedHashMap<>();
+                            m.put("name", eq.getName());
+                            m.put("category", eq.getCategory() != null ? eq.getCategory().name() : null);
+                            m.put("powerWatts", eq.getPowerWatts());
+                            m.put("hoursPerDay", eq.getHoursPerDay());
+                            return m;
+                          })
+                      .toList();
               ctx.put("equipment", equipment);
+
+              ctx.put("waterParameters", buildLatestParameters(aquariumId));
 
               return ctx;
             })
         .orElse(null);
+  }
+
+  private Map<String, Object> buildLatestParameters(Long aquariumId) {
+    Optional<WaterParameter> latest =
+        waterParameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId);
+    if (latest.isEmpty()) return null;
+    WaterParameter p = latest.get();
+    Map<String, Object> params = new LinkedHashMap<>();
+    params.put("measuredAt", p.getMeasuredAt() != null ? p.getMeasuredAt().toString() : null);
+    params.put("temperature", p.getTemperature());
+    params.put("salinity", p.getSalinity());
+    params.put("ph", p.getPh());
+    params.put("alkalinity", p.getAlkalinityDKH());
+    params.put("calcium", p.getCalciumPPM());
+    params.put("magnesium", p.getMagnesiumPPM());
+    params.put("nitrates", p.getNitratesPPM());
+    params.put("phosphates", p.getPhosphatesPPM());
+    return params;
   }
 
   /**

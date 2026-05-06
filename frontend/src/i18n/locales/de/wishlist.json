@@ -1,0 +1,12 @@
+{
+  "title": "Wunschliste",
+  "saveDesc": "Speichere, was du dir wünschst",
+  "emptyTitle": "Deine Wunschliste ist leer",
+  "emptyDesc": "Speichere Arten und Geräte, die du in Zukunft hinzufügen möchtest.",
+  "add": "Hinzufügen",
+  "addItem": "Item hinzufügen",
+  "goToMarket": "Zum Markt",
+  "viewAll": "Alle anzeigen",
+  "addModalTitle": "Zur Wunschliste hinzufügen",
+  "editModalTitle": "Item bearbeiten"
+}

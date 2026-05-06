@@ -1,0 +1,12 @@
+{
+  "title": "Markt",
+  "description": "Finde Ausrüstung und Produkte in den besten Aquarienläden.",
+  "searchPlaceholder": "Produkte suchen...",
+  "noResults": "Keine Ergebnisse",
+  "noResultsDesc": "Keine Produkte für \"{{query}}\" gefunden.",
+  "clearFilters": "Filter löschen",
+  "fallbackNotice": "Die Suche ist gerade nicht verfügbar. Zeige Beispielkatalog.",
+  "cachedBadge": "Demo-Daten",
+  "viewProduct": "Produkt ansehen",
+  "addToWishlist": "Zur Wunschliste"
+}

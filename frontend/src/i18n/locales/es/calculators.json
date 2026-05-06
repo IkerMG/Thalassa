@@ -1,0 +1,26 @@
+{
+  "dosing": {
+    "title": "Calculadora de Dosis",
+    "description": "Calcula las dosis exactas de aditivos para alcanzar tus parámetros objetivo.",
+    "calculate": "Calcular",
+    "recommendedDoses": "Dosis recomendadas",
+    "noAdjustment": "sin ajuste necesario",
+    "disclaimer": "Valores orientativos. Las concentraciones reales varían según el producto comercial. Añade los aditivos gradualmente y verifica con un test antes de dosificar de nuevo."
+  },
+  "energy": {
+    "title": "Calculadora de Energía",
+    "description": "Estima el consumo mensual de todos los equipos de tu acuario.",
+    "selectAquarium": "Selecciona un acuario",
+    "monthlyConsumption": "Consumo mensual",
+    "estimatedCost": "Coste estimado",
+    "breakdown": "Desglose por equipo",
+    "noBreakdown": "Sin equipos para desglosar.",
+    "noEquipment": "Este acuario no tiene equipos",
+    "noEquipmentDesc": "Añade equipos en la ficha del acuario para calcular el consumo energético.",
+    "manageEquipment": "Gestionar equipos",
+    "changeInProfile": "Cambiar en perfil",
+    "missingKwhPrice": "Precio de la electricidad no configurado",
+    "missingKwhPriceDesc": "Configura tu precio por kWh en el perfil para calcular el coste mensual de tus equipos.",
+    "goToProfile": "Ir al perfil"
+  }
+}

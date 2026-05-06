@@ -1,0 +1,32 @@
+{
+  "title": "Configuración",
+  "subtitle": "Gestiona tu perfil y preferencias",
+  "profile": {
+    "sectionTitle": "Perfil",
+    "displayName": "Nombre visible",
+    "displayNamePlaceholder": "Tu nombre en la comunidad",
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "saveSuccess": "Perfil actualizado correctamente",
+    "saveError": "Error al actualizar el perfil"
+  },
+  "preferences": {
+    "sectionTitle": "Preferencias",
+    "temperatureUnit": "Unidad de temperatura",
+    "volumeUnit": "Unidad de volumen",
+    "electricityPrice": "Precio de la electricidad (€/kWh)",
+    "electricityPricePlaceholder": "p. ej. 0.15",
+    "language": "Idioma"
+  },
+  "security": {
+    "sectionTitle": "Seguridad",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Mínimo 8 caracteres",
+    "changePassword": "Cambiar contraseña",
+    "changing": "Cambiando...",
+    "changeSuccess": "Contraseña cambiada correctamente",
+    "changeError": "La contraseña actual no es correcta",
+    "changeErrorGeneric": "Error al cambiar la contraseña"
+  }
+}

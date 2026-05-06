@@ -208,6 +208,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/users/me/password:
+    post:
+      tags: [Usuario]
+      summary: Cambiar contraseña
+      description: Cambia la contraseña del usuario autenticado. Requiere la contraseña actual.
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Contraseña actualizada correctamente
+        '400':
+          description: Contraseña actual incorrecta o nueva contraseña inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ── Acuarios ──────────────────────────────────────────────────────────────
   /api/aquariums:
     get:
@@ -1055,6 +1077,11 @@ components:
           type: string
         email:
           type: string
+        displayName:
+          type: string
+          nullable: true
+          description: Nombre visible para el usuario (máx. 50 chars). Si no está configurado, el frontend usa `username`.
+          maxLength: 50
         subscriptionPlan:
           $ref: '#/components/schemas/SubscriptionPlan'
         electricityPriceKwh:
@@ -1077,6 +1104,12 @@ components:
     UpdateUserRequest:
       type: object
       properties:
+        displayName:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 50
+          description: Nombre visible para el usuario.
         electricityPriceKwh:
           type: number
           format: double
@@ -1091,6 +1124,18 @@ components:
         volumeUnit:
           type: string
           nullable: true
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 64
 
     # ── Acuarios ──────────────────────────────────────────────────────────────
 
@@ -1226,6 +1271,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EquipmentEnergyCost'
+        errorCode:
+          type: string
+          nullable: true
+          description: >
+            Código de error de negocio (HTTP 200 con resultado semántico de error).
+            'KWH_PRICE_MISSING' si el usuario no ha configurado su precio de la luz.
+            'NO_EQUIPMENT' si el acuario no tiene ningún equipo registrado.
+            null si el cálculo es correcto.
 
     # ── Fauna ─────────────────────────────────────────────────────────────────
 
@@ -1354,6 +1407,9 @@ components:
           type: string
           nullable: true
           description: "TIMEOUT_ERROR | SERVICE_UNAVAILABLE. Null si todo fue bien."
+        fromCache:
+          type: boolean
+          description: "true si los resultados provienen del seed-cache local (el scraper Python estaba caído)."
 
     # ── Wishlist ──────────────────────────────────────────────────────────────
 

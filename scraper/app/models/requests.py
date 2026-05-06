@@ -3,7 +3,7 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, Field
 
 # Tiendas soportadas — ampliar aquí cuando se añada un nuevo scraper
-StoreId = Literal["tiendanimal", "kiwoko", "all"]
+StoreId = Literal["urbannatura", "cetamar", "all"]
 
 
 class ScrapeRequest(BaseModel):

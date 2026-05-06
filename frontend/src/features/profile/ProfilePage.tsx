@@ -1,13 +1,19 @@
-import { User, Crown, Mail, Globe, Settings } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { User, Crown, Mail, Globe, Settings, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { useUpdateProfile } from '../../hooks/mutations/useUpdateProfile';
 
+// ── Language selectors ────────────────────────────────────────────────────────
+
 const LOCALES = ['en', 'de', 'es'] as const;
 type Locale = (typeof LOCALES)[number];
 
+// ── Main Page ─────────────────────────────────────────────────────────────────
+
 export default function ProfilePage() {
   const { t, i18n } = useTranslation('profile');
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const { mutate: updateProfile, isPending } = useUpdateProfile();
 
@@ -49,6 +55,28 @@ export default function ProfilePage() {
             {user.plan}
           </span>
         </div>
+
+        {/* Reef Master upgrade CTA — only shown on FREE plan */}
+        {!isReefMaster && (
+          <div className="mt-5 pt-5 border-t border-[rgba(255,255,255,0.06)]">
+            <button
+              onClick={() => navigate('/dashboard/checkout')}
+              className="
+                w-full flex items-center justify-center gap-2
+                px-5 py-3 rounded-xl
+                bg-gradient-to-r from-amber-400 to-orange-500
+                text-white font-bold text-sm tracking-wide
+                shadow-lg shadow-orange-500/30
+                hover:brightness-110 hover:shadow-orange-500/50
+                active:scale-[0.98]
+                transition-all duration-150 cursor-pointer
+              "
+            >
+              <Crown size={16} />
+              {t('plan.upgradeButton')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Language selector */}
@@ -77,15 +105,24 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Settings — coming soon */}
-      <div className="bg-black border border-[rgba(255,255,255,0.06)] rounded-2xl p-6 flex flex-col items-center text-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
-          <Settings size={20} className="text-[#555]" />
+      {/* Settings shortcut */}
+      <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Settings size={16} className="text-[#59D3FF]" />
+            <span className="text-sm font-medium text-white">{t('settings.title')}</span>
+          </div>
+          <Link
+            to="/dashboard/profile/settings"
+            className="flex items-center gap-1.5 text-xs text-[#59D3FF] hover:underline"
+          >
+            Editar ajustes
+            <ArrowRight size={13} />
+          </Link>
         </div>
-        <p className="text-[#555] text-sm">{t('settings.comingSoonText')}</p>
-        <span className="text-[10px] font-mono tracking-widest text-[#59D3FF] border border-[rgba(89,211,255,0.25)] rounded-full px-3 py-1">
-          {t('comingSoon', { ns: 'common' })}
-        </span>
+        <p className="text-xs text-[#555] mt-2 ml-7">
+          Nombre visible, precio de la electricidad, unidades, idioma, contraseña.
+        </p>
       </div>
     </div>
   );

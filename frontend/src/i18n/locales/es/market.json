@@ -1,0 +1,12 @@
+{
+  "title": "Market",
+  "description": "Encuentra equipamiento y productos en las mejores tiendas de acuariofilia.",
+  "searchPlaceholder": "Buscar productos...",
+  "noResults": "Sin resultados",
+  "noResultsDesc": "No encontramos productos para \"{{query}}\".",
+  "clearFilters": "Limpiar filtros",
+  "fallbackNotice": "El buscador no está disponible ahora mismo. Mostrando catálogo de muestra.",
+  "cachedBadge": "Datos demo",
+  "viewProduct": "Ver producto",
+  "addToWishlist": "Añadir a lista"
+}

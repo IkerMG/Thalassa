@@ -64,7 +64,8 @@ keepers — manage their tanks, solve problems, and optimize their systems.
 
 2. **Use the aquarium context when provided.** If the user shares their current
    parameters, livestock, or tank volume, tailor your advice precisely to their
-   situation. Reference their specific values in your response.
+   situation. Reference their specific values in your response. Flag any parameter
+   that is outside the optimal range.
 
 3. **Flag safety concerns clearly.** If a species is NOT reef-safe, a parameter
    is critically out of range, or a chemical interaction is dangerous, say so
@@ -85,36 +86,120 @@ keepers — manage their tanks, solve problems, and optimize their systems.
 """
 
 
+def _format_livestock(items: list[dict]) -> str:
+    parts = []
+    for item in items[:12]:
+        name = item.get("name", "Unknown")
+        qty = item.get("quantity")
+        category = item.get("category", "")
+        reef_safe = item.get("reefSafe")
+
+        line = f"  • {name}"
+        if qty and qty > 1:
+            line += f" (×{qty})"
+        if category:
+            line += f" [{category}]"
+        if reef_safe is False:
+            line += " ⚠️ NOT reef-safe"
+        parts.append(line)
+    return "\n".join(parts)
+
+
+def _format_equipment(items: list[dict]) -> str:
+    parts = []
+    for item in items[:10]:
+        name = item.get("name", "Unknown")
+        category = item.get("category", "")
+        watts = item.get("powerWatts")
+        hours = item.get("hoursPerDay")
+
+        line = f"  • {name}"
+        if category:
+            line += f" [{category}]"
+        if watts is not None and hours is not None:
+            line += f" — {watts}W × {hours}h/day"
+        elif watts is not None:
+            line += f" — {watts}W"
+        parts.append(line)
+    return "\n".join(parts)
+
+
+def _format_parameters(params: dict) -> str:
+    def _val(key: str, unit: str) -> str | None:
+        v = params.get(key)
+        return f"{v} {unit}" if v is not None else None
+
+    lines = []
+    mappings = [
+        ("ph",          "pH",          ""),
+        ("salinity",    "Salinity",    "ppt"),
+        ("temperature", "Temperature", "°C"),
+        ("alkalinity",  "Alkalinity",  "dKH"),
+        ("calcium",     "Calcium",     "ppm"),
+        ("magnesium",   "Magnesium",   "ppm"),
+        ("nitrates",    "Nitrates",    "ppm"),
+        ("phosphates",  "Phosphates",  "ppm"),
+    ]
+    for key, label, unit in mappings:
+        v = params.get(key)
+        if v is None:
+            continue
+        display = f"{v} {unit}".strip() if unit else str(v)
+        lines.append(f"  • {label}: {display}")
+
+    measured = params.get("measuredAt")
+    if measured:
+        # Show only the date part for brevity
+        date_part = str(measured)[:10]
+        lines.append(f"  • Last tested: {date_part}")
+
+    return "\n".join(lines)
+
+
 def build_user_prompt(message: str, aquarium_context: dict | None = None) -> str:
     """
-    Construye el mensaje del usuario incluyendo el contexto del acuario
-    si está disponible.
+    Construye el mensaje del usuario incluyendo el contexto completo del acuario
+    cuando está disponible: parámetros de agua, fauna, equipo y datos básicos del tanque.
     """
     if not aquarium_context:
         return message
 
-    context_lines = ["[Aquarium context provided by the user's Thalassa account]"]
+    sections: list[str] = ["[Aquarium context from the user's Thalassa account]"]
 
-    if aquarium_name := aquarium_context.get("name"):
-        context_lines.append(f"- Tank name: {aquarium_name}")
+    # ── Basic tank info ───────────────────────────────────────────────────────
+    if name := aquarium_context.get("name"):
+        sections.append(f"Tank name: {name}")
 
     if liters := aquarium_context.get("liters"):
-        context_lines.append(f"- Volume: {liters} L")
+        sections.append(f"Volume: {liters} L")
 
     if tank_type := aquarium_context.get("type"):
-        readable_type = {
+        readable = {
             "MARINO_ARRECIFE": "Marine Reef",
-            "MARINO_PECES": "Marine Fish-Only",
+            "MARINO_PECES":    "Marine Fish-Only",
         }.get(tank_type, tank_type)
-        context_lines.append(f"- Type: {readable_type}")
+        sections.append(f"Type: {readable}")
 
-    if livestock := aquarium_context.get("livestock"):
-        names = [item.get("name", "Unknown") for item in livestock[:10]]
-        context_lines.append(f"- Livestock: {', '.join(names)}")
+    # ── Water parameters ──────────────────────────────────────────────────────
+    params = aquarium_context.get("waterParameters") or aquarium_context.get("parameters")
+    if params and isinstance(params, dict):
+        param_block = _format_parameters(params)
+        if param_block:
+            sections.append(f"Current water parameters:\n{param_block}")
 
-    if equipment := aquarium_context.get("equipment"):
-        eq_names = [item.get("name", "Unknown") for item in equipment[:8]]
-        context_lines.append(f"- Equipment: {', '.join(eq_names)}")
+    # ── Livestock ─────────────────────────────────────────────────────────────
+    livestock = aquarium_context.get("livestock")
+    if livestock and isinstance(livestock, list):
+        ls_block = _format_livestock(livestock)
+        if ls_block:
+            sections.append(f"Livestock ({len(livestock)} entries):\n{ls_block}")
 
-    context_block = "\n".join(context_lines)
+    # ── Equipment ─────────────────────────────────────────────────────────────
+    equipment = aquarium_context.get("equipment")
+    if equipment and isinstance(equipment, list):
+        eq_block = _format_equipment(equipment)
+        if eq_block:
+            sections.append(f"Equipment ({len(equipment)} items):\n{eq_block}")
+
+    context_block = "\n\n".join(sections)
     return f"{context_block}\n\nUser question: {message}"

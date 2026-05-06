@@ -102,16 +102,33 @@ public class EquipmentService {
    */
   public EnergyResponse calculateEnergy(Long aquariumId) {
     User user = getAuthenticatedUser();
+    Aquarium aquarium = getOwnedAquarium(aquariumId, user.getId());
 
     if (user.getElectricityPriceKwh() == null) {
-      throw new IllegalStateException(
-          "Configura el precio del kWh en tu perfil antes de calcular el coste energético.");
+      return EnergyResponse.builder()
+          .aquariumId(aquariumId)
+          .aquariumName(aquarium.getName())
+          .errorCode("KWH_PRICE_MISSING")
+          .equipmentBreakdown(List.of())
+          .totalMonthlyCost(BigDecimal.ZERO)
+          .build();
     }
 
-    Aquarium aquarium = getOwnedAquarium(aquariumId, user.getId());
     List<Equipment> equipmentList = equipmentRepository.findByAquariumId(aquariumId);
-    double priceKwh = user.getElectricityPriceKwh();
 
+    if (equipmentList.isEmpty()) {
+      return EnergyResponse.builder()
+          .aquariumId(aquariumId)
+          .aquariumName(aquarium.getName())
+          .errorCode("NO_EQUIPMENT")
+          .equipmentBreakdown(List.of())
+          .totalMonthlyCost(BigDecimal.ZERO)
+          .electricityPriceKwh(user.getElectricityPriceKwh())
+          .currencySymbol("€")
+          .build();
+    }
+
+    double priceKwh = user.getElectricityPriceKwh();
     List<EquipmentEnergyCost> breakdown =
         equipmentList.stream()
             .map(
@@ -143,6 +160,7 @@ public class EquipmentService {
         .electricityPriceKwh(priceKwh)
         .currencySymbol("€")
         .equipmentBreakdown(breakdown)
+        .errorCode(null)
         .build();
   }
 

@@ -1,0 +1,12 @@
+{
+  "title": "Wishlist",
+  "saveDesc": "Guarda lo que quieres conseguir",
+  "emptyTitle": "Tu wishlist está vacía",
+  "emptyDesc": "Guarda las especies y equipos que quieres añadir en el futuro.",
+  "add": "Añadir",
+  "addItem": "Añadir item",
+  "goToMarket": "Ir al Market",
+  "viewAll": "Ver todos",
+  "addModalTitle": "Añadir a wishlist",
+  "editModalTitle": "Editar item"
+}

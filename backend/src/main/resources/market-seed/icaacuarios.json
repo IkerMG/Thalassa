@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Skimmer Aqua Medic Turboflotor 1000",
+    "price": 139.00,
+    "product_url": "https://www.icaacuarios.com/skimmer-aqua-medic-turboflotor-1000",
+    "img_url": "https://www.icaacuarios.com/img/productos/turboflotor-1000.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Bomba Vortech MP10 Ecotech Marine",
+    "price": 229.00,
+    "product_url": "https://www.icaacuarios.com/bomba-vortech-mp10-ecotech",
+    "img_url": "https://www.icaacuarios.com/img/productos/vortech-mp10.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Lámpara LED Orphek Atlantik V4",
+    "price": 649.00,
+    "product_url": "https://www.icaacuarios.com/lampara-led-orphek-atlantik-v4",
+    "img_url": "https://www.icaacuarios.com/img/productos/orphek-atlantik-v4.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Sal Tropic Marin Pro-Reef 20 kg",
+    "price": 62.50,
+    "product_url": "https://www.icaacuarios.com/sal-tropic-marin-pro-reef-20kg",
+    "img_url": "https://www.icaacuarios.com/img/productos/tropic-marin-proreef.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Reactor de calcio Korallin C-1502",
+    "price": 289.00,
+    "product_url": "https://www.icaacuarios.com/reactor-calcio-korallin-c1502",
+    "img_url": "https://www.icaacuarios.com/img/productos/korallin-c1502.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Test de calcio Salifert",
+    "price": 12.90,
+    "product_url": "https://www.icaacuarios.com/test-calcio-salifert",
+    "img_url": "https://www.icaacuarios.com/img/productos/salifert-ca.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Lecho de arena Carib Sea Ocean Direct 9 kg",
+    "price": 38.90,
+    "product_url": "https://www.icaacuarios.com/arena-carib-sea-ocean-direct-9kg",
+    "img_url": "https://www.icaacuarios.com/img/productos/caribsea-ocean-direct.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Osmosis inversa Aqua Medic Armada 300 GPD",
+    "price": 129.00,
+    "product_url": "https://www.icaacuarios.com/osmosis-aqua-medic-armada-300gpd",
+    "img_url": "https://www.icaacuarios.com/img/productos/armada-300gpd.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Iluminación T5 ATI Sunpower 8x39W",
+    "price": 399.00,
+    "product_url": "https://www.icaacuarios.com/iluminacion-t5-ati-sunpower-8x39w",
+    "img_url": "https://www.icaacuarios.com/img/productos/ati-sunpower-8x39w.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Coral Frag Acropora azul Florida",
+    "price": 24.90,
+    "product_url": "https://www.icaacuarios.com/coral-acropora-azul-florida",
+    "img_url": "https://www.icaacuarios.com/img/corales/acropora-azul.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Bomba de retorno Aqua Medic Eco Runner 5000",
+    "price": 89.00,
+    "product_url": "https://www.icaacuarios.com/bomba-eco-runner-5000",
+    "img_url": "https://www.icaacuarios.com/img/productos/eco-runner-5000.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Refractómetro Red Sea Pro",
+    "price": 27.90,
+    "product_url": "https://www.icaacuarios.com/refractometro-red-sea-pro",
+    "img_url": "https://www.icaacuarios.com/img/productos/red-sea-refractometro.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Sustrato biológico Seachem Matrix 1 L",
+    "price": 16.90,
+    "product_url": "https://www.icaacuarios.com/sustrato-seachem-matrix-1l",
+    "img_url": "https://www.icaacuarios.com/img/productos/seachem-matrix.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Test de nitratos Salifert",
+    "price": 13.90,
+    "product_url": "https://www.icaacuarios.com/test-nitratos-salifert",
+    "img_url": "https://www.icaacuarios.com/img/productos/salifert-no3.jpg",
+    "store_name": "ICA Acuarios"
+  },
+  {
+    "name": "Cabezal de bomba Tunze Turbelle 6095",
+    "price": 179.00,
+    "product_url": "https://www.icaacuarios.com/bomba-tunze-turbelle-6095",
+    "img_url": "https://www.icaacuarios.com/img/productos/tunze-6095.jpg",
+    "store_name": "ICA Acuarios"
+  }
+]

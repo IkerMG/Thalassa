@@ -1,0 +1,26 @@
+{
+  "dosing": {
+    "title": "Dosing Calculator",
+    "description": "Calculate exact additive doses to reach your target parameters.",
+    "calculate": "Calculate",
+    "recommendedDoses": "Recommended doses",
+    "noAdjustment": "no adjustment needed",
+    "disclaimer": "Indicative values. Actual concentrations vary by commercial product. Add additives gradually and test before re-dosing."
+  },
+  "energy": {
+    "title": "Energy Calculator",
+    "description": "Estimate the monthly consumption of all your aquarium equipment.",
+    "selectAquarium": "Select an aquarium",
+    "monthlyConsumption": "Monthly consumption",
+    "estimatedCost": "Estimated cost",
+    "breakdown": "Equipment breakdown",
+    "noBreakdown": "No equipment to break down.",
+    "noEquipment": "This aquarium has no equipment",
+    "noEquipmentDesc": "Add equipment in the aquarium profile to calculate energy consumption.",
+    "manageEquipment": "Manage equipment",
+    "changeInProfile": "Change in profile",
+    "missingKwhPrice": "Electricity price not configured",
+    "missingKwhPriceDesc": "Set your kWh price in your profile to calculate the monthly cost of your equipment.",
+    "goToProfile": "Go to profile"
+  }
+}

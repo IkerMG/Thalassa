@@ -7,6 +7,11 @@
     "es": "Español"
   },
   "settings": {
-    "comingSoonText": "Die Bearbeitung von Einstellungen wird bald verfügbar sein."
+    "comingSoonText": "Die Bearbeitung von Einstellungen wird bald verfügbar sein.",
+    "title": "Einstellungen"
+  },
+  "plan": {
+    "upgradeButton": "Upgrade zu Reef Master simulieren",
+    "upgradeSuccess": "Reef Master Plan aktiviert! Rechner sind jetzt freigeschaltet."
   }
 }

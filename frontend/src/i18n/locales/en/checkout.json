@@ -1,0 +1,35 @@
+{
+  "title": "Activate Reef Master",
+  "subtitle": "Complete payment to unlock all premium features.",
+  "plan": {
+    "name": "Reef Master",
+    "price": "€9.99 / month",
+    "features": [
+      "Unlimited aquariums",
+      "Advanced AI assistant",
+      "Real-time parameter alerts",
+      "Priority access to new features"
+    ]
+  },
+  "form": {
+    "cardNumber": "Card number",
+    "cardNumberPlaceholder": "1234 5678 9012 3456",
+    "cardHolder": "Cardholder name",
+    "cardHolderPlaceholder": "As it appears on the card",
+    "expiry": "Expiry",
+    "expiryPlaceholder": "MM/YY",
+    "cvv": "CVV",
+    "cvvPlaceholder": "123",
+    "submit": "Activate now",
+    "submitting": "Processing...",
+    "cardInvalid": "Invalid card number",
+    "expiryInvalid": "Invalid expiry date",
+    "cvvInvalid": "Invalid CVV"
+  },
+  "success": {
+    "title": "Welcome to Reef Master!",
+    "message": "Your account has been upgraded. Enjoy all premium features.",
+    "cta": "Go to dashboard"
+  },
+  "demo": "Simulated payment — no real charge will be made."
+}
