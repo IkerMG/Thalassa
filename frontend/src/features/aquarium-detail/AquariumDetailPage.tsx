@@ -870,44 +870,46 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
           }
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
           {aquarium.livestock.map((item) => (
             <div
               key={item.id}
-              className="bg-black border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden flex flex-col"
+              className="bg-[#0a0a0a] border border-white/[0.07] rounded-lg flex flex-col overflow-hidden"
             >
-              <div className="aspect-[16/9] w-full">
+              {/* Strict image container — aspect-square + overflow-hidden prevent any resize */}
+              <div className="aspect-square w-full overflow-hidden shrink-0">
                 {item.imageUrl ? (
                   <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <ImagePlaceholder entityType="livestock" className="w-full h-full" />
                 )}
               </div>
-              <div className="p-2.5 flex flex-col gap-1.5">
+              {/* Info */}
+              <div className="p-2 flex flex-col gap-1.5">
                 <div className="flex items-start justify-between gap-1">
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-white truncate">{item.name}</p>
-                    <p className="text-[10px] text-[#666]">×{item.quantity}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold text-white truncate leading-tight">{item.name}</p>
+                    <p className="text-[10px] text-[#555] mt-0.5">×{item.quantity}</p>
                   </div>
-                  <div className="flex items-center shrink-0">
+                  <div className="flex items-center shrink-0 -mr-1">
                     <button
                       onClick={() => setEditItem(item)}
                       aria-label={`Edit ${item.name}`}
-                      className="text-[#555] hover:text-white transition-colors p-1"
+                      className="p-1 text-[#444] hover:text-white transition-colors"
                     >
-                      <Pencil size={11} />
+                      <Pencil size={10} />
                     </button>
                     <button
                       onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
                       aria-label={`Delete ${item.name}`}
-                      className="text-[#555] hover:text-[#F87171] transition-colors p-1"
+                      className="p-1 text-[#444] hover:text-[#F87171] transition-colors"
                     >
-                      <Trash2 size={11} />
+                      <Trash2 size={10} />
                     </button>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 flex-wrap">
-                  <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
+                  <span className={`text-[9px] font-semibold px-1.5 py-px rounded-full border leading-none ${CATEGORY_COLORS[item.category]}`}>
                     {t(`livestock.addModal.categories.${item.category}`)}
                   </span>
                   <ReefSafeBadge reefSafe={item.reefSafe} />
@@ -996,49 +998,53 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
           }
         />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
           {aquarium.equipment.map((item) => {
             const kwhDay = (item.powerWatts / 1000) * item.hoursPerDay;
             return (
               <div
                 key={item.id}
-                className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 flex items-center gap-3"
+                className="bg-[#0a0a0a] border border-white/[0.07] rounded-lg flex flex-col overflow-hidden"
               >
-                <div className="w-10 h-10 rounded-md overflow-hidden shrink-0">
+                {/* Strict image container — aspect-square + overflow-hidden prevent any resize */}
+                <div className="aspect-square w-full overflow-hidden shrink-0">
                   {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <ImagePlaceholder entityType="equipment" className="w-full h-full" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white truncate">{item.name}</p>
-                    {item.category && (
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${EQUIP_CATEGORY_COLORS[item.category]}`}>
-                        {t(`equipment.addModal.categories.${item.category}`)}
-                      </span>
-                    )}
+                {/* Info */}
+                <div className="p-2 flex flex-col gap-1.5">
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-semibold text-white truncate leading-tight">{item.name}</p>
+                      <p className="text-[10px] text-[#555] font-mono mt-0.5">
+                        {item.powerWatts}W · {item.hoursPerDay}h · {kwhDay.toFixed(1)}kWh
+                      </p>
+                    </div>
+                    <div className="flex items-center shrink-0 -mr-1">
+                      <button
+                        onClick={() => setEditItem(item)}
+                        aria-label={`Edit ${item.name}`}
+                        className="p-1 text-[#444] hover:text-white transition-colors"
+                      >
+                        <Pencil size={10} />
+                      </button>
+                      <button
+                        onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
+                        aria-label={`Delete ${item.name}`}
+                        className="p-1 text-[#444] hover:text-[#F87171] transition-colors"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-[#666] mt-0.5 font-mono">
-                    {item.powerWatts}W · {item.hoursPerDay}h/day · {kwhDay.toFixed(2)} kWh/day
-                  </p>
-                </div>
-                <div className="flex items-center shrink-0">
-                  <button
-                    onClick={() => setEditItem(item)}
-                    aria-label={`Edit ${item.name}`}
-                    className="text-[#555] hover:text-white transition-colors p-1"
-                  >
-                    <Pencil size={13} />
-                  </button>
-                  <button
-                    onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
-                    aria-label={`Delete ${item.name}`}
-                    className="text-[#555] hover:text-[#F87171] transition-colors p-1"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  {item.category && (
+                    <span className={`text-[9px] font-semibold px-1.5 py-px rounded-full self-start leading-none ${EQUIP_CATEGORY_COLORS[item.category]}`}>
+                      {t(`equipment.addModal.categories.${item.category}`)}
+                    </span>
+                  )}
                 </div>
               </div>
             );
