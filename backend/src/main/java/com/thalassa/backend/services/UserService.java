@@ -54,6 +54,9 @@ public class UserService {
     if (request.getVolumeUnit() != null) {
       user.setVolumeUnit(request.getVolumeUnit());
     }
+    if (request.getAvatarUrl() != null) {
+      user.setAvatarUrl(request.getAvatarUrl().isBlank() ? null : request.getAvatarUrl().trim());
+    }
     User saved = userRepository.save(user);
     return mapToResponse(saved);
   }
@@ -90,6 +93,7 @@ public class UserService {
         .locale(user.getLocale())
         .temperatureUnit(user.getTemperatureUnit())
         .volumeUnit(user.getVolumeUnit())
+        .avatarUrl(user.getAvatarUrl())
         .build();
   }
 }

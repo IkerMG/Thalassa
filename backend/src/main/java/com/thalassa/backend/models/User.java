@@ -34,6 +34,9 @@ public class User implements UserDetails {
   @Column(name = "display_name", length = 50)
   private String displayName;
 
+  @Column(name = "avatar_url", length = 500)
+  private String avatarUrl;
+
   @Column(nullable = false)
   @JsonIgnore
   private String password;

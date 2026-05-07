@@ -79,6 +79,7 @@ public class LivestockService {
             .category(request.getCategory())
             .reefSafe(request.getReefSafe())
             .quantity(request.getQuantity())
+            .imageUrl(request.getImageUrl())
             .aquarium(aquarium)
             .speciesCatalog(species)
             .build();
@@ -105,6 +106,7 @@ public class LivestockService {
     livestock.setCategory(request.getCategory());
     livestock.setReefSafe(request.getReefSafe());
     livestock.setQuantity(request.getQuantity());
+    livestock.setImageUrl(request.getImageUrl());
 
     if (request.getSpeciesCatalogId() != null) {
       SpeciesCatalog species =
@@ -139,6 +141,7 @@ public class LivestockService {
         .category(l.getCategory())
         .reefSafe(l.getReefSafe())
         .quantity(l.getQuantity())
+        .imageUrl(l.getImageUrl())
         .speciesCatalogId(l.getSpeciesCatalog() != null ? l.getSpeciesCatalog().getId() : null)
         .build();
   }

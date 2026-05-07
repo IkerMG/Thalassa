@@ -914,6 +914,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  # ── Upload ───────────────────────────────────────────────────────────────────
+  /api/upload:
+    post:
+      tags: [Upload]
+      summary: Subir imagen a Cloudinary
+      description: |
+        Sube una imagen al almacenamiento en la nube (Cloudinary) y devuelve su URL segura.
+        El archivo debe ser JPEG, PNG o WebP con un tamaño máximo de 5 MB.
+        La URL resultante se puede almacenar directamente en los campos imageUrl/avatarUrl
+        de las entidades (Livestock, Equipment, WishlistItem, User).
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, folder]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Imagen a subir (JPEG, PNG o WebP; máx. 5 MB)
+                folder:
+                  type: string
+                  enum: [livestock, equipment, wishlist, avatars]
+                  description: Carpeta destino dentro del bucket thalassa/
+      responses:
+        '200':
+          description: Imagen subida correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: Archivo inválido (tipo no permitido, tamaño excedido, carpeta no válida)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ── Notificaciones ──────────────────────────────────────────────────────────
   /api/notifications:
     get:
@@ -944,6 +985,15 @@ components:
       description: JWT obtenido en POST /api/auth/login
 
   schemas:
+
+    # ── Upload ────────────────────────────────────────────────────────────────
+
+    UploadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL segura (HTTPS) de la imagen subida a Cloudinary
 
     # ── Enumeraciones ─────────────────────────────────────────────────────────
     # Definidas aquí para que $ref sea válido; NO se generan (importMappings
@@ -1100,6 +1150,10 @@ components:
           type: string
           description: "L or GAL"
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+          description: URL del avatar del usuario en Cloudinary.
 
     UpdateUserRequest:
       type: object
@@ -1124,6 +1178,11 @@ components:
         volumeUnit:
           type: string
           nullable: true
+        avatarUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL del avatar en Cloudinary. Enviar cadena vacía para eliminar el avatar.
 
     ChangePasswordRequest:
       type: object
@@ -1213,6 +1272,11 @@ components:
           maximum: 24.0
         category:
           $ref: '#/components/schemas/EquipmentCategory'
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL de imagen en Cloudinary. Null si no se ha subido imagen.
 
     EquipmentResponse:
       type: object
@@ -1231,6 +1295,10 @@ components:
         category:
           $ref: '#/components/schemas/EquipmentCategory'
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL de imagen en Cloudinary.
 
     EquipmentEnergyCost:
       type: object
@@ -1306,6 +1374,11 @@ components:
           format: int64
           nullable: true
           description: ID de la especie en el catálogo. Null para especímenes personalizados.
+        imageUrl:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: URL de imagen en Cloudinary. Null si no se ha subido imagen.
 
     LivestockResponse:
       type: object
@@ -1326,6 +1399,10 @@ components:
           type: integer
           format: int64
           nullable: true
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL de imagen en Cloudinary.
 
     AddLivestockResponse:
       # @JsonInclude(NON_NULL) a nivel de clase: el campo 'warning' solo

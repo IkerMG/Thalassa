@@ -367,6 +367,7 @@ export interface components {
       temperatureUnit?: string | null;
       /** @description L or GAL */
       volumeUnit?: string | null;
+      avatarUrl?: string | null;
     };
     UpdateUserRequest: {
       /** @description Nombre visible para el usuario. */
@@ -376,6 +377,8 @@ export interface components {
       locale?: string | null;
       temperatureUnit?: string | null;
       volumeUnit?: string | null;
+      /** @description URL del avatar. Cadena vacía = eliminar avatar. */
+      avatarUrl?: string | null;
     };
     ChangePasswordRequest: {
       currentPassword: string;
@@ -416,6 +419,7 @@ export interface components {
       /** Format: double */
       hoursPerDay: number;
       category?: components["schemas"]["EquipmentCategory"];
+      imageUrl?: string | null;
     };
     EquipmentResponse: {
       /** Format: int64 */
@@ -426,6 +430,7 @@ export interface components {
       /** Format: double */
       hoursPerDay?: number;
       category?: components["schemas"]["EquipmentCategory"];
+      imageUrl?: string | null;
     };
     EquipmentEnergyCost: {
       /** Format: int64 */
@@ -472,6 +477,7 @@ export interface components {
        * @description ID de la especie en el catálogo. Null para especímenes personalizados.
        */
       speciesCatalogId?: number | null;
+      imageUrl?: string | null;
     };
     LivestockResponse: {
       /** Format: int64 */
@@ -483,6 +489,7 @@ export interface components {
       quantity?: number;
       /** Format: int64 */
       speciesCatalogId?: number | null;
+      imageUrl?: string | null;
     };
     AddLivestockResponse: {
       livestock?: components["schemas"]["LivestockResponse"];

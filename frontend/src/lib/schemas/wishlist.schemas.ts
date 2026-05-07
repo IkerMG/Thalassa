@@ -11,6 +11,7 @@ export const wishlistAddSchema = z.object({
   category: z.enum(['EQUIPMENT', 'LIVESTOCK', 'SUPPLEMENT', 'OTHER']).nullable().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
   notes: z.string().max(500, 'Máximo 500 caracteres').optional().or(z.literal('')),
+  imgUrl: z.string().nullable().optional(),
 });
 
 export type WishlistAddFormValues = z.infer<typeof wishlistAddSchema>;

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Plus, ExternalLink, Pencil, Trash2, ShoppingBag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import ImageUploader from '../../components/shared/ImageUploader';
+import ImagePlaceholder from '../../components/shared/ImagePlaceholder';
 import type { WishlistItem } from '../../api/wishlistApi';
 import type { WishlistCategory, WishlistPriority } from '../../api/wishlistApi';
 import { useWishlist } from '../../hooks/queries/useWishlist';
@@ -81,7 +83,15 @@ interface CardProps {
 function WishlistItemCard({ item, onEdit, onDelete }: CardProps) {
   const productHref = normalizeExternalUrl(item.productUrl);
   return (
-    <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex flex-col gap-3 hover:border-[rgba(255,255,255,0.14)] transition-colors">
+    <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden flex flex-col hover:border-[rgba(255,255,255,0.14)] transition-colors">
+      <div className="aspect-[4/3] w-full">
+        {item.imgUrl ? (
+          <img src={item.imgUrl} alt={item.productName} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <ImagePlaceholder entityType="wishlist" className="w-full h-full" />
+        )}
+      </div>
+      <div className="p-4 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <p className="text-white text-sm font-semibold leading-snug line-clamp-2 flex-1">
@@ -142,6 +152,7 @@ function WishlistItemCard({ item, onEdit, onDelete }: CardProps) {
           {item.notes}
         </p>
       )}
+      </div>
     </div>
   );
 }
@@ -160,6 +171,7 @@ function AddWishlistModal({ open, onClose }: AddModalProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<WishlistAddFormValues>({
     resolver: zodResolver(wishlistAddSchema),
@@ -175,7 +187,7 @@ function AddWishlistModal({ open, onClose }: AddModalProps) {
         price: values.price ?? 0,
         productUrl: values.productUrl ?? '',
         storeName: values.storeName ?? '',
-        imgUrl: null,
+        imgUrl: values.imgUrl ?? null,
         category: values.category ?? undefined,
         priority: values.priority ?? null,
         notes: values.notes ?? null,
@@ -265,6 +277,19 @@ function AddWishlistModal({ open, onClose }: AddModalProps) {
             <p className="text-xs text-red-400 mt-0.5">{errors.notes.message}</p>
           )}
         </div>
+
+        <Controller
+          name="imgUrl"
+          control={control}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value ?? null}
+              onChange={field.onChange}
+              folder="wishlist"
+              label="Imagen (opcional)"
+            />
+          )}
+        />
 
         <div className="flex gap-3 justify-end pt-1">
           <Button type="button" variant="ghost" size="md" onClick={handleClose}>
@@ -421,9 +446,9 @@ export default function WishlistPage() {
               : `${items.length} ${items.length === 1 ? 'item guardado' : 'items guardados'}`}
           </p>
         </div>
-        <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
+        <Button variant="primary" size="md" onClick={() => setAddOpen(true)} className="mr-10 sm:mr-0">
           <Plus size={16} />
-          {t('add')}
+          <span className="hidden sm:inline">{t('add')}</span>
         </Button>
       </div>
 

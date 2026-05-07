@@ -5,6 +5,7 @@ import type {
   AquariumRequest,
   AddLivestockRequest,
   AddLivestockResponse,
+  LivestockItem,
   AddEquipmentRequest,
   EquipmentItem,
 } from '../types/aquarium';
@@ -29,12 +30,22 @@ export const aquariumApi = {
       .post<AddLivestockResponse>(`/aquariums/${aquariumId}/livestock`, data)
       .then((r) => r.data),
 
+  updateLivestock: (livestockId: number, data: AddLivestockRequest) =>
+    api
+      .put<LivestockItem>(`/livestock/${livestockId}`, data)
+      .then((r) => r.data),
+
   deleteLivestock: (livestockId: number) =>
     api.delete(`/livestock/${livestockId}`),
 
   addEquipment: (aquariumId: number, data: AddEquipmentRequest) =>
     api
       .post<EquipmentItem>(`/aquariums/${aquariumId}/equipment`, data)
+      .then((r) => r.data),
+
+  updateEquipment: (equipmentId: number, data: AddEquipmentRequest) =>
+    api
+      .put<EquipmentItem>(`/equipment/${equipmentId}`, data)
       .then((r) => r.data),
 
   deleteEquipment: (equipmentId: number) =>

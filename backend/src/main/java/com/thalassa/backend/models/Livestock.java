@@ -37,6 +37,9 @@ public class Livestock {
   @Builder.Default
   private Integer quantity = 1;
 
+  @Column(name = "image_url", length = 500)
+  private String imageUrl;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "aquarium_id", nullable = false)
   @JsonBackReference("aquarium-livestock")

@@ -9,6 +9,7 @@ export const livestockSchema = z.object({
     .int('Must be a whole number')
     .min(1, 'Minimum 1'),
   speciesCatalogId: z.number().nullable().optional(),
+  imageUrl: z.string().nullable().optional(),
 });
 
 export type LivestockFormValues = z.infer<typeof livestockSchema>;

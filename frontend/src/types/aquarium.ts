@@ -16,6 +16,7 @@ export interface LivestockItem {
   reefSafe: boolean;
   quantity: number;
   speciesCatalogId: number | null;
+  imageUrl: string | null;
 }
 
 export interface EquipmentItem {
@@ -24,6 +25,7 @@ export interface EquipmentItem {
   powerWatts: number;
   hoursPerDay: number;
   category: EquipmentCategory | null;
+  imageUrl: string | null;
 }
 
 export interface AquariumDetail extends AquariumSummary {
@@ -43,6 +45,7 @@ export interface AddLivestockRequest {
   reefSafe: boolean;
   quantity: number;
   speciesCatalogId?: number | null;
+  imageUrl?: string | null;
 }
 
 export interface AddLivestockResponse {
@@ -55,4 +58,5 @@ export interface AddEquipmentRequest {
   powerWatts: number;
   hoursPerDay: number;
   category?: EquipmentCategory | null;
+  imageUrl?: string | null;
 }
