@@ -889,20 +889,20 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
                 <div className="flex items-start justify-between gap-1">
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-semibold text-white truncate leading-tight">{item.name}</p>
-                    <p className="text-[10px] text-[#555] mt-0.5">×{item.quantity}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">×{item.quantity}</p>
                   </div>
                   <div className="flex items-center shrink-0 -mr-1">
                     <button
                       onClick={() => setEditItem(item)}
                       aria-label={`Edit ${item.name}`}
-                      className="p-1 text-[#444] hover:text-white transition-colors"
+                      className="p-1 text-slate-500 hover:text-white transition-colors"
                     >
                       <Pencil size={10} />
                     </button>
                     <button
                       onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
                       aria-label={`Delete ${item.name}`}
-                      className="p-1 text-[#444] hover:text-[#F87171] transition-colors"
+                      className="p-1 text-slate-500 hover:text-[#F87171] transition-colors"
                     >
                       <Trash2 size={10} />
                     </button>
@@ -1019,7 +1019,7 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                   <div className="flex items-start justify-between gap-1">
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] font-semibold text-white truncate leading-tight">{item.name}</p>
-                      <p className="text-[10px] text-[#555] font-mono mt-0.5">
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">
                         {item.powerWatts}W · {item.hoursPerDay}h · {kwhDay.toFixed(1)}kWh
                       </p>
                     </div>
@@ -1027,14 +1027,14 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                       <button
                         onClick={() => setEditItem(item)}
                         aria-label={`Edit ${item.name}`}
-                        className="p-1 text-[#444] hover:text-white transition-colors"
+                        className="p-1 text-slate-500 hover:text-white transition-colors"
                       >
                         <Pencil size={10} />
                       </button>
                       <button
                         onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
                         aria-label={`Delete ${item.name}`}
-                        className="p-1 text-[#444] hover:text-[#F87171] transition-colors"
+                        className="p-1 text-slate-500 hover:text-[#F87171] transition-colors"
                       >
                         <Trash2 size={10} />
                       </button>

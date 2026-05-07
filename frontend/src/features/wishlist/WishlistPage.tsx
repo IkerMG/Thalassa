@@ -446,9 +446,9 @@ export default function WishlistPage() {
               : `${items.length} ${items.length === 1 ? 'item guardado' : 'items guardados'}`}
           </p>
         </div>
-        <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
+        <Button variant="primary" size="md" onClick={() => setAddOpen(true)} className="mr-10 sm:mr-0">
           <Plus size={16} />
-          {t('add')}
+          <span className="hidden sm:inline">{t('add')}</span>
         </Button>
       </div>
 

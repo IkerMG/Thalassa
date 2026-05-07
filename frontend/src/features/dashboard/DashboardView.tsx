@@ -175,15 +175,15 @@ export default function DashboardView() {
             {t('welcome', { username: user?.username })}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 mr-10 sm:mr-0">
           <Button variant="secondary" size="md" onClick={openChat}>
             <Bot size={15} />
-            {t('actions.aiAssistant')}
+            <span className="hidden sm:inline">{t('actions.aiAssistant')}</span>
           </Button>
           {canCreate && (
             <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
               <Plus size={16} />
-              {t('actions.newAquarium')}
+              <span className="hidden sm:inline">{t('actions.newAquarium')}</span>
             </Button>
           )}
         </div>

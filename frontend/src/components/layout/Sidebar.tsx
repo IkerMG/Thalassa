@@ -104,7 +104,7 @@ export default function Sidebar() {
           <button
             onClick={openChat}
             className={[
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
+              'w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm relative cursor-pointer',
               isChatOpen
                 ? 'text-[#59D3FF] bg-[rgba(89,211,255,0.08)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-r before:bg-[#59D3FF]'
                 : 'text-[#A0A0A0] hover:text-white hover:bg-[rgba(255,255,255,0.04)]',
