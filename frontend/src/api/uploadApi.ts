@@ -11,8 +11,13 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
-    // Pass FormData directly — axios removes the default Content-Type header
-    // so the browser can set multipart/form-data with the correct boundary.
-    return api.post<UploadResponse>('/upload', formData).then((r) => r.data);
+    // Explicitly unset Content-Type so the browser sets multipart/form-data
+    // with the correct boundary (the axiosConfig default is application/json
+    // which would prevent Spring's MultipartResolver from parsing the body).
+    return api
+      .post<UploadResponse>('/upload', formData, {
+        headers: { 'Content-Type': undefined },
+      })
+      .then((r) => r.data);
   },
 };

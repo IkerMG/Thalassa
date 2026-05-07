@@ -8,6 +8,7 @@ import {
   Fish,
   Wrench,
   Trash2,
+  Pencil,
   Layers,
   Waves,
   TriangleAlert,
@@ -16,7 +17,7 @@ import {
   Settings,
   Download,
 } from 'lucide-react';
-import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory } from '../../types/aquarium';
+import type { AquariumDetail, AquariumType, LivestockCategory, EquipmentCategory, LivestockItem, EquipmentItem } from '../../types/aquarium';
 import type { WaterParameter, ParameterKey, WaterParameterRequest } from '../../types/parameter';
 import {
   PARAMETER_KEYS,
@@ -48,8 +49,10 @@ import { useAquarium } from '../../hooks/queries/useAquarium';
 import { useWaterParameters } from '../../hooks/queries/useWaterParameters';
 import { useLogParameter } from '../../hooks/mutations/useLogParameter';
 import { useAddLivestock } from '../../hooks/mutations/useAddLivestock';
+import { useUpdateLivestock } from '../../hooks/mutations/useUpdateLivestock';
 import { useDeleteLivestock } from '../../hooks/mutations/useDeleteLivestock';
 import { useAddEquipment } from '../../hooks/mutations/useAddEquipment';
+import { useUpdateEquipment } from '../../hooks/mutations/useUpdateEquipment';
 import { useDeleteEquipment } from '../../hooks/mutations/useDeleteEquipment';
 import AquariumSettingsModal from './AquariumSettingsModal';
 
@@ -353,6 +356,232 @@ function AddEquipmentModal({ open, onClose, aquariumId }: AddEquipmentModalProps
   );
 }
 
+// ── Edit Livestock Modal ──────────────────────────────────────────────────────
+
+interface EditLivestockModalProps {
+  open: boolean;
+  onClose: () => void;
+  aquariumId: number;
+  aquariumType: AquariumType;
+  item: LivestockItem;
+}
+
+function EditLivestockModal({ open, onClose, aquariumId, aquariumType, item }: EditLivestockModalProps) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<LivestockFormValues>({
+    resolver: zodResolver(livestockSchema),
+  });
+
+  const { mutate, isPending } = useUpdateLivestock();
+  const reefSafe = watch('reefSafe');
+
+  useEffect(() => {
+    if (open) {
+      reset({
+        name: item.name,
+        category: item.category,
+        reefSafe: item.reefSafe,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl ?? undefined,
+      });
+    }
+  }, [open, item, reset]);
+
+  const handleClose = () => { reset(); onClose(); };
+
+  const onSubmit = (data: LivestockFormValues) => {
+    mutate(
+      { aquariumId, itemId: item.id, data: { ...data, name: data.name.trim() } },
+      { onSuccess: handleClose }
+    );
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} title={t('livestock.editModal.title', { defaultValue: 'Editar animal' })}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+        <Input
+          label={t('livestock.addModal.name')}
+          placeholder={t('livestock.addModal.namePlaceholder')}
+          {...register('name')}
+          error={errors.name?.message}
+        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+            {t('livestock.addModal.category')}
+          </label>
+          <select
+            {...register('category')}
+            className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
+          >
+            <option value="FISH">{t('livestock.addModal.categories.FISH')}</option>
+            <option value="CORAL">{t('livestock.addModal.categories.CORAL')}</option>
+            <option value="INVERTEBRATE">{t('livestock.addModal.categories.INVERTEBRATE')}</option>
+          </select>
+        </div>
+        <Input
+          label={t('livestock.addModal.quantity')}
+          type="number"
+          min={1}
+          {...register('quantity')}
+          error={errors.quantity?.message}
+        />
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            {...register('reefSafe')}
+            className="w-4 h-4 accent-[#59D3FF]"
+          />
+          <span className="text-sm text-[#A0A0A0]">{t('livestock.addModal.reefSafe')}</span>
+        </label>
+        {aquariumType === 'REEF' && !reefSafe && (
+          <div className="flex items-start gap-2 bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.20)] rounded-lg p-3">
+            <TriangleAlert size={14} className="text-[#F87171] mt-0.5 shrink-0" />
+            <p className="text-xs text-[#F87171]">{t('livestock.reefSafeWarning')}</p>
+          </div>
+        )}
+        <Controller
+          name="imageUrl"
+          control={control}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value ?? null}
+              onChange={field.onChange}
+              folder="livestock"
+              label="Imagen (opcional)"
+            />
+          )}
+        />
+        <div className="flex gap-3 justify-end">
+          <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Guardando…' : 'Guardar cambios'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+// ── Edit Equipment Modal ──────────────────────────────────────────────────────
+
+interface EditEquipmentModalProps {
+  open: boolean;
+  onClose: () => void;
+  aquariumId: number;
+  item: EquipmentItem;
+}
+
+function EditEquipmentModal({ open, onClose, aquariumId, item }: EditEquipmentModalProps) {
+  const { t } = useTranslation('aquarium');
+  const { t: tc } = useTranslation('common');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<EquipmentFormValues>({
+    resolver: zodResolver(equipmentSchema),
+  });
+
+  const { mutate, isPending } = useUpdateEquipment();
+
+  useEffect(() => {
+    if (open) {
+      reset({
+        name: item.name,
+        powerWatts: item.powerWatts,
+        hoursPerDay: item.hoursPerDay,
+        category: item.category ?? undefined,
+        imageUrl: item.imageUrl ?? undefined,
+      });
+    }
+  }, [open, item, reset]);
+
+  const handleClose = () => { reset(); onClose(); };
+
+  const onSubmit = (data: EquipmentFormValues) => {
+    mutate(
+      { aquariumId, itemId: item.id, data: { ...data, name: data.name.trim() } },
+      { onSuccess: handleClose }
+    );
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} title={t('equipment.editModal.title', { defaultValue: 'Editar equipo' })}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+        <Input
+          label={t('equipment.addModal.name')}
+          placeholder={t('equipment.addModal.namePlaceholder')}
+          {...register('name')}
+          error={errors.name?.message}
+        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[#A0A0A0] uppercase tracking-wide">
+            {t('equipment.addModal.category')}
+          </label>
+          <select
+            {...register('category')}
+            className="bg-[#0D0D0D] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[rgba(89,211,255,0.40)] transition-colors cursor-pointer"
+          >
+            <option value="LIGHT">{t('equipment.addModal.categories.LIGHT')}</option>
+            <option value="PUMP">{t('equipment.addModal.categories.PUMP')}</option>
+            <option value="SKIMMER">{t('equipment.addModal.categories.SKIMMER')}</option>
+            <option value="HEATER">{t('equipment.addModal.categories.HEATER')}</option>
+            <option value="OTHER">{t('equipment.addModal.categories.OTHER')}</option>
+          </select>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            label={t('equipment.addModal.power')}
+            type="number"
+            min={1}
+            placeholder={t('equipment.addModal.powerPlaceholder')}
+            {...register('powerWatts')}
+            error={errors.powerWatts?.message}
+          />
+          <Input
+            label={t('equipment.addModal.hours')}
+            type="number"
+            min={0.1}
+            max={24}
+            step={0.5}
+            placeholder={t('equipment.addModal.hoursPlaceholder')}
+            {...register('hoursPerDay')}
+            error={errors.hoursPerDay?.message}
+          />
+        </div>
+        <Controller
+          name="imageUrl"
+          control={control}
+          render={({ field }) => (
+            <ImageUploader
+              value={field.value ?? null}
+              onChange={field.onChange}
+              folder="equipment"
+              label="Imagen (opcional)"
+            />
+          )}
+        />
+        <div className="flex gap-3 justify-end">
+          <Button type="button" variant="ghost" size="md" onClick={handleClose}>{tc('cancel')}</Button>
+          <Button type="submit" variant="primary" size="md" disabled={isPending}>
+            {isPending ? 'Guardando…' : 'Guardar cambios'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 // ── Tab: Overview ─────────────────────────────────────────────────────────────
 
 interface OverviewTabProps {
@@ -613,6 +842,7 @@ interface LivestockTabProps {
 function LivestockTab({ aquarium }: LivestockTabProps) {
   const { t } = useTranslation('aquarium');
   const [addOpen, setAddOpen] = useState(false);
+  const [editItem, setEditItem] = useState<LivestockItem | null>(null);
   const { mutate: deleteLivestock } = useDeleteLivestock();
 
   return (
@@ -640,35 +870,44 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {aquarium.livestock.map((item) => (
             <div
               key={item.id}
-              className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden flex flex-col"
+              className="bg-black border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden flex flex-col"
             >
-              <div className="aspect-[4/3] w-full">
+              <div className="aspect-[16/9] w-full">
                 {item.imageUrl ? (
                   <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <ImagePlaceholder entityType="livestock" className="w-full h-full" />
                 )}
               </div>
-              <div className="p-4 flex flex-col gap-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white">{item.name}</p>
-                    <p className="text-xs text-[#666] mt-0.5">×{item.quantity}</p>
+              <div className="p-2.5 flex flex-col gap-1.5">
+                <div className="flex items-start justify-between gap-1">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-white truncate">{item.name}</p>
+                    <p className="text-[10px] text-[#666]">×{item.quantity}</p>
                   </div>
-                  <button
-                    onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
-                    aria-label={`Delete ${item.name}`}
-                    className="text-text-tertiary hover:text-[#F87171] transition-colors p-1"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center shrink-0">
+                    <button
+                      onClick={() => setEditItem(item)}
+                      aria-label={`Edit ${item.name}`}
+                      className="text-[#555] hover:text-white transition-colors p-1"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button
+                      onClick={() => deleteLivestock({ aquariumId: aquarium.id, itemId: item.id })}
+                      aria-label={`Delete ${item.name}`}
+                      className="text-[#555] hover:text-[#F87171] transition-colors p-1"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
+                <div className="flex items-center gap-1 flex-wrap">
+                  <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full border ${CATEGORY_COLORS[item.category]}`}>
                     {t(`livestock.addModal.categories.${item.category}`)}
                   </span>
                   <ReefSafeBadge reefSafe={item.reefSafe} />
@@ -685,6 +924,15 @@ function LivestockTab({ aquarium }: LivestockTabProps) {
         aquariumId={aquarium.id}
         aquariumType={aquarium.type}
       />
+      {editItem && (
+        <EditLivestockModal
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          aquariumId={aquarium.id}
+          aquariumType={aquarium.type}
+          item={editItem}
+        />
+      )}
     </div>
   );
 }
@@ -698,6 +946,7 @@ interface EquipmentTabProps {
 function EquipmentTab({ aquarium }: EquipmentTabProps) {
   const { t } = useTranslation('aquarium');
   const [addOpen, setAddOpen] = useState(false);
+  const [editItem, setEditItem] = useState<EquipmentItem | null>(null);
   const { mutate: deleteEquipment } = useDeleteEquipment();
 
   const totalWatts = aquarium.equipment.reduce((a, e) => a + e.powerWatts, 0);
@@ -775,13 +1024,22 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
                     {item.powerWatts}W · {item.hoursPerDay}h/day · {kwhDay.toFixed(2)} kWh/day
                   </p>
                 </div>
-                <button
-                  onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
-                  aria-label={`Delete ${item.name}`}
-                  className="text-text-tertiary hover:text-[#F87171] transition-colors p-1 shrink-0"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <div className="flex items-center shrink-0">
+                  <button
+                    onClick={() => setEditItem(item)}
+                    aria-label={`Edit ${item.name}`}
+                    className="text-[#555] hover:text-white transition-colors p-1"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => deleteEquipment({ aquariumId: aquarium.id, itemId: item.id })}
+                    aria-label={`Delete ${item.name}`}
+                    className="text-[#555] hover:text-[#F87171] transition-colors p-1"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -793,6 +1051,14 @@ function EquipmentTab({ aquarium }: EquipmentTabProps) {
         onClose={() => setAddOpen(false)}
         aquariumId={aquarium.id}
       />
+      {editItem && (
+        <EditEquipmentModal
+          open={!!editItem}
+          onClose={() => setEditItem(null)}
+          aquariumId={aquarium.id}
+          item={editItem}
+        />
+      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { useAuthStore } from '../store/authStore';
 import { authApi } from '../api/authApi';
+import { userApi } from '../api/userApi';
 import type { AuthRequest, RegisterRequest } from '../types/api';
 import type { User } from '../types/user';
 
 export function useAuth() {
-  const { token, user, isAuthenticated, setAuth, clearAuth } = useAuthStore();
+  const { token, user, isAuthenticated, setAuth, clearAuth, updateUser } = useAuthStore();
 
   const login = async (data: AuthRequest) => {
     const res = await authApi.login(data);
@@ -15,6 +16,19 @@ export function useAuth() {
       plan: res.subscriptionPlan,
     };
     setAuth(res.token, res.refreshToken ?? null, userData);
+
+    // Fetch full profile so avatarUrl, locale, kwhPrice etc. are in the store.
+    // Fire-and-forget: a failure here doesn't break login.
+    userApi.getProfile().then((profile) => {
+      updateUser({
+        avatarUrl: profile.avatarUrl ?? null,
+        kwhPrice: profile.electricityPriceKwh ?? undefined,
+        locale: (profile.locale as User['locale']) ?? undefined,
+        temperatureUnit: (profile.temperatureUnit as User['temperatureUnit']) ?? undefined,
+        volumeUnit: (profile.volumeUnit as User['volumeUnit']) ?? undefined,
+      });
+    }).catch(() => { /* non-critical */ });
+
     return res;
   };
 

@@ -114,6 +114,8 @@ public class AquariumService {
                         .name(e.getName())
                         .powerWatts(e.getPowerWatts())
                         .hoursPerDay(e.getHoursPerDay())
+                        .category(e.getCategory())
+                        .imageUrl(e.getImageUrl())
                         .build())
             .toList();
 
@@ -129,6 +131,7 @@ public class AquariumService {
                         .quantity(l.getQuantity())
                         .speciesCatalogId(
                             l.getSpeciesCatalog() != null ? l.getSpeciesCatalog().getId() : null)
+                        .imageUrl(l.getImageUrl())
                         .build())
             .toList();
 

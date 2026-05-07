@@ -3,6 +3,7 @@ import { User, Crown, Mail, Globe, Settings, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
 import { useUpdateProfile } from '../../hooks/mutations/useUpdateProfile';
+import { useUserProfile } from '../../hooks/queries/useUserProfile';
 
 // ── Language selectors ────────────────────────────────────────────────────────
 
@@ -15,9 +16,12 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation('profile');
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
+  const { data: profile } = useUserProfile();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
 
   if (!user) return null;
+
+  const avatarUrl = profile?.avatarUrl ?? user.avatarUrl ?? null;
 
   const isReefMaster = user.plan === 'REEFMASTER';
 
@@ -34,8 +38,8 @@ export default function ProfilePage() {
       <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 mb-5">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-[rgba(89,211,255,0.08)] border border-[rgba(89,211,255,0.20)] flex items-center justify-center flex-shrink-0">
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
             ) : (
               <User size={24} className="text-[#59D3FF]" />
             )}

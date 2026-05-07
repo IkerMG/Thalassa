@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronUp, User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
+import { useUserProfile } from '../../hooks/queries/useUserProfile';
 
 const MENU_ITEM_CLASS =
   'w-full flex items-center gap-2.5 px-4 py-2 text-sm text-[#A0A0A0] ' +
@@ -16,7 +17,9 @@ export default function UserDropup() {
   const navigate            = useNavigate();
   const { logout }          = useAuth();
   const user                = useAuthStore((s) => s.user);
+  const { data: profile }   = useUserProfile();
   const initial             = user?.username?.[0]?.toUpperCase() ?? 'U';
+  const avatarUrl           = profile?.avatarUrl ?? user?.avatarUrl ?? null;
 
   // Close on outside click
   useEffect(() => {
@@ -100,8 +103,8 @@ export default function UserDropup() {
         <div className="w-8 h-8 rounded-full overflow-hidden bg-[rgba(89,211,255,0.10)]
                         border border-[rgba(89,211,255,0.25)]
                         flex items-center justify-center shrink-0">
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.username ?? ''} className="w-full h-full object-cover" />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={user?.username ?? ''} className="w-full h-full object-cover" />
           ) : (
             <span className="text-[#59D3FF] text-xs font-bold">{initial}</span>
           )}
