@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,14 @@ public class ScraperService {
 
   private static final Logger log = LoggerFactory.getLogger(ScraperService.class);
 
+  // Maps the display store name (as returned by Python) to the seed file base name.
+  // Used to supplement stores that return 0 live results with seed cache items.
+  private static final Map<String, String> STORE_TO_SEED_FILE = Map.of(
+      "Urban Natura", "urbannatura",
+      "Cetamar",      "cetamar"
+  );
+  private static final int MAX_SEED_PER_STORE = 10;
+
   private final RestClient scraperRestClient;
   private final ObjectMapper objectMapper;
 
@@ -34,14 +45,23 @@ public class ScraperService {
   // Espejean la estructura real del JSON que devuelve el microservicio Python.
   // La respuesta Python usa snake_case y el campo de error es un objeto,
   // no un String; de ahí que no podamos deserializar directamente en ScraperResponse.
+  // Nota: Python devuelve "image_url" y "store", distintos de "img_url" y "store_name" del DTO.
 
   private record PythonScrapeError(String code, String message) {}
+
+  @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+  private record PythonProductResult(
+      String name,
+      Double price,
+      @com.fasterxml.jackson.annotation.JsonProperty("image_url") String imageUrl,
+      @com.fasterxml.jackson.annotation.JsonProperty("product_url") String productUrl,
+      String store) {}
 
   private record PythonScrapeResponse(
       String keyword,
       String store,
       Integer total,
-      List<ScraperProductResult> results,
+      List<PythonProductResult> results,
       PythonScrapeError error) {}
 
   // ── Operaciones ───────────────────────────────────────────────────────────
@@ -74,7 +94,7 @@ public class ScraperService {
       // Mapear el objeto error de Python al campo errorCode del DTO de Spring
       String errorCode = (pythonResponse.error() != null) ? pythonResponse.error().code() : null;
 
-      List<ScraperProductResult> results =
+      List<PythonProductResult> results =
           pythonResponse.results() != null ? pythonResponse.results() : Collections.emptyList();
 
       // Si Python devuelve error o lista vacía → intentar seed cache
@@ -85,13 +105,31 @@ public class ScraperService {
 
       List<ScraperProductResult> normalized = results.stream()
           .map(p -> ScraperProductResult.builder()
-              .name(p.getName())
-              .price(p.getPrice())
-              .productUrl(normalizeUrl(p.getProductUrl()))
-              .imgUrl(normalizeUrl(p.getImgUrl()))
-              .storeName(p.getStoreName())
+              .name(p.name())
+              .price(p.price())
+              .productUrl(normalizeUrl(p.productUrl()))
+              .imgUrl(normalizeUrl(p.imageUrl()))
+              .storeName(p.store())
               .build())
-          .toList();
+          .collect(Collectors.toCollection(ArrayList::new));
+
+      // Per-store fallback: for any expected store that contributed 0 live items,
+      // supplement from its seed file so the store filter always has items to show.
+      Set<String> liveStores = normalized.stream()
+          .map(ScraperProductResult::getStoreName)
+          .filter(Objects::nonNull)
+          .collect(Collectors.toSet());
+
+      for (Map.Entry<String, String> entry : STORE_TO_SEED_FILE.entrySet()) {
+        if (!liveStores.contains(entry.getKey())) {
+          List<ScraperProductResult> seed = loadSeedItemsForFile(entry.getValue(), keyword);
+          if (!seed.isEmpty()) {
+            normalized.addAll(seed);
+            log.info("scraper: supplemented '{}' with {} seed items for store '{}'",
+                keyword, seed.size(), entry.getKey());
+          }
+        }
+      }
 
       return ScraperResponse.builder()
           .keyword(pythonResponse.keyword())
@@ -113,6 +151,36 @@ public class ScraperService {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private List<ScraperProductResult> loadSeedItemsForFile(String seedFile, String keyword) {
+    try {
+      ClassPathResource resource = new ClassPathResource("market-seed/" + seedFile + ".json");
+      if (!resource.exists()) return List.of();
+      try (InputStream is = resource.getInputStream()) {
+        List<ScraperProductResult> items = objectMapper.readValue(is, new TypeReference<>() {});
+        List<ScraperProductResult> built = items.stream()
+            .map(p -> ScraperProductResult.builder()
+                .name(p.getName())
+                .price(p.getPrice())
+                .productUrl(normalizeUrl(p.getProductUrl()))
+                .imgUrl(normalizeUrl(p.getImgUrl()))
+                .storeName(p.getStoreName())
+                .build())
+            .collect(Collectors.toList());
+        // Prefer keyword-matched items; fall back to the full list if none match.
+        List<ScraperProductResult> matched = built.stream()
+            .filter(p -> p.getName() != null
+                && p.getName().toLowerCase().contains(keyword.toLowerCase()))
+            .collect(Collectors.toList());
+        return (matched.isEmpty() ? built : matched).stream()
+            .limit(MAX_SEED_PER_STORE)
+            .collect(Collectors.toList());
+      }
+    } catch (Exception e) {
+      log.warn("No se pudo cargar seed para '{}': {}", seedFile, e.getMessage());
+      return List.of();
+    }
+  }
 
   private ScraperResponse loadFromSeedCache(String keyword) {
     String[] seedFiles = {"urbannatura", "cetamar"};

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # ── HTTP Client ───────────────────────────────────────────────────────────
     request_timeout: int = 10       # segundos antes de TimeoutError
-    max_results_per_store: int = 5  # máximo de productos a devolver por tienda
+    max_results_per_store: int = 10  # máximo de productos a devolver por tienda
 
     # ── Tiendas (URLs base) ───────────────────────────────────────────────────
     tiendanimal_base_url: str = "https://www.tiendanimal.es"

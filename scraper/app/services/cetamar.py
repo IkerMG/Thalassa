@@ -95,6 +95,11 @@ _IMG_SELECTORS = [
     "img",
 ]
 
+_LAZY_ATTRS = (
+    "data-src", "data-lazy-src", "data-lazy", "data-original",
+    "data-full-size-image-url", "data-zoom-image",
+)
+
 
 def _parse_price(raw: str) -> float | None:
     cleaned = re.sub(r"[^\d,\.]", "", raw.strip())
@@ -124,15 +129,32 @@ def _abs_url(href: str | None) -> str | None:
     return None
 
 
+def _is_real_img(url: str) -> bool:
+    lo = url.lower()
+    return not (
+        lo.startswith("data:")
+        or "blank" in lo
+        or "placeholder" in lo
+        or "loading" in lo
+        or "transparent" in lo
+        or lo.endswith("/0/")
+        or lo in ("#", "")
+    )
+
+
 def _extract_img(tag: Tag) -> str | None:
-    for attr in ("src", "data-src", "data-lazy-src", "data-original", "data-full-size-image-url"):
-        val = tag.get(attr, "")
-        if val and not val.endswith(("placeholder", "blank.gif", "loading.gif")):
+    for attr in _LAZY_ATTRS:
+        val = str(tag.get(attr) or "").strip()
+        if val and _is_real_img(val):
             return _abs_url(val)
-    srcset = tag.get("srcset", "")
+    val = str(tag.get("src") or "").strip()
+    if val and _is_real_img(val):
+        return _abs_url(val)
+    srcset = str(tag.get("srcset") or "").strip()
     if srcset:
-        first = srcset.split(",")[0].strip().split(" ")[0]
-        return _abs_url(first)
+        first = srcset.split(",")[0].strip().split()[0]
+        if first and _is_real_img(first):
+            return _abs_url(first)
     return None
 
 

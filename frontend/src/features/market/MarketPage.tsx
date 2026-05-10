@@ -61,25 +61,31 @@ interface CardProps {
 
 function ProductCard({ product, onAddToWishlist, isAdding, fromCache }: CardProps) {
   const { t } = useTranslation('market');
-  const store = product.storeName ?? '';
+  const [imgError, setImgError] = useState(false);
+  const store = product.store_name ?? '';
   const storeBadge = STORE_COLORS[store] ?? 'text-[#A0A0A0] border-[rgba(255,255,255,0.12)]';
-  const productHref = normalizeExternalUrl(product.productUrl);
+  const productHref = normalizeExternalUrl(product.product_url);
+  const showImage = !!product.img_url && !imgError;
 
   return (
     <div className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl flex flex-col overflow-hidden hover:border-[rgba(255,255,255,0.14)] transition-colors group">
       {/* Image area */}
-      <div className="h-36 bg-[rgba(255,255,255,0.03)] flex items-center justify-center border-b border-[rgba(255,255,255,0.06)]">
-        {product.imgUrl ? (
+      <div className="aspect-[4/3] w-full overflow-hidden bg-[rgba(255,255,255,0.03)] border-b border-[rgba(255,255,255,0.06)]">
+        {showImage ? (
           <img
-            src={product.imgUrl}
+            src={product.img_url!}
             alt={product.name}
-            className="h-full w-full object-contain p-3"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
           />
         ) : (
-          <ShoppingBag size={32} className="text-[rgba(255,255,255,0.08)]" />
+          <img
+            src="/market-placeholder.svg"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover"
+          />
         )}
       </div>
 
@@ -146,7 +152,7 @@ function GridSkeleton() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 animate-pulse">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
-          <div className="h-36 bg-[rgba(255,255,255,0.04)]" />
+          <div className="aspect-[4/3] w-full bg-[rgba(255,255,255,0.04)]" />
           <div className="p-4 flex flex-col gap-2">
             <div className="h-4 w-full bg-[rgba(255,255,255,0.06)] rounded" />
             <div className="h-3 w-2/3 bg-[rgba(255,255,255,0.04)] rounded" />
@@ -209,7 +215,7 @@ export default function MarketPage() {
   // Client-side store filter
   const filtered = storeFilter === 'all'
     ? displayResults
-    : displayResults.filter((p) => p.storeName === storeFilter);
+    : displayResults.filter((p) => p.store_name === storeFilter);
 
   const handleCategoryClick = (key: CategoryKey) => {
     setActiveCategory(key);
@@ -227,11 +233,11 @@ export default function MarketPage() {
 
   const handleAddToWishlist = (product: ScraperResult) => {
     addToWishlist({
-      productName:  product.name    ?? 'Producto sin nombre',
-      price:        product.price   ?? 0,
-      productUrl:   product.productUrl ?? '',
-      storeName:    product.storeName  ?? '',
-      imgUrl:       product.imgUrl ?? null,
+      productName:  product.name        ?? 'Producto sin nombre',
+      price:        product.price       ?? 0,
+      productUrl:   product.product_url ?? '',
+      storeName:    product.store_name  ?? '',
+      imgUrl:       product.img_url     ?? null,
       category:     undefined,
       priority:     'MEDIUM',
       notes:        null,
@@ -344,7 +350,7 @@ export default function MarketPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {filtered.map((product, i) => (
             <ProductCard
-              key={`${product.productUrl ?? ''}-${i}`}
+              key={`${product.product_url ?? ''}-${i}`}
               product={product}
               onAddToWishlist={handleAddToWishlist}
               isAdding={isAdding}
