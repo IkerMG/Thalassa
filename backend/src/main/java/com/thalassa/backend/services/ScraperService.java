@@ -34,14 +34,23 @@ public class ScraperService {
   // Espejean la estructura real del JSON que devuelve el microservicio Python.
   // La respuesta Python usa snake_case y el campo de error es un objeto,
   // no un String; de ahí que no podamos deserializar directamente en ScraperResponse.
+  // Nota: Python devuelve "image_url" y "store", distintos de "img_url" y "store_name" del DTO.
 
   private record PythonScrapeError(String code, String message) {}
+
+  @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+  private record PythonProductResult(
+      String name,
+      Double price,
+      @com.fasterxml.jackson.annotation.JsonProperty("image_url") String imageUrl,
+      @com.fasterxml.jackson.annotation.JsonProperty("product_url") String productUrl,
+      String store) {}
 
   private record PythonScrapeResponse(
       String keyword,
       String store,
       Integer total,
-      List<ScraperProductResult> results,
+      List<PythonProductResult> results,
       PythonScrapeError error) {}
 
   // ── Operaciones ───────────────────────────────────────────────────────────
@@ -74,7 +83,7 @@ public class ScraperService {
       // Mapear el objeto error de Python al campo errorCode del DTO de Spring
       String errorCode = (pythonResponse.error() != null) ? pythonResponse.error().code() : null;
 
-      List<ScraperProductResult> results =
+      List<PythonProductResult> results =
           pythonResponse.results() != null ? pythonResponse.results() : Collections.emptyList();
 
       // Si Python devuelve error o lista vacía → intentar seed cache
@@ -85,11 +94,11 @@ public class ScraperService {
 
       List<ScraperProductResult> normalized = results.stream()
           .map(p -> ScraperProductResult.builder()
-              .name(p.getName())
-              .price(p.getPrice())
-              .productUrl(normalizeUrl(p.getProductUrl()))
-              .imgUrl(normalizeUrl(p.getImgUrl()))
-              .storeName(p.getStoreName())
+              .name(p.name())
+              .price(p.price())
+              .productUrl(normalizeUrl(p.productUrl()))
+              .imgUrl(normalizeUrl(p.imageUrl()))
+              .storeName(p.store())
               .build())
           .toList();
 
