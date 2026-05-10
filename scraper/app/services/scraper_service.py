@@ -16,6 +16,7 @@ import logging
 
 import httpx
 
+from app.config import get_settings
 from app.models.responses import ProductResult, ScrapeError, ScrapeResponse
 from app.services.urbannatura import scrape_urbannatura
 from app.services.cetamar import scrape_cetamar
@@ -111,12 +112,13 @@ async def search_products(keyword: str, store: str = "all") -> ScrapeResponse:
         return_exceptions=False,
     )
 
+    max_per_store = get_settings().max_results_per_store
     results: list[ProductResult] = []
     first_error: ScrapeError | None = None
 
     for store_id, (store_results, store_error) in zip(store_ids, gathered):
         if store_results:
-            results.extend(store_results)
+            results.extend(store_results[:max_per_store])
         if store_error:
             print(f"[service] {store_id} reportó error: {store_error.code} — {store_error.message}")
             if first_error is None:

@@ -80,9 +80,12 @@ function ProductCard({ product, onAddToWishlist, isAdding, fromCache }: CardProp
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ShoppingBag size={32} className="text-[rgba(255,255,255,0.08)]" />
-          </div>
+          <img
+            src="/market-placeholder.svg"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover"
+          />
         )}
       </div>
 
