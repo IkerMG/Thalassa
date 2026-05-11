@@ -1,0 +1,24 @@
+http:
+  routers:
+    frontend:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - web
+      service: frontend-svc
+
+    api:
+      rule: "Host(`localhost`) && PathPrefix(`/api`)"
+      entryPoints:
+        - web
+      service: backend-svc
+
+  services:
+    frontend-svc:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:80"
+
+    backend-svc:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8080"

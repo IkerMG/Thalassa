@@ -16,7 +16,8 @@ RUN npm ci --ignore-scripts
 
 # Copiar el resto del código fuente y compilar
 COPY . .
-RUN npm run build
+ARG VITE_BASE=/Thalassa/
+RUN npx tsc -b && npx vite build --base ${VITE_BASE}
 
 
 # ── Stage 2: Runtime ─────────────────────────────────────────────────────────
