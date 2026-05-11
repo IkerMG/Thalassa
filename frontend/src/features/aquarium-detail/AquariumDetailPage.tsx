@@ -89,6 +89,93 @@ const STATUS_COLORS: Record<ParameterStatus, string> = {
   unknown: '#666666',
 };
 
+// ── Parameter Corrective Advice ───────────────────────────────────────────────
+
+const PARAMETER_ADVICE: Record<ParameterKey, { low: string; high: string }> = {
+  temperature:   {
+    low:  'Aumenta la temperatura con el calefactor. Revisa que esté encendido y bien calibrado.',
+    high: 'Baja la temperatura con ventilación adicional o un enfriador. Evita superar los 28 °C.',
+  },
+  salinity:      {
+    low:  'Añade sal marina disuelta hasta alcanzar 1.023–1.026 SG. Usa un refractómetro para confirmar.',
+    high: 'Realiza un cambio de agua parcial con agua dulce RODI sin cloro para reducir la salinidad.',
+  },
+  ph:            {
+    low:  'Aumenta la agitación superficial para liberar CO₂ y revisa la alcalinidad. El pH bajo favorece infecciones.',
+    high: 'Mejora la aireación nocturna y reduce la iluminación si hay exceso de fotosíntesis.',
+  },
+  alkalinityDKH: {
+    low:  'Dosifica bicarbonato sódico o un suplemento de alcalinidad. Aumenta gradualmente (máx. 1 dKH/día).',
+    high: 'Reduce la dosificación y realiza cambios de agua. La alcalinidad muy alta puede precipitar el calcio.',
+  },
+  calciumPPM:    {
+    low:  'Dosifica cloruro de calcio o activa tu reactor de calcio. El coral necesita calcio para crecer.',
+    high: 'Reduce la dosificación temporalmente y controla la alcalinidad para evitar precipitación.',
+  },
+  magnesiumPPM:  {
+    low:  'Dosifica sulfato o cloruro de magnesio. El magnesio estabiliza calcio y alcalinidad.',
+    high: 'Realiza cambios de agua parciales con agua nueva para reducir el nivel gradualmente.',
+  },
+  nitratesPPM:   {
+    low:  'Nivel seguro. Valores muy bajos pueden afectar el crecimiento del coral SPS.',
+    high: 'Aumenta la frecuencia de cambios de agua, revisa la carga de peces y limpia el skimmer.',
+  },
+  phosphatesPPM: {
+    low:  'Nivel seguro. Valores inferiores a 0.01 pueden estresar el coral. Revisa la alimentación.',
+    high: 'Usa un reactor GFO, reduce la alimentación y aumenta los cambios de agua parciales.',
+  },
+};
+
+// ── Parameter Alert Modal ─────────────────────────────────────────────────────
+
+interface ParameterAlertModalProps {
+  paramKey: ParameterKey;
+  value: number;
+  status: ParameterStatus;
+  onClose: () => void;
+}
+
+function ParameterAlertModal({ paramKey, value, status, onClose }: ParameterAlertModalProps) {
+  const r      = PARAMETER_RANGES[paramKey];
+  const advice = PARAMETER_ADVICE[paramKey];
+  const isD    = status === 'danger';
+  const color  = isD ? 'text-[#F87171]'               : 'text-[#FBBF24]';
+  const border = isD ? 'border-[rgba(248,113,113,0.30)]' : 'border-[rgba(251,191,36,0.30)]';
+  const bg     = isD ? 'bg-[rgba(248,113,113,0.06)]'  : 'bg-[rgba(251,191,36,0.06)]';
+  const label  = isD ? 'Peligro'                       : 'Advertencia';
+  const suggestion = value < r.min ? advice.low : advice.high;
+
+  return (
+    <Modal open onClose={onClose} title={`${r.label} — ${label}`} maxWidth="max-w-md">
+      <div className="space-y-4">
+        <div className={`flex items-start gap-3 rounded-lg p-3 ${bg} border ${border}`}>
+          <TriangleAlert size={16} className={`${color} shrink-0 mt-0.5`} />
+          <div>
+            <p className={`text-sm font-semibold ${color}`}>
+              Valor registrado: {value.toFixed(r.decimals)}{r.unit ? ` ${r.unit}` : ''}
+            </p>
+            <p className="text-xs text-[#A0A0A0] mt-0.5">
+              Rango óptimo: {r.min}–{r.max}{r.unit ? ` ${r.unit}` : ''}
+            </p>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide mb-1.5">
+            Qué puedes hacer
+          </p>
+          <p className="text-sm text-white leading-relaxed">{suggestion}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full py-2 rounded-lg bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] text-sm text-[#A0A0A0] hover:text-white hover:border-[rgba(255,255,255,0.15)] transition-colors cursor-pointer"
+        >
+          Entendido
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 // ── Log Measurement Modal ─────────────────────────────────────────────────────
 
 interface LogModalProps {
@@ -593,6 +680,7 @@ interface OverviewTabProps {
 
 function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTabProps) {
   const { t } = useTranslation('aquarium');
+  const [alertKey, setAlertKey] = useState<{ key: ParameterKey; value: number; status: ParameterStatus } | null>(null);
   const fishCount = aquarium.livestock.filter((l) => l.category === 'FISH').reduce((a, l) => a + l.quantity, 0);
   const coralCount = aquarium.livestock.filter((l) => l.category === 'CORAL').reduce((a, l) => a + l.quantity, 0);
   const invertCount = aquarium.livestock.filter((l) => l.category === 'INVERTEBRATE').reduce((a, l) => a + l.quantity, 0);
@@ -631,10 +719,19 @@ function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTa
               const status = getParameterStatus(key, value);
               const sc = STATUS_CONFIG[status];
               const r = PARAMETER_RANGES[key];
+              const isAlertable = (status === 'warning' || status === 'danger') && value !== null;
               return (
                 <div
                   key={key}
-                  className="bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4"
+                  role={isAlertable ? 'button' : undefined}
+                  tabIndex={isAlertable ? 0 : undefined}
+                  title={isAlertable ? 'Haz clic para ver qué hacer' : undefined}
+                  onClick={isAlertable ? () => setAlertKey({ key, value: value as number, status }) : undefined}
+                  onKeyDown={isAlertable ? (e) => { if (e.key === 'Enter' || e.key === ' ') setAlertKey({ key, value: value as number, status }); } : undefined}
+                  className={[
+                    'bg-black border border-[rgba(255,255,255,0.08)] rounded-xl p-4 transition-colors',
+                    isAlertable ? 'cursor-pointer hover:border-[rgba(255,255,255,0.18)]' : '',
+                  ].join(' ')}
                 >
                   <div className={`flex items-center gap-1 mb-1 ${sc.color}`}>
                     {sc.icon}
@@ -679,6 +776,15 @@ function OverviewTab({ aquarium, lastParam, parameters, onLogClick }: OverviewTa
           ))}
         </div>
       </div>
+
+      {alertKey && (
+        <ParameterAlertModal
+          paramKey={alertKey.key}
+          value={alertKey.value}
+          status={alertKey.status}
+          onClose={() => setAlertKey(null)}
+        />
+      )}
     </div>
   );
 }

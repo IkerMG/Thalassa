@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/Thalassa/',
+  base: process.env.NODE_ENV === 'production' ? '/Thalassa/' : '/',
 
   plugins: [
     react(),
