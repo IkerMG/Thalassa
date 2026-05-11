@@ -5,6 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'path';
 
 export default defineConfig({
+  base: '/Thalassa/',
+
   plugins: [
     react(),
     tailwindcss(),
@@ -23,8 +25,8 @@ export default defineConfig({
         background_color: '#0A0A0A',
         display: 'standalone',
         orientation: 'portrait-primary',
-        start_url: '/dashboard',
-        scope: '/',
+        start_url: '/Thalassa/dashboard',
+        scope: '/Thalassa/',
         lang: 'en',
         icons: [
           {
