@@ -120,10 +120,11 @@ function ProductCard({ product, onAddToWishlist, isAdding, fromCache }: CardProp
               href={productHref}
               target="_blank"
               rel="noopener noreferrer"
+              title="Abre en una nueva pestaña"
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] text-xs font-medium hover:text-white hover:border-[rgba(255,255,255,0.25)] transition-colors"
             >
               <ExternalLink size={12} />
-              {t('viewProduct')}
+              {t('viewProduct')} ↗
             </a>
           ) : (
             <span className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-[rgba(255,255,255,0.04)] text-[#383838] text-xs font-medium cursor-not-allowed select-none">
