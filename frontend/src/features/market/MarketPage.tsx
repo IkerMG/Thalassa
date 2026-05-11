@@ -81,7 +81,7 @@ function ProductCard({ product, onAddToWishlist, isAdding, fromCache }: CardProp
           />
         ) : (
           <img
-            src="/market-placeholder.svg"
+            src={`${import.meta.env.BASE_URL}market-placeholder.svg`}
             alt=""
             aria-hidden="true"
             className="w-full h-full object-cover"

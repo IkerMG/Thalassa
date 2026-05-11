@@ -46,7 +46,7 @@ function Hero() {
   return (
     <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
       <video
-        src="/assets/hero-bg.mp4"
+        src={`${import.meta.env.BASE_URL}assets/hero-bg.mp4`}
         autoPlay
         loop
         muted
