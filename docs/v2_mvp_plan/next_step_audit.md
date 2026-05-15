@@ -1,7 +1,6 @@
 # NEXT STEP AUDIT — Thalassa
 
 > **Fecha:** 2026-05-03
-> **Auditor:** Tech Lead (Claude Code)
 > **Rama auditada:** `feat/fase14-mvp` (== `main` @ `88d81f6`)
 > **Scope:** Auditoría pre-entrega TFG para identificar gaps y definir alcance MVP final.
 
