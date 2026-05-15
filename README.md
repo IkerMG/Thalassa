@@ -1,426 +1,264 @@
-# Thalassa
+# 🌊 Thalassa
 
 <p align="center">
-  <strong>Plataforma profesional de gestión de acuarios marinos</strong>
+  <strong>Plataforma full-stack para la gestión de acuarios marinos</strong><br/>
+  <em>Spring Boot · React PWA · FastAPI · PostgreSQL · Docker</em>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-orange?logo=openjdk&logoColor=white" alt="Java 21" />
   <img src="https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 3.2" />
   <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" alt="React 18" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose" />
-  <img src="https://img.shields.io/badge/Licencia-Académica-lightgrey" alt="Licencia" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker" />
 </p>
 
 ---
 
-**Thalassa** es un SaaS freemium de pila completa para la gestión integral de acuarios marinos. Combina el seguimiento de parámetros del agua, el inventario de fauna y equipamiento, calculadoras de energía y dosificación, un asistente de inteligencia artificial especializado con Groq/Llama, un marketplace de especies con datos en tiempo real y soporte PWA — todo bajo una interfaz elegante de temática OLED oscura con soporte para inglés, alemán y español.
+## 📑 Índice
+
+1. [Visión general](#-visión-general)
+2. [Funcionalidades reales](#-funcionalidades-reales)
+3. [Arquitectura](#-arquitectura)
+4. [Stack tecnológico](#-stack-tecnológico)
+5. [Despliegue con Docker](#-despliegue-con-docker)
+6. [Resolución de problemas](#-resolución-de-problemas)
+7. [Estructura del repositorio](#-estructura-del-repositorio)
 
 ---
 
-## Funcionalidades
+## 🐠 Visión general
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Autenticación** | Tokens de acceso JWT + refresh tokens rotativos, recuperación/restablecimiento de contraseña por email, control de acceso freemium por rol |
-| **Dashboard** | Vista general de múltiples acuarios con estadísticas globales (fauna, equipos) y tarjetas individuales por acuario |
-| **Parámetros del agua** | Registro y visualización histórica de pH, temperatura, salinidad, alcalinidad, calcio, magnesio, nitrato y fosfato |
-| **Fauna** | Inventario de peces, corales e invertebrados con validación de compatibilidad con arrecife y enlace al catálogo de especies |
-| **Equipamiento** | Seguimiento de dispositivos (luces, bombas, skimmers, calentadores) con potencia en vatios y uso diario |
-| **Calculadora de energía** | Estimación del consumo mensual en kWh a partir de los datos del equipamiento *(plan ReefMaster)* |
-| **Calculadora de dosificación** | Cálculo de dosis de aditivos en función del volumen del acuario *(plan ReefMaster)* |
-| **Asistente IA** | Asistente conversacional especializado en acuariofilia marina, impulsado por Groq (Llama 3.3 70B) |
-| **Marketplace de especies** | Listados de productos obtenidos mediante scraping en tiempo real de distribuidores asociados vía FastAPI |
-| **Lista de deseos** | Guardado de especies y productos de interés con prioridad y notas |
-| **Notificaciones** | Campana de notificaciones con alertas categorizadas dentro de la aplicación |
-| **Exportación CSV** | Exportación del historial de parámetros del agua a CSV *(plan ReefMaster)* |
-| **i18n** | Interfaz completa en inglés, alemán y español con preferencia de idioma por usuario |
-| **PWA** | Instalable en escritorio y móvil, con soporte offline mediante Service Worker |
+**Thalassa** es una aplicación web pensada para aficionados a la acuariofilia marina. Permite llevar el control de uno o varios acuarios: el historial de parámetros del agua, el inventario de equipamiento y de fauna, el coste energético mensual, una wishlist de productos y un comparador de precios entre las principales tiendas españolas del sector.
+
+El proyecto se distribuye como tres microservicios independientes que se orquestan con **Docker Compose** detrás de un proxy **Traefik**.
 
 ---
 
-## Arquitectura
+## ✅ Funcionalidades reales
 
+> Esta tabla refleja **únicamente** lo que está implementado y operativo en el código fuente. No se incluyen módulos que aún sean mocks o stubs.
+
+| 🧩 Módulo | Descripción | Endpoints / Componentes |
+|---|---|---|
+| 🔐 **Autenticación JWT** | Registro, login, refresh rotativo (15 min access · 30 d refresh), logout y recuperación de contraseña por email. | [AuthController.java](backend/src/main/java/com/thalassa/backend/controllers/AuthController.java) |
+| 🐟 **Gestión de acuarios** | CRUD de acuarios (litros, tipo FOWLR/REEF) con gate freemium: el plan FREE limita a **1 acuario**. | [AquariumController.java](backend/src/main/java/com/thalassa/backend/controllers/AquariumController.java) |
+| 💧 **Parámetros del agua** | Registro histórico de pH, salinidad, temperatura, alcalinidad, calcio, magnesio, nitratos, fosfatos. Listado paginado, **exportación a CSV** y gráficas con Recharts. | [WaterParameterService.java](backend/src/main/java/com/thalassa/backend/services/WaterParameterService.java) |
+| 🐡 **Inventario de fauna** | Alta/baja/edición de especímenes con marcado reef‑safe y enlace al catálogo. Advertencia al añadir fauna no reef‑safe en acuarios de tipo REEF. | [LivestockController.java](backend/src/main/java/com/thalassa/backend/controllers/LivestockController.java) |
+| ⚙️ **Equipamiento + energía** | CRUD de equipos (potencia W, horas/día) y **cálculo del coste energético mensual** a partir del precio del kWh configurado por el usuario. | [EquipmentController.java](backend/src/main/java/com/thalassa/backend/controllers/EquipmentController.java) |
+| 📚 **Catálogo de especies** | Búsqueda case‑insensitive por nombre común o científico, detalle por ID. | [SpeciesCatalogController.java](backend/src/main/java/com/thalassa/backend/controllers/SpeciesCatalogController.java) |
+| 🛒 **Mercado comparador** | Búsqueda en caliente contra el microservicio Python que scrapea **Cetamar** y **Urban Natura** con BeautifulSoup. Resiliencia con seed cache (ver más abajo). | [MarketPage.tsx](frontend/src/features/market/MarketPage.tsx) · [ScraperController.java](backend/src/main/java/com/thalassa/backend/controllers/ScraperController.java) |
+| ❤️ **Wishlist** | Guarda productos del mercado (o personalizados) con notas, prioridad y categoría. CRUD con validación de ownership. | [WishlistController.java](backend/src/main/java/com/thalassa/backend/controllers/WishlistController.java) |
+| 🤖 **Chat IA** | Asistente especializado en acuariofilia. Proxy Spring Boot → FastAPI → **Groq (Llama 3.3 70B)**. Rate‑limit diario: 5 mensajes para el plan FREE, ilimitado para REEFMASTER. | [ChatService.java](backend/src/main/java/com/thalassa/backend/services/ChatService.java) |
+| 🧮 **Calculadoras** | Calculadora de dosificación de elementos y calculadora de coste energético (vista cliente). | [DosingCalcPage.tsx](frontend/src/features/calculators/DosingCalcPage.tsx) · [EnergyCalcPage.tsx](frontend/src/features/calculators/EnergyCalcPage.tsx) |
+| 🖼️ **Subida de imágenes** | Upload a **Cloudinary** (JPEG/PNG/WebP, máx. 5 MB) para avatares, fauna, equipamiento y wishlist. | [UploadController.java](backend/src/main/java/com/thalassa/backend/controllers/UploadController.java) |
+| 💳 **Plan FREE / REEFMASTER** | Endpoint de simulación de upgrade para QA/dev (sin pasarela de pago real) y `PlanGate` en frontend. | [UserController.java](backend/src/main/java/com/thalassa/backend/controllers/UserController.java) · [PlanGate.tsx](frontend/src/components/shared/PlanGate.tsx) |
+| 📊 **Dashboard** | Resumen global: nº de acuarios, fauna total, equipamiento total. | [DashboardController.java](backend/src/main/java/com/thalassa/backend/controllers/DashboardController.java) |
+| 🌍 **Internacionalización** | Español, inglés y alemán con `i18next`. | [frontend/src/i18n/](frontend/src/i18n/) |
+| 📱 **PWA** | Instalable y con service worker vía `vite-plugin-pwa`. | [frontend/package.json](frontend/package.json) |
+
+---
+
+## 🏗️ Arquitectura
+
+Thalassa se compone de **tres servicios independientes** orquestados por Docker Compose, más una base de datos PostgreSQL y un proxy Traefik que termina TLS en producción.
+
+```mermaid
+graph TD
+    subgraph Cliente
+        U[👤 Usuario]
+    end
+
+    subgraph "Docker Compose · thalassa-net"
+        TR[🔀 Traefik<br/>HTTPS · Let's Encrypt]
+        FE[⚛️ Frontend<br/>React 18 + Vite PWA<br/>:80]
+        BE[☕ Backend<br/>Spring Boot 3.2 / Java 21<br/>:8080]
+        SC[🐍 Scraper<br/>FastAPI + BeautifulSoup<br/>:8001]
+        DB[(🐘 PostgreSQL 16<br/>:5432)]
+        BK[💾 Backup<br/>pg_dump diario]
+        SEED[(📦 market-seed/*.json<br/>en el classpath del backend)]
+    end
+
+    subgraph "Servicios externos"
+        GROQ[🤖 Groq API<br/>Llama 3.3 70B]
+        CL[🖼️ Cloudinary]
+        CT[🌐 Cetamar.com]
+        UN[🌐 UrbanNatura.com]
+    end
+
+    U -->|HTTPS| TR
+    TR -->|"PathPrefix /api"| BE
+    TR -->|SPA| FE
+    FE -.->|REST + JWT| BE
+    BE -->|JDBC| DB
+    BE -->|HTTP en caliente| SC
+    BE -->|"fallback si scraper falla"| SEED
+    BE -->|REST| GROQ
+    BE -->|SDK upload| CL
+    SC -->|httpx GET| CT
+    SC -->|httpx GET| UN
+    SC -->|Chat IA| GROQ
+    BK -->|cron 03:00 UTC| DB
 ```
-                    ┌─────────────────────────────────────┐
-                    │       Traefik (Proxy inverso)        │
-                    │        HTTP :80 → HTTPS :443         │
-                    └─────────┬──────────────┬─────────────┘
-                              │              │
-                    ┌─────────▼────┐  ┌──────▼──────────┐
-                    │  Frontend    │  │    Backend API   │
-                    │  nginx SPA   │  │  Spring Boot     │
-                    │  React+Vite  │  │  :8080           │
-                    └─────────────┘  └──────┬────────────┘
-                                            │
-                              ┌─────────────┼─────────────┐
-                              │             │             │
-                    ┌─────────▼───┐  ┌──────▼────┐  ┌────▼──────┐
-                    │  PostgreSQL │  │  Scraper  │  │  Backup   │
-                    │  :5432      │  │  FastAPI  │  │  cron pg  │
-                    │  (interno)  │  │  :8001    │  │  dump     │
-                    └─────────────┘  └───────────┘  └───────────┘
-```
 
-Todos los servicios se comunican a través de la red interna Docker (`thalassa-net`). El puerto de la base de datos **no** está expuesto al host.
+### 🛡️ Sistema de resiliencia del mercado comparador
+
+El comparador de precios **no falla nunca de forma visible al usuario**, incluso si los sitios externos están caídos o si el ISP del usuario los bloquea. El sistema combina tres capas:
+
+1. **Scraper Python (capa 1 — live).** [ScraperService.search](backend/src/main/java/com/thalassa/backend/services/ScraperService.java) llama a `GET /scrape?keyword=…` del microservicio FastAPI, que dispara en paralelo (`asyncio.gather`) los scrapers de **Cetamar** y **Urban Natura**. Un fallo de una tienda **no cancela** los resultados de la otra.
+
+2. **Seed cache del backend (capa 2 — fallback).** Si Python devuelve `errorCode`, lista vacía, o si una tienda concreta no devuelve productos, el backend **inyecta datos semilla locales** desde `backend/src/main/resources/market-seed/cetamar.json` y `urbannatura.json` (hasta 10 ítems por tienda, priorizando los que coincidan con la keyword). El campo `fromCache: true` lo señala en la respuesta para mostrarse como badge en el frontend.
+
+3. **Placeholder SVG en el frontend (capa 3 — fallos de imagen).** Las URLs de imagen apuntan a CDNs externos que algunos ISPs españoles bloquean. Cuando el `<img>` falla, [ProductCard](frontend/src/features/market/MarketPage.tsx) sustituye la imagen rota por el SVG local **[`/market-placeholder.svg`](frontend/public/market-placeholder.svg)** — sin hacer ninguna petición de red, evitando bloqueos del navegador.
+
+> Resultado: aunque toda la red externa esté caída, el módulo de mercado sigue mostrando productos comparables sin imágenes rotas ni errores 500.
 
 ---
 
-## Stack Tecnológico
+## 🧰 Stack tecnológico
 
-### Backend
-| Tecnología | Versión | Rol |
-|------------|---------|-----|
-| Java | 21 | Runtime |
-| Spring Boot | 3.2.5 | API REST, lógica de negocio, seguridad |
-| Spring Security | 6.x | Autenticación JWT, autorización |
-| Spring Data JPA | 3.x | Capa ORM (Hibernate 6.4) |
-| PostgreSQL | 16 | Base de datos principal |
-| Flyway | 10.x | Migraciones del esquema de base de datos |
-| OpenAPI Generator | 7.x | Generación de DTOs a partir de `openapi.yaml` |
-| Spring Actuator | 3.x | Health checks, métricas Prometheus |
-| Sentry SDK | 7.x | Seguimiento de errores en producción |
-| Testcontainers | 1.19 | Tests de integración con PostgreSQL real |
-| JUnit 5 + Mockito | — | Tests unitarios y de integración |
-| Spotless | — | Formato de código (Google Java Style) |
-
-### Frontend
-| Tecnología | Versión | Rol |
-|------------|---------|-----|
-| React | 18 | Librería de interfaz de usuario |
-| TypeScript | 5 | Tipado estático |
-| Vite | 5 | Herramienta de compilación y servidor de desarrollo |
-| Tailwind CSS | 3 | Estilos basados en utilidades |
-| Zustand | 4 | Estado global (autenticación, UI) |
-| TanStack Query | 5 | Estado del servidor, caché, mutaciones |
-| React Router DOM | 6 | Enrutamiento SPA y guardas de ruta |
-| react-i18next | 14 | Internacionalización (EN/DE/ES) |
-| Framer Motion | 11 | Transiciones de página y animaciones |
-| Recharts | 2 | Gráficas de parámetros del agua |
-| Radix UI | — | Componentes headless accesibles |
-| React Hook Form + Zod | — | Validación de formularios |
-| Axios | 1 | Cliente HTTP con interceptores |
-| MSW | 2 | Simulación de API en tests |
-| Vitest + Testing Library | — | Tests unitarios y de componentes |
-| Sentry SDK | 8 | Seguimiento de errores en el frontend |
-| vite-plugin-pwa | — | Service Worker, Web App Manifest |
-
-### Scraper
-| Tecnología | Versión | Rol |
-|------------|---------|-----|
-| Python | 3.12 | Runtime |
-| FastAPI | 0.111 | Microservicio REST |
-| HTTPX + BeautifulSoup | — | Scraping HTTP y análisis de HTML |
-| Groq SDK | — | Puente con Llama 3.3 70B para el asistente IA |
-
-### Infraestructura
-| Tecnología | Rol |
-|------------|-----|
-| Docker + Docker Compose | Orquestación de contenedores |
-| Traefik | Proxy inverso con HTTPS automático (Let's Encrypt) |
-| nginx | Servidor de archivos estáticos para la SPA |
-| GitHub Actions | CI: lint → typecheck → test → build |
-| pg_dump cron | Copias de seguridad automáticas de PostgreSQL (diarias/semanales/mensuales) |
+| Capa | Tecnología | Versión | Rol |
+|---|---|---|---|
+| ☕ **Backend** | Spring Boot · Java | 3.2.5 · 21 | API REST, JWT, JPA/Hibernate, Flyway, Spring Security |
+| ⚛️ **Frontend** | React · Vite · TypeScript | 18 · 6 · 5 | SPA + PWA, React Router 6, React Query, Zustand, Zod, Tailwind CSS 4, Recharts, i18next |
+| 🐍 **Scraper** | Python · FastAPI · BeautifulSoup | 3.12 · 0.115 · 4.12 | Microservicio asíncrono de scraping (`httpx` + `lxml`) y proxy de IA |
+| 🤖 **IA** | Groq SDK + Llama 3.3 70B | 1.2.0 | Asistente conversacional de acuariofilia |
+| 🐘 **Base de datos** | PostgreSQL | 16-alpine | Persistencia relacional + migraciones Flyway |
+| 🔀 **Proxy** | Traefik | v3.3 | Reverse proxy, redirect HTTP→HTTPS, Let's Encrypt (HTTP‑01) |
+| 🐳 **Orquestación** | Docker Compose | — | Despliegue completo con un único comando |
+| 🖼️ **CDN imágenes** | Cloudinary | — | Almacenamiento de imágenes de usuario |
+| 📊 **Observabilidad** | Sentry · Spring Actuator | — | Errores frontend + healthcheck `/actuator/health` |
 
 ---
 
-## Requisitos Previos
+## 🚀 Despliegue con Docker
 
-- **Docker** 24+ y **Docker Compose** v2 (comando `docker compose`)
-- Git
+> Requisitos: **Docker Desktop** (Windows/macOS) o Docker Engine + Compose v2 en Linux. Aproximadamente **4 GB de RAM** libres para los cuatro contenedores.
 
-Con esto es suficiente. Todo el stack se ejecuta dentro de contenedores.
-
-> Para el desarrollo local sin Docker también necesitas: Java 21+, Maven 3.9+, Node.js 20+ y una instancia de PostgreSQL 16 en ejecución.
-
----
-
-## Inicio Rápido (Docker Compose)
-
-### 1. Clonar y configurar el entorno
+### 1️⃣ Clonar el repositorio
 
 ```bash
-git clone <repo-url>
-cd thalassa
+git clone https://github.com/IkerMG/Thalassa.git
+cd Thalassa
+```
 
-# Copiar la plantilla de variables de entorno
+### 2️⃣ Crear el archivo `.env`
+
+Copia la plantilla y rellena los valores reales:
+
+```bash
+# Linux / macOS
 cp .env.example .env
+
+# Windows PowerShell
+Copy-Item .env.example .env
 ```
 
-Abre `.env` y rellena **todos los valores obligatorios**:
+Variables que **debes** rellenar antes de levantar:
 
-| Variable | Obligatoria | Descripción |
-|----------|-------------|-------------|
-| `JWT_SECRET` | ✅ | Secreto de firma HS512 para los tokens de acceso. Genera uno con: `openssl rand -hex 64` |
-| `JWT_REFRESH_SECRET` | ✅ | Secreto de firma para los refresh tokens. Genera uno distinto al anterior. |
-| `POSTGRES_USER` | ✅ | Nombre de usuario de PostgreSQL (ej: `thalassa`) |
-| `POSTGRES_PASSWORD` | ✅ | Contraseña de PostgreSQL. Usa un valor aleatorio robusto. |
-| `GROQ_API_KEY` | ✅ | Clave de API de [console.groq.com](https://console.groq.com/keys). Disponible en nivel gratuito. |
-| `CORS_ALLOWED_ORIGINS` | ✅ | Orígenes permitidos separados por comas (ej: `https://thalassa.app`). En local usa `https://localhost`. |
-| `SPRING_PROFILES_ACTIVE` | ✅ | Perfil Spring: `dev` en local, `prod` en producción |
-| `VITE_SENTRY_DSN` | ⬜ | DSN de Sentry para el frontend (dejar vacío para desactivar) |
-| `SENTRY_DSN` | ⬜ | DSN de Sentry para el backend (dejar vacío para desactivar) |
-| `DOMAIN` | ⬜ | Dominio público para HTTPS con Traefik (por defecto: `localhost`) |
-| `ACME_EMAIL` | ⬜ | Email para notificaciones de renovación de certificados Let's Encrypt |
+| Variable | Descripción | Cómo obtenerla |
+|---|---|---|
+| `JWT_SECRET` | Clave HMAC para firmar el access token | `openssl rand -hex 64` |
+| `JWT_REFRESH_SECRET` | Clave HMAC para el refresh token (distinta de la anterior) | `openssl rand -hex 64` |
+| `POSTGRES_USER` · `POSTGRES_PASSWORD` | Credenciales de la BD interna | Inventa una contraseña fuerte |
+| `GROQ_API_KEY` | API key del LLM (Llama 3.3) | https://console.groq.com/keys |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos por CORS | Ej. `http://localhost:5173` para dev |
+| `SPRING_PROFILES_ACTIVE` | Perfil de Spring | `dev` para desarrollo · `prod` para producción |
+| `DOMAIN` · `ACME_EMAIL` | Dominio público + email para Let's Encrypt | Solo para producción |
+| `CLOUDINARY_*` | Credenciales Cloudinary | https://cloudinary.com/console (necesario para subir imágenes) |
 
-### 2. Compilar e iniciar todos los servicios
+### 3️⃣ Levantar la pila completa
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-En el primer arranque, Docker realizará automáticamente:
-1. Compilación de imágenes multi-etapa para `backend` (Maven → JRE) y `frontend` (Node → nginx)
-2. Aplicación de las migraciones de base de datos con Flyway
-3. Arranque de los 5 servicios con comprobaciones de salud
+Esto construye y arranca los seis servicios:
 
-### 3. Abrir la aplicación
+| Servicio | URL local | Puerto |
+|---|---|---|
+| Frontend (PWA) | http://localhost:5173 | 5173 → 80 |
+| Backend API + Swagger | http://localhost:8080/swagger-ui.html | 8080 |
+| Scraper docs | http://localhost:8001/docs | 8001 |
+| Traefik | http://localhost | 80/443 |
+| PostgreSQL | _(interno)_ | 5432 |
+| Backup | _(cron 03:00 UTC)_ | — |
 
-```
-https://localhost
-```
+Comprueba el estado con `docker compose ps`. El backend tiene healthcheck contra `/actuator/health`, así que el contenedor pasará a `healthy` cuando esté listo para recibir tráfico.
 
-> El navegador mostrará una advertencia de certificado — es lo esperado con el certificado autofirmado usado en `localhost`. Acéptala para continuar.
-
-**Puertos por defecto (mapeo interno):**
-
-| Servicio | Puerto interno | Expuesto vía Traefik |
-|----------|----------------|----------------------|
-| Frontend (nginx) | 80 | `https://localhost` |
-| Backend API | 8080 | `https://localhost/api/` |
-| Panel de Traefik | 8080 | `http://localhost:8090` |
-| Scraper (FastAPI) | 8001 | Solo red interna |
-| PostgreSQL | 5432 | Solo red interna |
-
-### 4. Detener y limpiar
+### 4️⃣ Comandos útiles
 
 ```bash
-# Detener los contenedores (conserva los datos)
-docker compose down
-
-# Detener y eliminar los volúmenes (borra la base de datos)
-docker compose down -v
+docker compose logs -f backend     # ver logs en vivo
+docker compose down                # parar todo
+docker compose down -v             # parar y borrar volúmenes (¡borra la BD!)
+docker compose restart scraper     # reiniciar un servicio
 ```
 
 ---
 
-## Entorno de Desarrollo (Hot Reload)
+## 🛠️ Resolución de problemas
 
-Para el desarrollo activo con recarga en vivo, ejecuta cada servicio de forma independiente.
+### ⚠️ Timeout al descargar imágenes Docker (`failed to fetch oauth token` / `i/o timeout`)
 
-### Solo la base de datos (necesaria como dependencia)
+Algunos ISPs españoles (Movistar, Vodafone…) y redes corporativas bloquean o degradan las conexiones al **Docker Hub** y a `registry-1.docker.io`. Síntoma típico:
 
-```bash
-docker compose up db
+```
+ERROR: failed to solve: failed to fetch oauth token: Get https://auth.docker.io/...: net/http: TLS handshake timeout
 ```
 
-### Backend (Spring Boot)
+**Solución:** configurar un **registry mirror** en Docker Desktop apuntando al espejo público de Google (`mirror.gcr.io`).
+
+1. Abre Docker Desktop → **Settings** → **Docker Engine**.
+2. Añade `registry-mirrors` al JSON:
+   ```json
+   {
+     "registry-mirrors": ["https://mirror.gcr.io"]
+   }
+   ```
+3. Pulsa **Apply & Restart** y vuelve a lanzar `docker compose up -d --build`.
+
+### 🖼️ El mercado muestra imágenes con el placeholder SVG
+
+Es el comportamiento esperado cuando el ISP bloquea el CDN de Cetamar / Urban Natura. La aplicación cae automáticamente al SVG local `/market-placeholder.svg` para no romper el layout. Los enlaces «Ver producto» siguen funcionando.
+
+### 🤖 El scraper se queda en `unhealthy`
+
+El healthcheck del servicio `scraper` exige que `GROQ_API_KEY` esté definido y **no sea** un placeholder. Asegúrate de haber sustituido el valor en `.env` y reinicia el contenedor:
 
 ```bash
-cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+docker compose up -d --force-recreate scraper
 ```
 
-La API estará disponible en `http://localhost:8080/api`.
+### 🔁 Errores 401 inesperados en el frontend
 
-### Frontend (Vite)
+El access token caduca a los 15 minutos. El interceptor de axios refresca automáticamente, pero si el refresh también ha expirado (30 días) la app dispara el evento `auth:expired` y redirige a `/login`. Vuelve a iniciar sesión.
 
-```bash
-cd frontend
-npm install
-npm run dev
+---
+
+## 📁 Estructura del repositorio
+
 ```
-
-La SPA estará disponible en `http://localhost:5173`.
-
-### Scraper (FastAPI)
-
-```bash
-cd scraper
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8001
+Thalassa/
+├── backend/        # Spring Boot 3.2 · Java 21 · PostgreSQL · Flyway
+│   └── src/main/resources/market-seed/   ← datos semilla del mercado
+├── frontend/       # React 18 · Vite · TypeScript · Tailwind · PWA
+│   └── public/market-placeholder.svg     ← fallback de imágenes rotas
+├── scraper/        # FastAPI · BeautifulSoup · Groq
+│   └── app/services/{cetamar,urbannatura}.py
+├── scripts/        # backup.sh (pg_dump diario)
+├── docker-compose.yml
+├── docker-compose.override.yml   # overrides locales (sin TLS)
+├── traefik-dev.yml
+└── .env.example
 ```
 
 ---
 
-## Ejecución de Tests
-
-### Frontend
-
-```bash
-cd frontend
-npm run test           # Ejecuta la suite Vitest
-npm run typecheck      # Comprobación de tipos TypeScript (tsc --noEmit)
-npm run lint           # ESLint
-```
-
-### Backend
-
-```bash
-cd backend
-./mvnw test            # JUnit 5 + Testcontainers (requiere Docker)
-./mvnw verify          # Build completo: compilar → tests → Spotless → cobertura JaCoCo
-```
-
-Umbral de cobertura mínimo: **60% de líneas** aplicado por JaCoCo.
-
----
-
-## Estructura del Proyecto
-
-```
-thalassa/
-├── backend/                         API Spring Boot
-│   ├── src/main/java/com/thalassa/
-│   │   ├── config/                  Seguridad, CORS, OpenAPI
-│   │   ├── controllers/             Endpoints REST
-│   │   ├── dto/                     DTOs de petición/respuesta (generados por OpenAPI)
-│   │   ├── exceptions/              Excepciones personalizadas + GlobalExceptionHandler
-│   │   ├── models/                  Entidades JPA
-│   │   ├── repositories/            Repositorios Spring Data JPA
-│   │   ├── security/                Filtro JWT, servicio de tokens
-│   │   └── services/                Lógica de negocio
-│   ├── src/main/resources/
-│   │   ├── db/migration/            Migraciones SQL de Flyway (V1, V2, …)
-│   │   ├── application.yml          Configuración base (sin secretos)
-│   │   ├── application-dev.yml      Sobreescrituras para desarrollo local
-│   │   └── openapi.yaml             Contrato de la API (fuente de verdad para los DTOs)
-│   └── pom.xml
-│
-├── frontend/                        SPA React + Vite
-│   └── src/
-│       ├── api/                     Clientes Axios por dominio
-│       ├── components/
-│       │   ├── layout/              Sidebar, BottomTabBar, GestorLayout
-│       │   ├── shared/              PlanGate, EmptyState, NotificationBell, …
-│       │   └── ui/                  Button, Input, Modal, Badge, Spinner
-│       ├── features/                Componentes de página organizados por funcionalidad
-│       │   ├── auth/                Login, Registro, Recuperación/Restablecimiento de contraseña
-│       │   ├── aquarium-detail/     Pestañas de Parámetros, Fauna y Equipamiento
-│       │   ├── calculators/         Calculadoras de energía y dosificación
-│       │   ├── chat/                Drawer del asistente IA
-│       │   ├── dashboard/           Cuadrícula de acuarios y modal de creación
-│       │   ├── landing/             Página pública de marketing
-│       │   ├── market/              Marketplace de especies
-│       │   ├── profile/             Ajustes de usuario y selector de idioma
-│       │   └── wishlist/            Elementos guardados
-│       ├── hooks/                   Hooks personalizados (queries, mutaciones, auth)
-│       ├── i18n/                    Configuración i18next + traducciones (en/de/es)
-│       ├── lib/                     Esquemas Zod, helper de toasts
-│       ├── routes/                  AppRouter, ProtectedRoute, PublicRoute
-│       ├── store/                   Stores Zustand (auth, UI)
-│       ├── types/                   Interfaces TypeScript
-│       └── utils/                   Formateadores, rangos de parámetros
-│
-├── scraper/                         Microservicio FastAPI
-│   └── app/
-│       ├── routers/                 Endpoints de chat, especies y lista de deseos
-│       └── services/                Cliente Groq, analizadores HTML
-│
-├── docs/                            Documentación del proyecto (vault Obsidian)
-│   ├── architecture-decisions/      Registros ADR
-│   └── *.md                         Especificaciones, wireframes, backlog, Gantt
-│
-├── .github/workflows/ci.yml         Pipeline de CI con GitHub Actions
-├── docker-compose.yml               Orquestación del stack completo
-├── .env.example                     Plantilla de variables de entorno
-├── CONTRIBUTING.md                  Convenciones de commits y nomenclatura de ramas
-└── CHANGELOG.md                     Historial de versiones
-```
-
----
-
-## API
-
-El backend sigue el diseño **API-First**. La fuente de verdad es:
-
-```
-backend/src/main/resources/openapi.yaml
-```
-
-Todos los DTOs de petición y respuesta se generan a partir de esta especificación mediante `openapi-generator-maven-plugin` durante la fase de compilación de Maven. La interfaz interactiva de Swagger UI está disponible en:
-
-```
-https://localhost/api/swagger-ui/index.html
-```
-
-Grupos de endpoints principales:
-
-| Endpoint | Descripción |
-|----------|-------------|
-| `POST /api/auth/register` | Crear cuenta |
-| `POST /api/auth/login` | Autenticarse y recibir tokens de acceso y refresh |
-| `POST /api/auth/refresh` | Rotar el refresh token y obtener un nuevo token de acceso |
-| `POST /api/auth/logout` | Revocar el refresh token |
-| `POST /api/auth/forgot-password` | Solicitar email de restablecimiento de contraseña |
-| `POST /api/auth/reset-password` | Confirmar el restablecimiento con el token recibido |
-| `GET/PUT /api/users/me` | Perfil y preferencias del usuario |
-| `GET/POST /api/aquariums` | Listar y crear acuarios |
-| `GET/PUT/DELETE /api/aquariums/{id}` | CRUD de acuario |
-| `GET/POST /api/aquariums/{id}/parameters` | Registro de parámetros del agua |
-| `GET /api/aquariums/{id}/parameters/export` | Exportación a CSV |
-| `GET/POST/DELETE /api/aquariums/{id}/livestock` | Gestión de fauna |
-| `GET/POST/DELETE /api/aquariums/{id}/equipment` | Gestión de equipamiento |
-| `POST /api/chat/message` | Mensaje al asistente IA |
-| `GET /api/wishlist` | Especies y productos guardados |
-| `GET /api/notifications` | Notificaciones dentro de la aplicación |
-| `GET /api/dashboard/summary` | Estadísticas agregadas |
-| `GET /actuator/health` | Estado del servicio (sin autenticación) |
-| `GET /actuator/prometheus` | Endpoint de métricas para Prometheus |
-
----
-
-## CI/CD
-
-GitHub Actions se ejecuta en cada push y pull request a `main`:
-
-```
-┌─────────────┐    ┌──────────────────────┐    ┌─────────────────┐
-│  frontend   │    │       backend        │    │     docker      │
-│  npm ci     │    │  mvn verify          │    │  compose build  │
-│  lint       │    │  (test + cobertura)  │    │  --no-start     │
-│  typecheck  │    │  Spotless check      │    └─────────────────┘
-│  build      │    └──────────────────────┘
-└─────────────┘
-```
-
-Los tres jobs se ejecutan en paralelo. No es posible hacer merge de un PR si alguna comprobación falla.
-
----
-
-## Observabilidad
-
-| Herramienta | Endpoint / Ubicación |
-|-------------|----------------------|
-| Spring Actuator health | `GET /actuator/health` |
-| Métricas Prometheus | `GET /actuator/prometheus` |
-| Logs estructurados JSON | `docker logs thalassa-backend` |
-| Sentry (frontend) | Configurado mediante `VITE_SENTRY_DSN` |
-| Sentry (backend) | Configurado mediante `SENTRY_DSN` |
-
----
-
-## Copias de Seguridad de la Base de Datos
-
-Un servicio de backup automatizado ejecuta `pg_dump` según una planificación cron y almacena los volcados comprimidos en `./backups/`:
-
-| Planificación | Retención |
-|---------------|-----------|
-| Diaria (02:00 UTC) | 7 días |
-| Semanal (domingos 03:00 UTC) | 4 semanas |
-| Mensual (día 1, 04:00 UTC) | 12 meses |
-
-Para restaurar una copia de seguridad:
-
-```bash
-gunzip < backups/daily/thalassa_YYYY-MM-DD.sql.gz | \
-  docker exec -i thalassa-db psql -U $POSTGRES_USER thalassa
-```
-
----
-
-## Licencia
-
-Proyecto académico — DAW 2025/2026.
+<p align="center">
+  <em>Proyecto Final · Desarrollo de Aplicaciones Web · ILERNA</em><br/>
+  <sub>© 2026 · Iker Mozo Gamero — Trabajo académico</sub>
+</p>
